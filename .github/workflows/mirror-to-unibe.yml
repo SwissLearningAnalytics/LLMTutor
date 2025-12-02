@@ -1,0 +1,23 @@
+name: Mirror to UniBe GitHub
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to UniBe mirror
+        run: |
+          git remote add unibe https://natalie-borter:${{ secrets.UNIBE_TOKEN }}@github.unibe.ch/natalie-borter/LLMTutor.git
+          git push unibe --all
+          git push unibe --tags
