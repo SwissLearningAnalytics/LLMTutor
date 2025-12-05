@@ -1,0 +1,93 @@
+{
+  "id": "185466f6-8713-4a0f-9990-06e454ce3999",
+  "prevId": "efdee1d8-7d5f-4ffb-ad51-504752116631",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.t_messages": {
+      "name": "t_messages",
+      "schema": "",
+      "columns": {
+        "pk_message_id": {
+          "name": "pk_message_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "executionId": {
+          "name": "executionId",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pseudonym": {
+          "name": "pseudonym",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "promptName": {
+          "name": "promptName",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "modelName": {
+          "name": "modelName",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "feedback": {
+          "name": "feedback",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mode": {
+          "name": "mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

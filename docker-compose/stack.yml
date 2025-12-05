@@ -1,0 +1,15 @@
+version: "3.3"
+
+services:
+  sok_tutor_db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: sok_tutor
+      POSTGRES_DB: sok_tutor
+      POSTGRES_USER: sok_tutor
+    ports:
+      - "5017:5432"
+    volumes:
+      - sok_tutor_db_data:/var/lib/postgresql/data
+volumes:
+  sok_tutor_db_data:

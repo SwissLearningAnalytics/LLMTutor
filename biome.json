@@ -1,0 +1,49 @@
+{
+  "$schema": "node_modules/@biomejs/biome/configuration_schema.json",
+  "organizeImports": {
+    "enabled": true
+  },
+  "files": {
+    "include": [
+      "index.html",
+      "src/**/*.tsx",
+      "src/**/*.ts",
+      "src/**/*.jsx",
+      "src/**/*.js"
+    ],
+    "ignore": ["src/routeTree.gen.ts"]
+  },
+  "linter": {
+    "ignore": ["node_modules", "dist"],
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noSvgWithoutTitle": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "noDefaultExport": "info",
+        "useBlockStatements": "error"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "noUnusedImports": {
+          "fix": "safe",
+          "level": "warn"
+        }
+      },
+      "nursery": {
+        "noEnum": "info"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": false
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}

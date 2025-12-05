@@ -1,0 +1,26 @@
+{
+  "title": "Tutor",
+  "description": "Schema for tutor configuration objects",
+  "type": "object",
+  "properties": {
+    "tutor_id": {
+      "type": "string",
+      "description": "Unique identifier for the tutor, only alphanumeric characters and hyphens, must start with a letter",
+      "pattern": "^[a-zA-Z][a-zA-Z0-9-]*$"
+    },
+    "displayName": {
+      "type": "string",
+      "description": "Human-readable name displayed in the UI"
+    },
+    "prompt": {
+      "type": "string",
+      "description": "The system prompt that defines the tutor's behavior and instructions"
+    },
+    "learningObjectives": {
+      "type": "string",
+      "description": "Optional learning objectives for the tutor"
+    }
+  },
+  "required": ["tutor_id", "displayName", "prompt"],
+  "additionalProperties": false
+}

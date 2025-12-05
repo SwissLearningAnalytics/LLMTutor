@@ -1,0 +1,1 @@
+ALTER TABLE "t_messages" ADD COLUMN "executionId" varchar(64) NOT NULL;
