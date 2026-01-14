@@ -1,6 +1,8 @@
 # Swiss Learning Analytics LLM Tutor
 
-  This repository contains an open-source LLM-based learning tutor that lets institutions host their own case-based, personalized AI coach. The system is designed to help students understand abstract and technical concepts by embedding them in interactive, realistic case scenarios.
+This README is in English. For the German version, see [README.de.md](README.de.md).
+ 
+This repository contains an open-source LLM-based learning tutor that lets institutions host their own case-based, personalized AI coach. The system is designed to help students understand abstract and technical concepts by embedding them in interactive, realistic case scenarios.
 
 The tutor was developed as part of the BeLEARN project ["LLM-based training using personalized case examples"](https://belearn.swiss/en/research-practice/projects/llm-based-training-using-personalized-case-examples/), which investigates how large language models can support learning in demanding methodological courses such as statistics. From 2026 onward, the system is further developed in the follow-up BeLEARN project ["Successful Learning with LLM Tutors"](https://belearn.swiss/en/research-practice/projects/successful-learning-with-llm-tutors/), which focuses on identifying patterns indicative of successful learning with a LLM Tutor.
 
