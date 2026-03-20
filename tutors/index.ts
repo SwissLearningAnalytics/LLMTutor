@@ -17,6 +17,8 @@ export async function getTutor(tutorId: string): Promise<Tutor> {
       return (await import("./tutors/regression.yaml")).default as Tutor;
     case "t-test":
       return (await import("./tutors/t-test.yaml")).default as Tutor;
+    case "klinische_studien_master":
+      return (await import("./tutors/klinische-studien-master.yaml")).default as Tutor;
     default:
       throw new Error("Tutor not found");
   }
