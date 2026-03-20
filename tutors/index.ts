@@ -11,14 +11,18 @@ export async function getTutor(tutorId: string): Promise<Tutor> {
       return (await import("./tutors/individualdiagnostik.yaml")).default as Tutor;
     case "kinder":
       return (await import("./tutors/kinder.yaml")).default as Tutor;
+    case "klinische_studien_master":
+      return (await import("./tutors/klinische-studien-master.yaml")).default as Tutor;
     case "korrelation":
       return (await import("./tutors/korrelation.yaml")).default as Tutor;
+    case "leadership":
+      return (await import("./tutors/leadership.yaml")).default as Tutor;
     case "regression":
       return (await import("./tutors/regression.yaml")).default as Tutor;
     case "t-test":
       return (await import("./tutors/t-test.yaml")).default as Tutor;
-    case "klinische_studien_master":
-      return (await import("./tutors/klinische-studien-master.yaml")).default as Tutor;
+    case "variabel":
+      return (await import("./tutors/variabel.yaml")).default as Tutor;
     default:
       throw new Error("Tutor not found");
   }
@@ -29,7 +33,10 @@ export const tutorIds = [
   "gruppenstatistiken",
   "individualdiagnostik",
   "kinder",
+  "klinische_studien_master",
   "korrelation",
+  "leadership",
   "regression",
   "t-test",
+  "variabel",
 ];
