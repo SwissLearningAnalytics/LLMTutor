@@ -5,6 +5,10 @@ export async function getTutor(tutorId: string): Promise<Tutor> {
   switch (tutorId) {
     case "erwachsene":
       return (await import("./tutors/erwachsene.yaml")).default as Tutor;
+    case "fernuni_cfa":
+      return (await import("./tutors/fernuni_cfa.yaml")).default as Tutor;
+    case "fernuni_mediation":
+      return (await import("./tutors/fernuni_mediation.yaml")).default as Tutor;
     case "gruppenstatistiken":
       return (await import("./tutors/gruppenstatistiken.yaml")).default as Tutor;
     case "individualdiagnostik":
@@ -30,6 +34,8 @@ export async function getTutor(tutorId: string): Promise<Tutor> {
 
 export const tutorIds = [
   "erwachsene",
+  "fernuni_cfa",
+  "fernuni_mediation",
   "gruppenstatistiken",
   "individualdiagnostik",
   "kinder",
