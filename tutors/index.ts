@@ -3,6 +3,8 @@ import type { Tutor } from "@/lib/types/tutor";
 
 export async function getTutor(tutorId: string): Promise<Tutor> {
   switch (tutorId) {
+    case "deskriptive_statistik_heilpaed_offen":
+      return (await import("./tutors/deskriptive_statistik_heil.yaml")).default as Tutor;
     case "erwachsene":
       return (await import("./tutors/erwachsene.yaml")).default as Tutor;
     case "fernuni_cfa":
@@ -33,6 +35,7 @@ export async function getTutor(tutorId: string): Promise<Tutor> {
 }
 
 export const tutorIds = [
+  "deskriptive_statistik_heilpaed_offen",
   "erwachsene",
   "fernuni_cfa",
   "fernuni_mediation",
