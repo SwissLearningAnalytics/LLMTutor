@@ -71,6 +71,11 @@ export const chatHandler = createServerFn({ method: "POST", response: "raw" })
         messages: m.messages,
         ...(providerName === AiProviders.OpenAI && {
           temperature: model.startsWith("gpt-5") ? 1 : 0.6, // for gpt-5 only the default is 1
+          providerOptions: {
+            openai: {
+              reasoningEffort: "none",
+            },
+          },
         }),
         onError: (error) => {
           console.error("Error generating response:", error);

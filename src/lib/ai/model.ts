@@ -8,6 +8,7 @@ export type AiProviders = (typeof AiProviders)[keyof typeof AiProviders];
 export const AiModels = {
   [AiProviders.Local]: ["mistral:v0.3", "llama3.3"],
   [AiProviders.OpenAI]: [
+    "gpt-5.4",
     "gpt-4.1",
     "gpt-4-turbo",
     "gpt-4o",
