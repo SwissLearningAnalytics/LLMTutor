@@ -171,9 +171,7 @@ function RouteComponent() {
     if (reflectionOnChatbotFeedback.isCorrect === undefined) {
       return false;
     }
-    if (reflectionOnChatbotFeedback.isSuitable === undefined) {
-      return false;
-    }
+    // not checking isSuitable because it only applies to non-study mode
     return true;
   }
 

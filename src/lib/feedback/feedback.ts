@@ -22,13 +22,6 @@ export const studyFeedback: Feedback = {
   ],
   ai: [
     {
-      label: "isSuitable",
-      text: "Die Aussage des Tutors ist angemessen / zum Gespräch passend?",
-      tooltip:
-        "Wählen Sie „Nein“, wenn die Aussage im Kontext des Gesprächs unerwartet oder nicht sinnvoll ist. Das ist zum Beispiel der Fall, wenn sie deutlich von der sokratischen Methode abweicht, keinen Bezug mehr zum Fallbeispiel oder zum aktuellen Thema hat, unerwartet von Ihrer Frage oder Anweisung abweicht oder ein erwarteter (fiktiver) statistischer Output fehlt.",
-      options: ["Nein", "Ja"],
-    },
-    {
       label: "isCorrect",
       text: "Ist die Aussage des Tutors vollständig korrekt (fiktive Szenarien / Resultate ausgenommen)? ",
       tooltip:
