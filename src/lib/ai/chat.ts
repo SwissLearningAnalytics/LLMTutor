@@ -1,13 +1,13 @@
-import {
-  providerName,
-  AiProviders,
-  AiModels,
-  defaultModel,
-} from "@/lib/ai/model";
+import { createOpenAI } from "@ai-sdk/openai";
 import { createServerFn } from "@tanstack/react-start";
 import { streamText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
 import { createOllama } from "ollama-ai-provider";
+import {
+  AiModels,
+  AiProviders,
+  defaultModel,
+  providerName,
+} from "@/lib/ai/model";
 
 const provider = (() => {
   "use server";
@@ -35,8 +35,8 @@ const provider = (() => {
   }
 })();
 
-export const chatHandler = createServerFn({ method: "POST", response: "raw" })
-  .validator(
+export const chatHandler = createServerFn({ method: "POST" })
+  .inputValidator(
     (
       options:
         | {
@@ -45,7 +45,7 @@ export const chatHandler = createServerFn({ method: "POST", response: "raw" })
           }
         | undefined,
     ) => {
-      if (!options || !options.body) {
+      if (!options?.body) {
         throw new Error("Invalid options data");
       }
       if (options.model) {
@@ -83,7 +83,7 @@ export const chatHandler = createServerFn({ method: "POST", response: "raw" })
       });
 
       return result.toDataStreamResponse();
-    } catch (e) {
+    } catch {
       return new Response("Internal Server Error", { status: 500 });
     }
   });

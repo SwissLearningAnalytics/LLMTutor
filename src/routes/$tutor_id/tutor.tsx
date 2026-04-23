@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils/cn";
 import { useIsStudyMode } from "@/lib/utils/use-is-study-mode";
 import { useChat } from "@ai-sdk/react";
 import { ClientOnly, createFileRoute, notFound } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { CornerDownLeftIcon, RefreshCwIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";

@@ -1,7 +1,7 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { getTutor, tutorIds } from "@/tutors";
-import { Link, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/overview")({
   component: RouteComponent,

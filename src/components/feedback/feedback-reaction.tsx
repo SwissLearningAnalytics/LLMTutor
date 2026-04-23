@@ -1,6 +1,6 @@
+import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils/cn";
-import { motion } from "framer-motion";
 
 export function FeedbackReaction() {
   return (

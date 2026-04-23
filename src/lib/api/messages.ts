@@ -1,7 +1,7 @@
+import { createServerFn } from "@tanstack/react-start";
 import { AiModels, providerName } from "@/lib/ai/model";
 import { db } from "@/lib/db";
 import { type MessagesSelect, messages } from "@/lib/db/schema";
-import { createServerFn } from "@tanstack/react-start";
 
 /**
  * Creates a new message with feedback in the database.
@@ -10,7 +10,7 @@ import { createServerFn } from "@tanstack/react-start";
  * @throws {Error} If there's a database error.
  */
 export const addMessage = createServerFn({ method: "POST" })
-  .validator((messageData: Partial<MessagesSelect>) => {
+  .inputValidator((messageData: Partial<MessagesSelect>) => {
     if (!messageData) {
       throw new Error("Invalid message data");
     }
@@ -51,7 +51,7 @@ export const addMessage = createServerFn({ method: "POST" })
   });
 
 export const getMessages = createServerFn({ method: "POST" })
-  .validator((key: string) => {
+  .inputValidator((key: string) => {
     if (!key) {
       throw new Error("Key is missing");
     }

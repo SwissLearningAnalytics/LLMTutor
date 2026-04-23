@@ -1,3 +1,6 @@
+import { InfoIcon } from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -9,9 +12,6 @@ import {
 import type { FeedbackField } from "@/lib/feedback/types";
 import { cn } from "@/lib/utils/cn";
 import { useIsStudyMode } from "@/lib/utils/use-is-study-mode";
-import { motion } from "framer-motion";
-import { InfoIcon } from "lucide-react";
-import { useEffect, useRef } from "react";
 
 export function Feedback({
   feedbackFields,
@@ -27,7 +27,7 @@ export function Feedback({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [feedback]);
+  }, []);
 
   const inFocusState = feedbackFields.every((field) => !feedback[field.label]);
 
@@ -171,7 +171,7 @@ function FeedbackCheckbox({
         }}
       />
       <div className="flex w-full items-center justify-between gap-1.5 font-normal">
-        <p className="text-sm font-medium leading-none">{feedbackField.text}</p>
+        <p className="text-sm leading-none font-medium">{feedbackField.text}</p>
         {feedbackField.tooltip && (
           <Popover>
             <PopoverTrigger

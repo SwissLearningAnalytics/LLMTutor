@@ -8,17 +8,13 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createServerRootRoute } from '@tanstack/react-start/server'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as OverviewRouteImport } from './routes/overview'
 import { Route as DataRouteImport } from './routes/data'
 import { Route as Tutor_idIndexRouteImport } from './routes/$tutor_id/index'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as Tutor_idTutorRouteImport } from './routes/$tutor_id/tutor'
-import { ServerRoute as ApiHealthServerRouteImport } from './routes/api/health'
-
-const rootServerRouteImport = createServerRootRoute()
 
 const TutorRoute = TutorRouteImport.update({
   id: '/tutor',
@@ -40,15 +36,15 @@ const Tutor_idIndexRoute = Tutor_idIndexRouteImport.update({
   path: '/$tutor_id/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Tutor_idTutorRoute = Tutor_idTutorRouteImport.update({
   id: '/$tutor_id/tutor',
   path: '/$tutor_id/tutor',
   getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHealthServerRoute = ApiHealthServerRouteImport.update({
-  id: '/api/health',
-  path: '/api/health',
-  getParentRoute: () => rootServerRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -56,13 +52,15 @@ export interface FileRoutesByFullPath {
   '/overview': typeof OverviewRoute
   '/tutor': typeof TutorRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
-  '/$tutor_id': typeof Tutor_idIndexRoute
+  '/api/health': typeof ApiHealthRoute
+  '/$tutor_id/': typeof Tutor_idIndexRoute
 }
 export interface FileRoutesByTo {
   '/data': typeof DataRoute
   '/overview': typeof OverviewRoute
   '/tutor': typeof TutorRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
+  '/api/health': typeof ApiHealthRoute
   '/$tutor_id': typeof Tutor_idIndexRoute
 }
 export interface FileRoutesById {
@@ -71,6 +69,7 @@ export interface FileRoutesById {
   '/overview': typeof OverviewRoute
   '/tutor': typeof TutorRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
+  '/api/health': typeof ApiHealthRoute
   '/$tutor_id/': typeof Tutor_idIndexRoute
 }
 export interface FileRouteTypes {
@@ -80,15 +79,23 @@ export interface FileRouteTypes {
     | '/overview'
     | '/tutor'
     | '/$tutor_id/tutor'
-    | '/$tutor_id'
+    | '/api/health'
+    | '/$tutor_id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/data' | '/overview' | '/tutor' | '/$tutor_id/tutor' | '/$tutor_id'
+  to:
+    | '/data'
+    | '/overview'
+    | '/tutor'
+    | '/$tutor_id/tutor'
+    | '/api/health'
+    | '/$tutor_id'
   id:
     | '__root__'
     | '/data'
     | '/overview'
     | '/tutor'
     | '/$tutor_id/tutor'
+    | '/api/health'
     | '/$tutor_id/'
   fileRoutesById: FileRoutesById
 }
@@ -97,28 +104,8 @@ export interface RootRouteChildren {
   OverviewRoute: typeof OverviewRoute
   TutorRoute: typeof TutorRoute
   Tutor_idTutorRoute: typeof Tutor_idTutorRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   Tutor_idIndexRoute: typeof Tutor_idIndexRoute
-}
-export interface FileServerRoutesByFullPath {
-  '/api/health': typeof ApiHealthServerRoute
-}
-export interface FileServerRoutesByTo {
-  '/api/health': typeof ApiHealthServerRoute
-}
-export interface FileServerRoutesById {
-  __root__: typeof rootServerRouteImport
-  '/api/health': typeof ApiHealthServerRoute
-}
-export interface FileServerRouteTypes {
-  fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/health'
-  fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/health'
-  id: '__root__' | '/api/health'
-  fileServerRoutesById: FileServerRoutesById
-}
-export interface RootServerRouteChildren {
-  ApiHealthServerRoute: typeof ApiHealthServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -147,8 +134,15 @@ declare module '@tanstack/react-router' {
     '/$tutor_id/': {
       id: '/$tutor_id/'
       path: '/$tutor_id'
-      fullPath: '/$tutor_id'
+      fullPath: '/$tutor_id/'
       preLoaderRoute: typeof Tutor_idIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$tutor_id/tutor': {
@@ -160,31 +154,24 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-declare module '@tanstack/react-start/server' {
-  interface ServerFileRoutesByPath {
-    '/api/health': {
-      id: '/api/health'
-      path: '/api/health'
-      fullPath: '/api/health'
-      preLoaderRoute: typeof ApiHealthServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-  }
-}
 
 const rootRouteChildren: RootRouteChildren = {
   DataRoute: DataRoute,
   OverviewRoute: OverviewRoute,
   TutorRoute: TutorRoute,
   Tutor_idTutorRoute: Tutor_idTutorRoute,
+  ApiHealthRoute: ApiHealthRoute,
   Tutor_idIndexRoute: Tutor_idIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-const rootServerRouteChildren: RootServerRouteChildren = {
-  ApiHealthServerRoute: ApiHealthServerRoute,
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
 }
-export const serverRouteTree = rootServerRouteImport
-  ._addFileChildren(rootServerRouteChildren)
-  ._addFileTypes<FileServerRouteTypes>()

@@ -1,8 +1,11 @@
-import { createServerFileRoute } from "@tanstack/react-start/server";
-import { json } from "@tanstack/react-start";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const ServerRoute = createServerFileRoute("/api/health").methods({
-  GET: ({ request, params }) => {
-    return json({ message: "OK" });
+export const Route = createFileRoute("/api/health")({
+  server: {
+    handlers: {
+      GET: () => {
+        return Response.json({ message: "OK" });
+      },
+    },
   },
 });
