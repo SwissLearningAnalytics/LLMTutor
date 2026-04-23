@@ -110,7 +110,7 @@ function RouteComponent() {
                     size="icon"
                     className="-m-1.5 size-10 rounded-sm bg-transparent focus-visible:ring-offset-0"
                   >
-                    <InfoIcon className="!size-5 shrink-0" />
+                    <InfoIcon className="size-5! shrink-0" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="start">

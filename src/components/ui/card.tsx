@@ -3,10 +3,10 @@ import * as React from "react";
 import { cn } from "@/lib/utils/cn";
 import { type VariantProps, cva } from "class-variance-authority";
 
-const cardVariants = cva("rounded-lg overflow-hidden", {
+const cardVariants = cva("overflow-hidden rounded-lg", {
   variants: {
     variant: {
-      default: "border mb-5 w-full overflow-hidden",
+      default: "mb-5 w-full overflow-hidden border",
       question: "border-[0.5px] bg-surface-primary shadow",
     },
   },
@@ -16,8 +16,7 @@ const cardVariants = cva("rounded-lg overflow-hidden", {
 });
 
 export interface CardProps
-  extends React.HTMLProps<HTMLDivElement>,
-    VariantProps<typeof cardVariants> {
+  extends React.HTMLProps<HTMLDivElement>, VariantProps<typeof cardVariants> {
   asChild?: boolean;
 }
 
@@ -54,7 +53,7 @@ const CardTitle = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
+      "text-2xl leading-none font-semibold tracking-tight",
       className,
     )}
     {...props}

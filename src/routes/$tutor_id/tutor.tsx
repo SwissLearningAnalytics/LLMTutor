@@ -317,7 +317,7 @@ function RouteComponent() {
       }
     >
       <div className="mx-auto flex h-full max-w-7xl flex-col sm:p-6">
-        <div className="no-scrollbar flex flex-grow flex-col overflow-auto px-4 sm:px-0">
+        <div className="no-scrollbar flex grow flex-col overflow-auto px-4 sm:px-0">
           {status === "submitted" && messages.length === 1 && <LoadingDots />}
           {messages
             .filter((msg) => msg.content !== tutor.prompt)
@@ -370,7 +370,7 @@ function RouteComponent() {
                     <motion.div layout={false}>
                       <div
                         className={cn(
-                          "prose !max-w-none overflow-auto rounded-lg border border-primary bg-surface-feedback-neutral-light p-4 text-base leading-6",
+                          "prose max-w-none! overflow-auto rounded-lg border border-primary bg-surface-feedback-neutral-light p-4 text-base leading-6",
                           "ml-auto w-1/2",
                         )}
                       >
@@ -384,7 +384,7 @@ function RouteComponent() {
                     <motion.div layout={false}>
                       <div
                         className={cn(
-                          "prose mb-4 mt-8 !max-w-full overflow-auto rounded-lg border text-base font-bold leading-6 text-secondary shadow",
+                          "prose mb-4 mt-8 max-w-full! overflow-auto rounded-lg border text-base font-bold leading-6 text-secondary shadow",
                           "bg-white p-4",
                           phase ===
                             Phase.answer_with_feedback_and_response_hidden &&

@@ -110,7 +110,7 @@ function FeedbackQuestion({
               size="icon"
               className="-m-1.5 size-10 rounded-sm bg-transparent focus-visible:ring-offset-0"
             >
-              <InfoIcon className="!size-5 shrink-0" />
+              <InfoIcon className="size-5! shrink-0" />
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start">{tooltip}</PopoverContent>
@@ -156,7 +156,7 @@ function FeedbackCheckbox({
   const isSelected = Boolean(feedback[feedbackField.label]);
 
   return (
-    <Label className="flex items-center gap-3 rounded-lg border p-3 text-secondary has-[[aria-checked=true]]:border-black has-[[aria-checked=true]]:text-black">
+    <Label className="flex items-center gap-3 rounded-lg border p-3 text-secondary has-aria-checked:border-black has-aria-checked:text-black">
       <Checkbox
         id={`toggle-${feedbackField.label}`}
         checked={isSelected}
@@ -183,7 +183,7 @@ function FeedbackCheckbox({
                 size="icon"
                 className="-m-1.5 size-10 rounded-sm bg-transparent focus-visible:ring-offset-0"
               >
-                <InfoIcon className="!size-5 shrink-0" />
+                <InfoIcon className="size-5! shrink-0" />
               </Button>
             </PopoverTrigger>
             <PopoverContent align="start">
