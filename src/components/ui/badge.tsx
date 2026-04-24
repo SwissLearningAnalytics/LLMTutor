@@ -4,7 +4,7 @@ import type * as React from "react";
 import { cn } from "@/lib/utils/cn";
 
 const badgeVariants = cva(
-  "inline-flex text-charcoal text-nowrap items-center gap-2.5 rounded-sm cursor-default px-1.5 py-1 text-xs",
+  "inline-flex cursor-default items-center gap-2.5 rounded-sm px-1.5 py-1 text-xs text-nowrap text-charcoal",
   {
     variants: {
       variant: {
@@ -23,7 +23,8 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {

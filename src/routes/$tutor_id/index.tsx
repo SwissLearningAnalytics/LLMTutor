@@ -97,7 +97,7 @@ function RouteComponent() {
 
             <Label
               htmlFor="audience"
-              className="mb-1 flex items-center gap-1 text-base font-bold leading-none"
+              className="mb-1 flex items-center gap-1 text-base leading-none font-bold"
             >
               <div>Pseudonym</div>
               <Popover>
