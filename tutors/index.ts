@@ -19,8 +19,6 @@ export async function getTutor(tutorId: string): Promise<Tutor> {
       return (await import("./tutors/kinder.yaml")).default as Tutor;
     case "klinische_studien_master":
       return (await import("./tutors/Studien_Lesen_Tutor.yaml")).default as Tutor;
-    case "klinische_studien_master":
-      return (await import("./tutors/klinische-studien-master.yaml")).default as Tutor;
     case "korrelation":
       return (await import("./tutors/korrelation.yaml")).default as Tutor;
     case "leadership":
@@ -44,7 +42,6 @@ export const tutorIds = [
   "gruppenstatistiken",
   "individualdiagnostik",
   "kinder",
-  "klinische_studien_master",
   "klinische_studien_master",
   "korrelation",
   "leadership",
