@@ -41,6 +41,7 @@ export const Route = createFileRoute("/api/chat")({
         const data: {
           messages: UIMessage[];
           model?: string;
+          systemPrompt: string;
         } = await request.json();
 
         if (process.env.MODE === "prod") {
@@ -57,6 +58,7 @@ export const Route = createFileRoute("/api/chat")({
           const result = await streamText({
             model: provider(model),
             messages: await convertToModelMessages(data.messages),
+            system: data.systemPrompt,
             ...(providerName === AiProviders.OpenAI && {
               temperature: model.startsWith("gpt-5") ? 1 : 0.6, // for gpt-5 only the default is 1
               providerOptions: {

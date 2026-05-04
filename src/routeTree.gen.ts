@@ -8,170 +8,170 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as TutorRouteImport } from "./routes/tutor";
-import { Route as OverviewRouteImport } from "./routes/overview";
-import { Route as DataRouteImport } from "./routes/data";
-import { Route as Tutor_idIndexRouteImport } from "./routes/$tutor_id/index";
-import { Route as ApiHealthRouteImport } from "./routes/api/health";
-import { Route as ApiChatRouteImport } from "./routes/api/chat";
-import { Route as Tutor_idTutorRouteImport } from "./routes/$tutor_id/tutor";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as TutorRouteImport } from './routes/tutor'
+import { Route as OverviewRouteImport } from './routes/overview'
+import { Route as DataRouteImport } from './routes/data'
+import { Route as Tutor_idIndexRouteImport } from './routes/$tutor_id/index'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as Tutor_idTutorRouteImport } from './routes/$tutor_id/tutor'
 
 const TutorRoute = TutorRouteImport.update({
-  id: "/tutor",
-  path: "/tutor",
+  id: '/tutor',
+  path: '/tutor',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const OverviewRoute = OverviewRouteImport.update({
-  id: "/overview",
-  path: "/overview",
+  id: '/overview',
+  path: '/overview',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const DataRoute = DataRouteImport.update({
-  id: "/data",
-  path: "/data",
+  id: '/data',
+  path: '/data',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const Tutor_idIndexRoute = Tutor_idIndexRouteImport.update({
-  id: "/$tutor_id/",
-  path: "/$tutor_id/",
+  id: '/$tutor_id/',
+  path: '/$tutor_id/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
-  id: "/api/health",
-  path: "/api/health",
+  id: '/api/health',
+  path: '/api/health',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
-  id: "/api/chat",
-  path: "/api/chat",
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const Tutor_idTutorRoute = Tutor_idTutorRouteImport.update({
-  id: "/$tutor_id/tutor",
-  path: "/$tutor_id/tutor",
+  id: '/$tutor_id/tutor',
+  path: '/$tutor_id/tutor',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/data": typeof DataRoute;
-  "/overview": typeof OverviewRoute;
-  "/tutor": typeof TutorRoute;
-  "/$tutor_id/tutor": typeof Tutor_idTutorRoute;
-  "/api/chat": typeof ApiChatRoute;
-  "/api/health": typeof ApiHealthRoute;
-  "/$tutor_id/": typeof Tutor_idIndexRoute;
+  '/data': typeof DataRoute
+  '/overview': typeof OverviewRoute
+  '/tutor': typeof TutorRoute
+  '/$tutor_id/tutor': typeof Tutor_idTutorRoute
+  '/api/chat': typeof ApiChatRoute
+  '/api/health': typeof ApiHealthRoute
+  '/$tutor_id/': typeof Tutor_idIndexRoute
 }
 export interface FileRoutesByTo {
-  "/data": typeof DataRoute;
-  "/overview": typeof OverviewRoute;
-  "/tutor": typeof TutorRoute;
-  "/$tutor_id/tutor": typeof Tutor_idTutorRoute;
-  "/api/chat": typeof ApiChatRoute;
-  "/api/health": typeof ApiHealthRoute;
-  "/$tutor_id": typeof Tutor_idIndexRoute;
+  '/data': typeof DataRoute
+  '/overview': typeof OverviewRoute
+  '/tutor': typeof TutorRoute
+  '/$tutor_id/tutor': typeof Tutor_idTutorRoute
+  '/api/chat': typeof ApiChatRoute
+  '/api/health': typeof ApiHealthRoute
+  '/$tutor_id': typeof Tutor_idIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/data": typeof DataRoute;
-  "/overview": typeof OverviewRoute;
-  "/tutor": typeof TutorRoute;
-  "/$tutor_id/tutor": typeof Tutor_idTutorRoute;
-  "/api/chat": typeof ApiChatRoute;
-  "/api/health": typeof ApiHealthRoute;
-  "/$tutor_id/": typeof Tutor_idIndexRoute;
+  __root__: typeof rootRouteImport
+  '/data': typeof DataRoute
+  '/overview': typeof OverviewRoute
+  '/tutor': typeof TutorRoute
+  '/$tutor_id/tutor': typeof Tutor_idTutorRoute
+  '/api/chat': typeof ApiChatRoute
+  '/api/health': typeof ApiHealthRoute
+  '/$tutor_id/': typeof Tutor_idIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/data"
-    | "/overview"
-    | "/tutor"
-    | "/$tutor_id/tutor"
-    | "/api/chat"
-    | "/api/health"
-    | "/$tutor_id/";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/data'
+    | '/overview'
+    | '/tutor'
+    | '/$tutor_id/tutor'
+    | '/api/chat'
+    | '/api/health'
+    | '/$tutor_id/'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/data"
-    | "/overview"
-    | "/tutor"
-    | "/$tutor_id/tutor"
-    | "/api/chat"
-    | "/api/health"
-    | "/$tutor_id";
+    | '/data'
+    | '/overview'
+    | '/tutor'
+    | '/$tutor_id/tutor'
+    | '/api/chat'
+    | '/api/health'
+    | '/$tutor_id'
   id:
-    | "__root__"
-    | "/data"
-    | "/overview"
-    | "/tutor"
-    | "/$tutor_id/tutor"
-    | "/api/chat"
-    | "/api/health"
-    | "/$tutor_id/";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/data'
+    | '/overview'
+    | '/tutor'
+    | '/$tutor_id/tutor'
+    | '/api/chat'
+    | '/api/health'
+    | '/$tutor_id/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  DataRoute: typeof DataRoute;
-  OverviewRoute: typeof OverviewRoute;
-  TutorRoute: typeof TutorRoute;
-  Tutor_idTutorRoute: typeof Tutor_idTutorRoute;
-  ApiChatRoute: typeof ApiChatRoute;
-  ApiHealthRoute: typeof ApiHealthRoute;
-  Tutor_idIndexRoute: typeof Tutor_idIndexRoute;
+  DataRoute: typeof DataRoute
+  OverviewRoute: typeof OverviewRoute
+  TutorRoute: typeof TutorRoute
+  Tutor_idTutorRoute: typeof Tutor_idTutorRoute
+  ApiChatRoute: typeof ApiChatRoute
+  ApiHealthRoute: typeof ApiHealthRoute
+  Tutor_idIndexRoute: typeof Tutor_idIndexRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/tutor": {
-      id: "/tutor";
-      path: "/tutor";
-      fullPath: "/tutor";
-      preLoaderRoute: typeof TutorRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/overview": {
-      id: "/overview";
-      path: "/overview";
-      fullPath: "/overview";
-      preLoaderRoute: typeof OverviewRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/data": {
-      id: "/data";
-      path: "/data";
-      fullPath: "/data";
-      preLoaderRoute: typeof DataRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/$tutor_id/": {
-      id: "/$tutor_id/";
-      path: "/$tutor_id";
-      fullPath: "/$tutor_id/";
-      preLoaderRoute: typeof Tutor_idIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/health": {
-      id: "/api/health";
-      path: "/api/health";
-      fullPath: "/api/health";
-      preLoaderRoute: typeof ApiHealthRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/chat": {
-      id: "/api/chat";
-      path: "/api/chat";
-      fullPath: "/api/chat";
-      preLoaderRoute: typeof ApiChatRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/$tutor_id/tutor": {
-      id: "/$tutor_id/tutor";
-      path: "/$tutor_id/tutor";
-      fullPath: "/$tutor_id/tutor";
-      preLoaderRoute: typeof Tutor_idTutorRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/tutor': {
+      id: '/tutor'
+      path: '/tutor'
+      fullPath: '/tutor'
+      preLoaderRoute: typeof TutorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overview': {
+      id: '/overview'
+      path: '/overview'
+      fullPath: '/overview'
+      preLoaderRoute: typeof OverviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data': {
+      id: '/data'
+      path: '/data'
+      fullPath: '/data'
+      preLoaderRoute: typeof DataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$tutor_id/': {
+      id: '/$tutor_id/'
+      path: '/$tutor_id'
+      fullPath: '/$tutor_id/'
+      preLoaderRoute: typeof Tutor_idIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$tutor_id/tutor': {
+      id: '/$tutor_id/tutor'
+      path: '/$tutor_id/tutor'
+      fullPath: '/$tutor_id/tutor'
+      preLoaderRoute: typeof Tutor_idTutorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,16 +183,16 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   ApiHealthRoute: ApiHealthRoute,
   Tutor_idIndexRoute: Tutor_idIndexRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from "./router.tsx";
-import type { createStart } from "@tanstack/react-start";
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
   interface Register {
-    ssr: true;
-    router: Awaited<ReturnType<typeof getRouter>>;
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
   }
 }

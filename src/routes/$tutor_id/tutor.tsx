@@ -92,6 +92,7 @@ function RouteComponent() {
           body: {
             messages,
             model,
+            systemPrompt: tutor.prompt,
           },
         };
       },
@@ -191,7 +192,7 @@ function RouteComponent() {
       systemMessageSent.current = true;
       sendMessage({
         role: "system",
-        parts: [{ type: "text", text: tutor.prompt }],
+        parts: [{ type: "text", text: "Beginne die Unterhaltung." }],
       }).then(() => {
         setPhase(Phase.question_with_feedback);
       });
