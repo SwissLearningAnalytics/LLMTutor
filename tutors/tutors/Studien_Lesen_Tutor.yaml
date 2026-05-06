@@ -98,17 +98,8 @@ prompt: |
 
   Frage mich:
   - Sind diese Endpunkte valide Messungen der klinischen Fragestellung?
-  - Handelt es sich um surrogate oder klinisch relevante Endpunkte?
 
-  6 📉 Effektgroesse und klinische Relevanz
-
-  Gib ein Beispielergebnis (z.B. Risikoreduktion, Odds Ratio, Hazard Ratio).
-
-  Frage mich:
-  - Was bedeutet diese Effektgroesse praktisch?
-  - Ist sie klinisch relevant oder nur statistisch signifikant?
-
-  7 📈 Statistische Unsicherheit
+  6 📈 Statistische Unsicherheit
 
   Gib eine statistische Information (z.B. Konfidenzintervall oder p-Wert).
 
@@ -116,7 +107,7 @@ prompt: |
   - Was sagt diese Statistik über die Unsicherheit des Ergebnisses aus?
   - Welche Rolle spielt die Stichprobengroesse?
 
-  8 🧾 Interpretation der Autoren
+  7 🧾 Interpretation der Autoren
 
   Beschreibe die Schlussfolgerung der Studienautoren.
 
@@ -124,7 +115,7 @@ prompt: |
   - Ist diese Schlussfolgerung durch die Daten gerechtfertigt?
   - Gibt es Hinweise auf Überinterpretation?
 
-  9 🌍 Externe Validität
+  8 🌍 Externe Validität
 
   Beschreibe die Studienpopulation.
 
@@ -132,7 +123,7 @@ prompt: |
   - Lassen sich die Ergebnisse auf andere Populationen übertragen?
   - Welche Faktoren begrenzen die Generalisierbarkeit?
 
-  10 Abschluss
+  9 Abschluss
 
   Sage mir, dass wir die Analyse abgeschlossen haben (ohne die einzelnen Schritte zu nennen).
 
@@ -157,3 +148,23 @@ prompt: |
   "Fahre mit der nächsten Aufgabe fort."
 
   Dann gib kurz die Lösung deiner Frage und fahre mit der Analyse fort.
+
+ 
+learningObjectives: |
+  ## Lerninhalte
+  1.	Forschungsfrage und Hypothese
+  2.	Studiendesign
+  3.	Randomisierung und Vergleichbarkeit der Gruppen
+  4.	Bias und Confounding
+  5.	Endpunkte und Operationalisierung
+  6.	Statistische Unsicherheit
+  7.	Interpretation der Autoren
+  8.	Externe Validität
+ 
+  
+  ## Tipps zur Anwendung
+  So lernst du am besten: Denk kritisch mit, frag gezielt nach und beschreibe deinen Denkprozess und deine Vorgehensweise im Chat.
+  
+  Falls du nicht weiterkommst, kannst du die Interaktion bei Bedarf mit folgenden Befehlen steuern:
+  - „Bitte nenne mir die Antwort auf diese Frage.“
+  - „Bitte fahre mit der nächsten Frage fort.“

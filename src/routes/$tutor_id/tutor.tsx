@@ -310,17 +310,19 @@ function RouteComponent() {
         </div>
       }
       sidebox={
-        <div className="prose font-semibold">
-          <MemoizedMarkdown
-            id={`lernziele-${tutor.tutor_id}`}
-            parts={[
-              {
-                type: "text",
-                text: tutor.learningObjectives || "Keine Lernziele definiert.",
-              },
-            ]}
-          />
-        </div>
+        !tutor.learningObjectives ? null : (
+          <div className="prose font-semibold">
+            <MemoizedMarkdown
+              id={`lernziele-${tutor.tutor_id}`}
+              parts={[
+                {
+                  type: "text",
+                  text: tutor.learningObjectives,
+                },
+              ]}
+            />
+          </div>
+        )
       }
     >
       <div className="mx-auto flex h-full max-w-7xl flex-col sm:p-6">
