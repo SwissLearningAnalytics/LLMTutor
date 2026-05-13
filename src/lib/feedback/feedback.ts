@@ -35,13 +35,6 @@ export const studyFeedback: Feedback = {
 export const nonStudyFeedback: Feedback = {
   user: [
     {
-      label: "externalResource",
-      text: "Für meine Antwort habe ich externe Quellen genutzt (z. B. Internet oder andere Personen).",
-      tooltip:
-        "Wählen Sie diese Option, wenn Sie bei der Beurteilung der Qualität der Aussage des Tutors ODER bei der Ausarbeitung Ihrer Antwort, externe Quellen wie z.B. Unterrichtsmaterial, andere Personen, Google, Websites usw. genutzt haben.",
-      options: ["Ja"],
-    },
-    {
       label: "thoughtAboutIndex",
       text: "Für die Antwort habe ich aktiv nachgedacht / Ich wusste die Antwort nicht sofort",
       tooltip:
@@ -50,13 +43,6 @@ export const nonStudyFeedback: Feedback = {
     },
   ],
   ai: [
-    {
-      label: "isSuitable",
-      text: "Was der Tutor schreibt, ist unangemessen (unerwartet) oder passt nicht zum Gespräch.",
-      tooltip:
-        "Wählen Sie diese Option , wenn die Aussage im Kontext des Gesprächs unerwartet oder nicht sinnvoll ist. Das ist zum Beispiel der Fall, wenn sie deutlich von der sokratischen Methode abweicht, keinen Bezug mehr zum Fallbeispiel oder zum aktuellen Thema hat oder unerwartet von Ihrer Frage oder Anweisung abweicht.",
-      options: ["Nein"],
-    },
     {
       label: "isCorrect",
       text: "Was der Tutor schreibt, ist nicht ganz richtig.",
