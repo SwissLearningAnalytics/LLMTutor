@@ -7,6 +7,10 @@ export async function getTutor(tutorId: string): Promise<Tutor> {
       return (await import("./tutors/deskriptive_statistik_heil.yaml")).default as Tutor;
     case "deskriptive_statistik_heilpaed_offen_2":
       return (await import("./tutors/deskriptive_statistik_heil_2.yaml")).default as Tutor;
+    case "diagnostik_i_technischer_test":
+      return (await import("./tutors/diagnostik_technischer_test.yaml")).default as Tutor;
+    case "diagnostik_i_uebung":
+      return (await import("./tutors/diagnostik_i.yaml")).default as Tutor;
     case "erwachsene":
       return (await import("./tutors/erwachsene.yaml")).default as Tutor;
     case "fernuni_cfa":
@@ -39,6 +43,8 @@ export async function getTutor(tutorId: string): Promise<Tutor> {
 export const tutorIds = [
   "deskriptive_statistik_heilpaed_offen",
   "deskriptive_statistik_heilpaed_offen_2",
+  "diagnostik_i_technischer_test",
+  "diagnostik_i_uebung",
   "erwachsene",
   "fernuni_cfa",
   "fernuni_mediation",
