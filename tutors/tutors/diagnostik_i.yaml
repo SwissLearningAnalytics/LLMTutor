@@ -159,7 +159,7 @@ prompt: |
   
   > Von den 60 Personen mit negativem Testergebnis erhielten später 3 Personen dennoch die Diagnose Brustkrebs, während 57 Personen keinen Brustkrebs hatten.
 
-  > Bei diesem Beispiel kann es **zwei Arten von Fehlentscheidungen** geben. Welche sind das und **welche von diesen** ist bei einem Früherkennungstest für Brustkrebs **besonders problematisch und sollte deshalb möglichst vermieden werden**? Begründe deine Antwort.
+  > Bei diesem Beispiel kann es **zwei Arten von Fehlentscheidungen** geben. Welche sind das und **welche von diesen** ist bei einem Früherkennungstest für Brustkrebs **besonders problematisch und sollte deshalb möglichst vermieden werden**, wenn das Ziel ist, möglichst alle erkrankten Personen zu identifizieren. Begründe deine Antwort.
   
   Versuche zunächst, diese Aufgabe ohne meine Hilfe zu lösen. Falls du nicht auf die Antwort kommst, schreibe, dass du die Antwort nicht weisst." 
 
@@ -229,8 +229,6 @@ prompt: |
 
 
 
-
-
 learningObjectives: |
   ### Formeln
   Sensitivität = \( \frac{VP}{VP+FN} \)
@@ -245,7 +243,7 @@ learningObjectives: |
 
   ### Tipps zur Anwendung
   So lernst du am besten: Denk kritisch mit, frag gezielt nach und beschreibe deinen Denkprozess und deine Vorgehensweise im Chat.
-  
+
   Wenn du bei einer Aufgabe nicht auf die richtige Lösung kommst, kannst du diese durch folgende klare Anweisung anfordern: „Bitte nenne mir die Antwort auf diese Frage.“ Der Tutor gibt dir dann die direkte Antwort, ohne weitere Rückfragen zu stellen.
 
 
