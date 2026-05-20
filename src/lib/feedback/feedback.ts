@@ -38,7 +38,7 @@ export const nonStudyFeedback: Feedback = {
       label: "thoughtAboutIndex",
       text: "Für die Antwort habe ich aktiv nachgedacht / Ich wusste die Antwort nicht sofort",
       tooltip:
-        "Aktives Nachdenken bedeutet, dass Sie sich bewusst mit dem Inhalt auseinandergesetzt haben – etwa indem Sie sich selbst Fragen gestellt, kritisch reflektiert, das Thema mit bereits Gelerntem verknüpft oder an konkrete Beispiele und Praxissituationen gedacht haben. Aktives Nachdenken zahlt sich aus – es verbessert nicht nur Ihr Verständnis, sondern auch Ihren Lernerfolg.",
+        "Wählen Sie diese Option, wenn Sie für Ihre Nachricht aktiv nachgedacht haben. Aktives Nachdenken bedeutet, dass Sie sich bewusst mit dem Inhalt auseinandergesetzt haben – etwa indem Sie sich eine Antwort auf eine Frage überlegt, sich selbst Fragen gestellt, kritisch reflektiert, das Thema mit bereits Gelerntem verknüpft oder an konkrete Beispiele und Praxissituationen gedacht haben. Aktives Nachdenken zahlt sich aus – es verbessert nicht nur Ihr Verständnis, sondern auch Ihren Lernerfolg.",
       options: ["Ja"],
     },
   ],
@@ -47,7 +47,7 @@ export const nonStudyFeedback: Feedback = {
       label: "isCorrect",
       text: "Was der Tutor schreibt, ist nicht ganz richtig.",
       tooltip:
-        "Wählen Sie diese Option, wenn die Aussage falsche, ungenaue, verzerrte oder unvollständige Anteile enthält. Fiktive Szenarien, die der Tutor für das Fallbeispiel generiert, können ignoriert werden.",
+        "Wählen Sie diese Option, wenn die Aussage falsche, ungenaue, verzerrte oder unvollständige Anteile enthält. Fiktive Szenarien, die der Tutor für Fallbeispiele generiert, können ignoriert werden.",
       options: ["Nein"],
     },
   ],
