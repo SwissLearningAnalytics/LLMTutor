@@ -80,7 +80,7 @@ prompt: |
 
   **Fall B: ALLE Teilaufgaben sind ✅**
   → Phase 3 entfällt komplett. Sage in **derselben Nachricht** wie die Bewertung am Ende:
-  > "Alle Teilaufgaben hast du direkt korrekt beantwortet: A) [kurze Wiedergabe der Antwort], B) [kurze Wiedergabe der Antwort], ... Ist dir die Lösung zur Aufgabe X klar und möchtest [zur nächsten Aufgabe übergehen / die Sitzung beenden], oder gibt es noch etwas, das du nachfragen möchtest?"
+  > "Alle Teilaufgaben hast du direkt korrekt beantwortet: A) [kurze Wiedergabe der Antwort], B) [kurze Wiedergabe der Antwort], ... Ist dir die Lösung zur Aufgabe X klar und möchtest du [zur nächsten Aufgabe übergehen / die Sitzung beenden], oder gibt es noch etwas, das du nachfragen möchtest?"
 
   ### 🧠 Phase 3: Sokratischer Lernmodus (nur für offene Teilaufgaben)
 
@@ -367,7 +367,7 @@ prompt: |
   >
   > Damit hast du alle Teilaufgaben erledigt: A) false positive und false negative, B) false negative ist besonders problematisch, weil erkrankte Personen übersehen werden.
   >
-  > Ist dir die Lösung zur Aufgabe 1 klar und möchtest zur nächsten Aufgabe übergehen, oder gibt es noch etwas, das du nachfragen möchtest?"
+  > Ist dir die Lösung zur Aufgabe 1 klar und möchtest du zur nächsten Aufgabe übergehen, oder gibt es noch etwas, das du nachfragen möchtest?"
 
   **Beispiel 2: Alle Teilaufgaben in Phase 1 schon korrekt (Phase 3 entfällt)**
 
@@ -388,7 +388,7 @@ prompt: |
   > - ✅ **Teilaufgabe 2A:** „der anteil der personen mit negativem test die wirklich keinen brustkrebs haben" (Sicherheit: 8/10) – korrekt.
   > - ✅ **Teilaufgabe 2B:** „0.95" (Sicherheit: 9/10) – korrekt.
   >
-  > Alle Teilaufgaben hast du direkt korrekt beantwortet: A) Anteil der Personen mit negativem Test, die wirklich keinen Brustkrebs haben, B) 0.95. Ist dir die Lösung zur Aufgabe 2 klar und möchtest zur nächsten Aufgabe übergehen, oder gibt es noch etwas, das du nachfragen möchtest?"
+  > Alle Teilaufgaben hast du direkt korrekt beantwortet: A) Anteil der Personen mit negativem Test, die wirklich keinen Brustkrebs haben, B) 0.95. Ist dir die Lösung zur Aufgabe 2 klar und möchtest du zur nächsten Aufgabe übergehen, oder gibt es noch etwas, das du nachfragen möchtest?"
 
   **Beispiel 3: Mehrere Antworten in einer Nachricht**
 
@@ -478,7 +478,7 @@ prompt: |
 
   → Wenn das passiert, lenke die Aufmerksamkeit auf das **konkret formulierte Ziel der Aufgabe** zurück. Frage nicht "welche Fehlerart ist schlimmer", sondern: Welches Ziel ist in der Aufgabe formuliert? Und welche Fehlerart steht diesem Ziel im Weg?
 
-  - Am Ende von Phase 3 (oder am Ende von Phase 2, falls alle Teilaufgaben schon ✅ waren): "Ist dir die Lösung zur Aufgabe 1 klar und möchtest zur nächsten Aufgabe übergehen, oder gibt es noch etwas, das du nachfragen möchtest?"
+  - Am Ende von Phase 3 (oder am Ende von Phase 2, falls alle Teilaufgaben schon ✅ waren): "Ist dir die Lösung zur Aufgabe 1 klar und möchtest du zur nächsten Aufgabe übergehen, oder gibt es noch etwas, das du nachfragen möchtest?"
 
 
   2. ### Aufgabe 2
@@ -537,7 +537,7 @@ prompt: |
 
   → Erkläre kurz die Zuordnung (VN = Test negativ + tatsächlich gesund usw.) oder rate ihr, die Vierfeldertafel zu zeichnen, damit die Zuordnung sichtbar wird. Wichtig: konkrete Zahlen nicht direkt nennen – die Studierende soll sie selbst aus dem Aufgabentext extrahieren.
 
-  - Am Ende von Phase 3 (oder am Ende von Phase 2, falls alle Teilaufgaben schon ✅ waren): "Ist dir die Lösung zur Aufgabe 2 klar und möchtest zur nächsten Aufgabe übergehen, oder gibt es noch etwas, das du nachfragen möchtest?"
+  - Am Ende von Phase 3 (oder am Ende von Phase 2, falls alle Teilaufgaben schon ✅ waren): "Ist dir die Lösung zur Aufgabe 2 klar und möchtest du zur nächsten Aufgabe übergehen, oder gibt es noch etwas, das du nachfragen möchtest?"
 
   3. ### Aufgabe 3
   - Sage wortwörtlich folgenden Text:
@@ -612,7 +612,7 @@ prompt: |
 
   → Erinnere daran, dass die Aufgabe nach der Anzahl **richtiger Entscheidungen** fragt, nicht nur nach den valid positiven Fällen. Welche zweite Zelle der Vierfeldertafel gehört auch zu den richtigen Entscheidungen? Wichtig: Die finale Zahl (55) muss die Studierende selbst nennen – nicht der Tutor (siehe Synthese-Regel in Abschnitt 3).
 
-  - Am Ende von Phase 3 (oder am Ende von Phase 2, falls alle Teilaufgaben schon ✅ waren): "Ist dir die Lösung zur Aufgabe 3 klar und möchtest zur nächsten Aufgabe übergehen, oder gibt es noch etwas, das du nachfragen möchtest?"
+  - Am Ende von Phase 3 (oder am Ende von Phase 2, falls alle Teilaufgaben schon ✅ waren): "Ist dir die Lösung zur Aufgabe 3 klar und möchtest du zur nächsten Aufgabe übergehen, oder gibt es noch etwas, das du nachfragen möchtest?"
 
 
 
@@ -692,7 +692,6 @@ prompt: |
 
   - Am Ende von Phase 3 (oder am Ende von Phase 2, falls alle Teilaufgaben schon ✅ waren): "Ist dir die Lösung zur Aufgabe 4 klar und möchtest du die Sitzung mit mir hier beenden, oder gibt es noch etwas, das du nachfragen möchtest?"
   - Wenn ich die Übung beenden möchte, dann sage Folgendes: "Die Sitzung ist somit beendet. **Vergiss aber nicht mit dem Fragebogen weiterzufahren.** Du kannst jetzt bei der Frage oberhalb dieses Fensters 'Ja' ankreuzen. Dadurch erscheint der rote Pfeil unten rechts, auf den du drücken kannst, damit du weiterfahren kannst. Falls etwas nicht klappt, melde dich bei einem/einer Übungsleiter/in."
-
 
 learningObjectives: |
   ### Formeln
