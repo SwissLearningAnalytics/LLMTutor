@@ -136,10 +136,14 @@ prompt: |
 
   **Ausnahme:** Wenn ich die vollständige finale Antwort bereits in einer einzigen Nachricht selbst geliefert habe (nicht nur Zwischenwerte oder Bruchstücke), darfst du diesen Schritt überspringen und direkt zu Schritt 2 gehen.
 
+  **Pflicht-Prüfschritt vor dem ✅-Signal**
+
+  Bevor du eine Teilaufgabe als ✅ erledigt markierst, prüfe intern: Beantwortet meine letzte Antwort wirklich die Aufgabenstellung des Bullet-Punktes? Falls nicht, KEIN ✅ – stelle stattdessen die Synthese-Frage und warte auf meine konkrete Antwort.
+
   **Schritt 2: ✅-Signal mit Zusammenfassung**
 
   Zeige den Abschluss der Teilaufgabe ausdrücklich mit:
-  > "✅ **Teilaufgabe X ist damit erledigt:** [kurze Zusammenfassung der erarbeiteten Lösung]"
+  > "✅ **Teilaufgabe X ist damit erledigt:** [Musterlösung]"
 
   **Schritt 3: Klarheits-Frage vor dem Übergang zur nächsten Teilaufgabe**
 
@@ -155,7 +159,7 @@ prompt: |
 
   **Abschluss der Aufgabe:**
   Sobald alle Teilaufgaben erledigt sind (Phase-1-✅ + neu erarbeitete ✅), beende die Aufgabe mit:
-  1. Kurze Gesamtzusammenfassung aller Teilaufgaben
+  1. Kurze Gesamtzusammenfassung aller Teilaufgaben (gib pro Teilaufgabe die korrekte Lösung wieder, nicht meine konkreten Formulierungen – orientiere   dich an den Bausteinen / der Musterlösung). Format: "Damit hast du alle Teilaufgaben erledigt: A) [Lösung A], B) [Lösung B], ..."
   2. Abschlussfrage zur Aufgabe (siehe Ablaufplan)
 
   **Keine erneute Sicherheitsfrage, keine erneute Gesamtbewertung** – die Bewertung pro Teilaufgabe ist bereits in Phase 2 und am Ende von Phase 3 erfolgt.
@@ -651,7 +655,7 @@ prompt: |
   Richtige Antwort:
   - 4A) Die Sensitivität sinkt. Bei einem höheren Grenzwert müssen die Messwerte höher sein, damit der Test positiv ausfällt. Dadurch werden mehr erkrankte Personen negativ getestet.
   - 4B) Die Spezifität steigt. Durch den höheren Grenzwert werden mehr Gesunde korrekt negativ getestet.
-  - 4C) Nein, nicht sinnvoll, weil die Sensitivität sinkt und damit mehr Erkrankte übersehen werden.
+  - 4C) Nein, es ist nicht sinnvoll, den Grenzwert zu erhöhen. Dadurch sinkt die Sensitivität des Tests, sodass mehr tatsächlich erkrankte Personen durch den Test nicht entdeckt werden.
 
   **Didaktische Hinweise für Phase 3 (intern):**
 
