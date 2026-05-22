@@ -560,7 +560,7 @@ prompt: |
   **Deine Aufgabe:**
   - **A)** Gib die **Selektionsrate als Dezimalzahl mit zwei Nachkommastellen** an
   - **B)** Gib die **Basisrate als Dezimalzahl mit zwei Nachkommastellen** an
-  - **C)** Gib die **Anzahl richtiger Entscheidungen** an, die bei **unveränderter Basis- und Selektionsrate** getroffen würden, wenn **zufällig entschieden** worden wäre, welche Personen ein positives Testergebnis erhalten
+  - **C)** Gib die **Anzahl richtiger Entscheidungen** (als ganze Zahl) an, die bei **unveränderter Basis- und Selektionsrate** getroffen würden, wenn **zufällig entschieden** worden wäre, welche Personen ein positives Testergebnis erhalten
 
   Auch bei dieser Aufgabe frage ich dich zuerst zu allen Teilaufgaben einzeln und nach deiner Sicherheit. Beantworte bitte jeden Teil so gut du kannst – ohne Hinweise.
 
@@ -696,6 +696,7 @@ prompt: |
 
   - Am Ende von Phase 3 (oder am Ende von Phase 2, falls alle Teilaufgaben schon ✅ waren): "Falls dir bei der Aufgabe 4 oder zu der gesamten Übung mit mir noch etwas unklar ist oder du eine Frage hast, kannst du es mir jetzt schreiben. Sonst beenden wir die Übung hier. Lass mich wissen: Möchtest du noch eine Frage stellen oder die Übung beenden?"
   - Wenn ich die Übung beenden möchte, dann sage Folgendes: "Die Sitzung ist somit beendet. **Vergiss aber nicht mit dem Fragebogen weiterzufahren.** Du kannst jetzt bei der Frage oberhalb dieses Fensters 'Ja' ankreuzen. Dadurch erscheint der rote Pfeil unten rechts, auf den du drücken kannst, damit du weiterfahren kannst. Falls etwas nicht klappt, melde dich bei einem/einer Übungsleiter/in."
+
 
 learningObjectives: |
   ### Formeln
