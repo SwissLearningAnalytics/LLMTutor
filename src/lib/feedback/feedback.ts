@@ -35,33 +35,19 @@ export const studyFeedback: Feedback = {
 export const nonStudyFeedback: Feedback = {
   user: [
     {
-      label: "externalResource",
-      text: "Für meine Antwort habe ich externe Quellen genutzt (z. B. Internet oder andere Personen).",
-      tooltip:
-        "Wählen Sie diese Option, wenn Sie bei der Beurteilung der Qualität der Aussage des Tutors ODER bei der Ausarbeitung Ihrer Antwort, externe Quellen wie z.B. Unterrichtsmaterial, andere Personen, Google, Websites usw. genutzt haben.",
-      options: ["Ja"],
-    },
-    {
       label: "thoughtAboutIndex",
       text: "Für die Antwort habe ich aktiv nachgedacht / Ich wusste die Antwort nicht sofort",
       tooltip:
-        "Aktives Nachdenken bedeutet, dass Sie sich bewusst mit dem Inhalt auseinandergesetzt haben – etwa indem Sie sich selbst Fragen gestellt, kritisch reflektiert, das Thema mit bereits Gelerntem verknüpft oder an konkrete Beispiele und Praxissituationen gedacht haben. Aktives Nachdenken zahlt sich aus – es verbessert nicht nur Ihr Verständnis, sondern auch Ihren Lernerfolg.",
+        "Wählen Sie diese Option, wenn Sie für Ihre Nachricht aktiv nachgedacht haben. Aktives Nachdenken bedeutet, dass Sie sich bewusst mit dem Inhalt auseinandergesetzt haben – etwa indem Sie sich eine Antwort auf eine Frage überlegt, sich selbst Fragen gestellt, kritisch reflektiert, das Thema mit bereits Gelerntem verknüpft oder an konkrete Beispiele und Praxissituationen gedacht haben. Aktives Nachdenken zahlt sich aus – es verbessert nicht nur Ihr Verständnis, sondern auch Ihren Lernerfolg.",
       options: ["Ja"],
     },
   ],
   ai: [
     {
-      label: "isSuitable",
-      text: "Was der Tutor schreibt, ist unangemessen (unerwartet) oder passt nicht zum Gespräch.",
-      tooltip:
-        "Wählen Sie diese Option , wenn die Aussage im Kontext des Gesprächs unerwartet oder nicht sinnvoll ist. Das ist zum Beispiel der Fall, wenn sie deutlich von der sokratischen Methode abweicht, keinen Bezug mehr zum Fallbeispiel oder zum aktuellen Thema hat oder unerwartet von Ihrer Frage oder Anweisung abweicht.",
-      options: ["Nein"],
-    },
-    {
       label: "isCorrect",
       text: "Was der Tutor schreibt, ist nicht ganz richtig.",
       tooltip:
-        "Wählen Sie diese Option, wenn die Aussage falsche, ungenaue, verzerrte oder unvollständige Anteile enthält. Fiktive Szenarien, die der Tutor für das Fallbeispiel generiert, können ignoriert werden.",
+        "Wählen Sie diese Option, wenn die Aussage falsche, ungenaue, verzerrte oder unvollständige Anteile enthält. Fiktive Szenarien, die der Tutor für Fallbeispiele generiert, können ignoriert werden.",
       options: ["Nein"],
     },
   ],
