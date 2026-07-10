@@ -6,7 +6,7 @@ export const Route = createFileRoute("/admin/import")({
     handlers: {
       GET: async () => {
         await importTutors();
-        return new Response("Import complete");
+        return new Response("Import abgeschlossen");
       },
     },
   },

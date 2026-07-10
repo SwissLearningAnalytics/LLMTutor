@@ -13,9 +13,11 @@ import { authClient } from "@/lib/auth-client";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
 
 const userFormSchema = z.object({
-  name: z.string().min(1, "Name is required."),
-  email: z.email("Enter a valid email address."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
+  name: z.string().min(1, "Name ist erforderlich."),
+  email: z.email("Gib eine gültige E-Mail-Adresse ein."),
+  password: z
+    .string()
+    .min(8, "Das Passwort muss mindestens 8 Zeichen lang sein."),
   role: z.enum(["user", "admin"]),
 });
 
@@ -24,7 +26,7 @@ const editUserFormSchema = userFormSchema.extend({
     .string()
     .refine(
       (password) => password.length === 0 || password.length >= 8,
-      "Password must be at least 8 characters.",
+      "Das Passwort muss mindestens 8 Zeichen lang sein.",
     ),
 });
 
@@ -77,7 +79,7 @@ export function UserForm(props: UserFormProps) {
               queryKey: ["admin-user", props.userId],
             }),
           ]);
-          setStatus({ type: "success", message: "User updated." });
+          setStatus({ type: "success", message: "Benutzer aktualisiert." });
           return;
         }
 
@@ -103,7 +105,7 @@ export function UserForm(props: UserFormProps) {
     },
   });
 
-  const title = isEdit ? "Edit User" : "Create User";
+  const title = isEdit ? "Benutzer bearbeiten" : "Benutzer erstellen";
 
   return (
     <Layout header={<AdminHeader title={title} />}>
@@ -117,7 +119,7 @@ export function UserForm(props: UserFormProps) {
         <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
           <Link to="/admin/users">
             <ArrowLeftIcon data-icon="inline-start" />
-            Back to users
+            Zurück zu den Benutzern
           </Link>
         </Button>
 
@@ -153,7 +155,7 @@ export function UserForm(props: UserFormProps) {
 
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>E-Mail</FieldLabel>
                   <Input
                     id={field.name}
                     name={field.name}
@@ -177,7 +179,7 @@ export function UserForm(props: UserFormProps) {
 
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Passwort</FieldLabel>
                   <Input
                     id={field.name}
                     name={field.name}
@@ -201,7 +203,7 @@ export function UserForm(props: UserFormProps) {
 
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Role</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Rolle</FieldLabel>
                   <select
                     id={field.name}
                     name={field.name}
@@ -213,7 +215,7 @@ export function UserForm(props: UserFormProps) {
                     aria-invalid={isInvalid}
                     className="flex h-10 w-full rounded-md border bg-surface-primary p-2 text-sm ring-offset-surface-primary focus-visible:ring-2 focus-visible:ring-black/50 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <option value="user">User</option>
+                    <option value="user">Benutzer</option>
                     <option value="admin">Admin</option>
                   </select>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
@@ -229,7 +231,11 @@ export function UserForm(props: UserFormProps) {
               ) : (
                 <UserPlusIcon data-icon="inline-start" />
               )}
-              {isPending ? "Saving..." : isEdit ? "Save user" : "Create user"}
+              {isPending
+                ? "Speichern..."
+                : isEdit
+                  ? "Benutzer speichern"
+                  : "Benutzer erstellen"}
             </Button>
             {status?.type === "success" && (
               <Badge variant="green" role="status" aria-live="polite">
@@ -281,8 +287,8 @@ export function getErrorMessage(error: unknown) {
     "message" in error &&
     typeof error.message === "string"
   ) {
-    return error.message;
+    return "Die Aktion konnte nicht abgeschlossen werden.";
   }
 
-  return "Something went wrong.";
+  return "Etwas ist schiefgelaufen.";
 }

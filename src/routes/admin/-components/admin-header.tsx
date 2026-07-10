@@ -27,7 +27,7 @@ export function AdminHeader({
         {children}
         <Button type="button" disabled={isSigningOut} onClick={signOut}>
           <LogOutIcon data-icon="inline-start" />
-          Logout
+          Abmelden
         </Button>
       </div>
     </>

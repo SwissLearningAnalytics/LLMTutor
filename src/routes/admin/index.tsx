@@ -73,19 +73,19 @@ function RouteComponent() {
   return (
     <Layout
       header={
-        <AdminHeader title="Tutors">
+        <AdminHeader title="Tutoren">
           {canManageUsers && (
             <Button asChild>
               <Link to="/admin/users">
                 <UserIcon data-icon="inline-start" />
-                Manage Users
+                Benutzer verwalten
               </Link>
             </Button>
           )}
           <Button variant="destructive" asChild>
             <Link to="/admin/create">
               <PlusIcon data-icon="inline-start" />
-              Create Tutor
+              Tutor erstellen
             </Link>
           </Button>
         </AdminHeader>
@@ -100,8 +100,8 @@ function RouteComponent() {
           <Input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Search tutors"
-            aria-label="Search tutors"
+            placeholder="Tutoren suchen"
+            aria-label="Tutoren suchen"
             className="bg-surface-primary pl-10"
           />
         </div>
@@ -115,7 +115,7 @@ function RouteComponent() {
                     <Link
                       to="/admin/$tutorId"
                       params={{ tutorId: tutor.tutorId }}
-                      aria-label={`Edit ${tutor.displayName}`}
+                      aria-label={`${tutor.displayName} bearbeiten`}
                       className="absolute inset-0 z-0 rounded-lg ring-offset-2 ring-inset focus-visible:ring-2 focus-visible:ring-black/50 focus-visible:outline-none"
                     />
                     <div className="pointer-events-none relative z-10 flex items-center justify-between gap-4 p-4 transition-colors group-hover:bg-surface-background-primary">
@@ -143,10 +143,10 @@ function RouteComponent() {
             ) : (
               <div className="flex min-h-48 flex-col items-center justify-center gap-1 p-8 text-center">
                 <h2 className="text-lg font-semibold text-primary">
-                  No matching tutors
+                  Keine passenden Tutoren
                 </h2>
                 <p className="text-sm text-secondary">
-                  Try a different search term.
+                  Versuche einen anderen Suchbegriff.
                 </p>
               </div>
             )
@@ -154,16 +154,16 @@ function RouteComponent() {
             <div className="flex min-h-48 flex-col items-center justify-center gap-4 p-8 text-center">
               <div className="flex flex-col gap-1">
                 <h2 className="text-lg font-semibold text-primary">
-                  No tutors yet
+                  Noch keine Tutoren
                 </h2>
                 <p className="text-sm text-secondary">
-                  Create the first tutor to get started.
+                  Erstelle den ersten Tutor, um loszulegen.
                 </p>
               </div>
               <Button asChild>
                 <Link to="/admin/create">
                   <PlusIcon data-icon="inline-start" />
-                  Create Tutor
+                  Tutor erstellen
                 </Link>
               </Button>
             </div>
@@ -198,7 +198,7 @@ function DeleteTutorDialog({
           type="button"
           variant="ghost"
           size="icon"
-          aria-label={`Delete ${displayName}`}
+          aria-label={`${displayName} löschen`}
           className="pointer-events-auto relative z-20 text-feedback-negative hover:bg-surface-feedback-negative-light hover:opacity-100"
         >
           <Trash2Icon />
@@ -206,20 +206,20 @@ function DeleteTutorDialog({
       </AlertDialogTrigger>
       <AlertDialogContent className="rounded-lg border border-border-primary bg-surface-primary text-primary shadow-floating">
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete tutor?</AlertDialogTitle>
+          <AlertDialogTitle>Tutor löschen?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete {displayName}. This action cannot be
-            undone.
+            Dadurch wird {displayName} dauerhaft gelöscht. Diese Aktion kann
+            nicht rückgängig gemacht werden.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>Abbrechen</AlertDialogCancel>
           <AlertDialogAction
             disabled={isDeleting}
             className="bg-surface-button-accent text-button-outline"
             onClick={() => onDelete(tutorId)}
           >
-            Delete
+            Löschen
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -70,11 +70,11 @@ function RouteComponent() {
   return (
     <Layout
       header={
-        <AdminHeader title="Users">
+        <AdminHeader title="Benutzer">
           <Button variant="destructive" asChild>
             <Link to="/admin/users/create">
               <PlusIcon data-icon="inline-start" />
-              Create User
+              Benutzer erstellen
             </Link>
           </Button>
         </AdminHeader>
@@ -84,7 +84,7 @@ function RouteComponent() {
         <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
           <Link to="/admin">
             <ArrowLeftIcon data-icon="inline-start" />
-            Back to tutors
+            Zurück zu den Tutoren
           </Link>
         </Button>
 
@@ -96,8 +96,8 @@ function RouteComponent() {
           <Input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Search users"
-            aria-label="Search users"
+            placeholder="Benutzer suchen"
+            aria-label="Benutzer suchen"
             className="bg-surface-primary pl-10"
           />
         </div>
@@ -105,12 +105,12 @@ function RouteComponent() {
         <section className="overflow-hidden rounded-lg border border-border-primary bg-surface-primary shadow-sm">
           {isLoading ? (
             <div className="flex min-h-48 items-center justify-center p-8 text-sm text-secondary">
-              Loading users...
+              Benutzer werden geladen...
             </div>
           ) : error ? (
             <div className="flex min-h-48 flex-col items-center justify-center gap-1 p-8 text-center">
               <h2 className="text-lg font-semibold text-primary">
-                Could not load users
+                Benutzer konnten nicht geladen werden
               </h2>
               <p className="text-sm text-secondary">{getErrorMessage(error)}</p>
             </div>
@@ -122,7 +122,7 @@ function RouteComponent() {
                     <Link
                       to="/admin/users/$userId"
                       params={{ userId: user.id }}
-                      aria-label={`Edit ${user.name}`}
+                      aria-label={`${user.name} bearbeiten`}
                       className="absolute inset-0 z-0 rounded-lg ring-offset-2 ring-inset focus-visible:ring-2 focus-visible:ring-black/50 focus-visible:outline-none"
                     />
                     <div className="pointer-events-none relative z-10 flex items-center justify-between gap-4 p-4 transition-colors group-hover:bg-surface-background-primary">
@@ -148,10 +148,10 @@ function RouteComponent() {
             ) : (
               <div className="flex min-h-48 flex-col items-center justify-center gap-1 p-8 text-center">
                 <h2 className="text-lg font-semibold text-primary">
-                  No matching users
+                  Keine passenden Benutzer
                 </h2>
                 <p className="text-sm text-secondary">
-                  Try a different search term.
+                  Versuche einen anderen Suchbegriff.
                 </p>
               </div>
             )
@@ -159,16 +159,16 @@ function RouteComponent() {
             <div className="flex min-h-48 flex-col items-center justify-center gap-4 p-8 text-center">
               <div className="flex flex-col gap-1">
                 <h2 className="text-lg font-semibold text-primary">
-                  No users yet
+                  Noch keine Benutzer
                 </h2>
                 <p className="text-sm text-secondary">
-                  Create the first user to get started.
+                  Erstelle den ersten Benutzer, um loszulegen.
                 </p>
               </div>
               <Button asChild>
                 <Link to="/admin/users/create">
                   <PlusIcon data-icon="inline-start" />
-                  Create User
+                  Benutzer erstellen
                 </Link>
               </Button>
             </div>
@@ -190,7 +190,7 @@ function UserRoleBadge({ role }: { role?: string | null }) {
       ) : (
         <UserIcon className="-mr-1 size-4" data-icon="inline-start" />
       )}
-      {isAdmin ? "Admin" : "User"}
+      {isAdmin ? "Admin" : "Benutzer"}
     </Badge>
   );
 }

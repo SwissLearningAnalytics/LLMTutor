@@ -62,7 +62,7 @@ function toFormValues(user: AdminUser): UserFormValues {
 function UserFormLoadingState() {
   return (
     <div className="grid min-h-dvh place-items-center bg-surface-background-primary text-sm text-secondary">
-      Loading user...
+      Benutzer wird geladen...
     </div>
   );
 }
@@ -72,7 +72,7 @@ function UserFormErrorState({ message }: { message: string }) {
     <div className="grid min-h-dvh place-items-center bg-surface-background-primary p-8 text-center">
       <div className="flex max-w-sm flex-col gap-1">
         <h1 className="text-lg font-semibold text-primary">
-          Could not load user
+          Benutzer konnte nicht geladen werden
         </h1>
         <p className="text-sm text-secondary">{message}</p>
       </div>

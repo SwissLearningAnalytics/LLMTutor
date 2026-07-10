@@ -75,7 +75,7 @@ export function TutorForm(props: TutorFormProps) {
             queryKey: getTutorOptions(props.tutorId).queryKey,
           }),
         ]);
-        setSuccessMessage("Tutor updated.");
+        setSuccessMessage("Tutor aktualisiert.");
         return;
       }
 
@@ -110,8 +110,8 @@ export function TutorForm(props: TutorFormProps) {
         <AdminHeader
           title={
             props.mode === "edit"
-              ? `Edit Tutor ${props.defaultValues.displayName}`
-              : "Create Tutor"
+              ? `Tutor ${props.defaultValues.displayName} bearbeiten`
+              : "Tutor erstellen"
           }
         />
       }
@@ -126,7 +126,7 @@ export function TutorForm(props: TutorFormProps) {
         <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
           <Link to="/admin">
             <ArrowLeftIcon data-icon="inline-start" />
-            Back to tutors
+            Zurück zu den Tutoren
           </Link>
         </Button>
         <form.Field name="displayName">
@@ -135,7 +135,7 @@ export function TutorForm(props: TutorFormProps) {
               field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Displayname</FieldLabel>
+                <FieldLabel htmlFor={field.name}>Anzeigename</FieldLabel>
                 <Input
                   type="text"
                   name={field.name}
@@ -177,7 +177,7 @@ export function TutorForm(props: TutorFormProps) {
               field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Tutor ID</FieldLabel>
+                <FieldLabel htmlFor={field.name}>Tutor-ID</FieldLabel>
                 <Input
                   type="text"
                   name={field.name}
@@ -204,7 +204,7 @@ export function TutorForm(props: TutorFormProps) {
               field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Prompt</FieldLabel>
+                <FieldLabel htmlFor={field.name}>Systemprompt</FieldLabel>
                 <Textarea
                   name={field.name}
                   id={field.name}
@@ -225,9 +225,7 @@ export function TutorForm(props: TutorFormProps) {
               field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>
-                  Learning objectives
-                </FieldLabel>
+                <FieldLabel htmlFor={field.name}>Lernziele</FieldLabel>
                 <Textarea
                   name={field.name}
                   id={field.name}
@@ -243,7 +241,7 @@ export function TutorForm(props: TutorFormProps) {
           }}
         </form.Field>
         <Button type="submit" disabled={isPending}>
-          {isEdit ? "Update" : "Create"}
+          {isEdit ? "Aktualisieren" : "Erstellen"}
         </Button>
         {successMessage && (
           <Badge variant="green" role="status" aria-live="polite">

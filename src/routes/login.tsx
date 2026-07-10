@@ -41,7 +41,7 @@ function RouteComponent() {
     const password = formData.get("password")?.toString();
 
     if (!email || !password) {
-      setErrorMessage("Enter your email and password.");
+      setErrorMessage("Gib deine E-Mail-Adresse und dein Passwort ein.");
       return;
     }
 
@@ -73,9 +73,10 @@ function RouteComponent() {
             className="size-12 mix-blend-screen"
           />
           <div className="flex flex-col gap-3">
-            <h1 className="text-3xl font-semibold">Tutor Administration</h1>
+            <h1 className="text-3xl font-semibold">Tutor-Administration</h1>
             <p className="text-base text-white/75">
-              Sign in to manage tutors, user accounts, and admin access.
+              Melde dich an, um Tutoren, Benutzerkonten und Admin-Zugriff zu
+              verwalten.
             </p>
           </div>
         </section>
@@ -83,20 +84,20 @@ function RouteComponent() {
         <section className="rounded-lg border border-border-primary bg-surface-primary p-5 shadow-floating sm:p-6">
           <form onSubmit={signIn} className="flex flex-col gap-6">
             <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-semibold text-primary">Login</h1>
+              <h1 className="text-2xl font-semibold text-primary">Anmelden</h1>
               <p className="text-sm text-secondary">
-                Use your admin account to continue.
+                Melde dich mit deinem Admin-Konto an, um fortzufahren.
               </p>
             </div>
 
             {session.error && (
-              <LoginError message="Could not check your current session." />
+              <LoginError message="Deine aktuelle Sitzung konnte nicht geprüft werden." />
             )}
 
             {errorMessage && <LoginError message={errorMessage} />}
 
             <Label className="flex flex-col gap-2">
-              Email
+              E-Mail
               <Input
                 type="email"
                 autoComplete="email"
@@ -107,7 +108,7 @@ function RouteComponent() {
             </Label>
 
             <Label className="flex flex-col gap-2">
-              Password
+              Passwort
               <Input
                 type="password"
                 name="password"
@@ -119,7 +120,7 @@ function RouteComponent() {
 
             <Button type="submit" disabled={isPending}>
               <LogInIcon data-icon="inline-start" />
-              {isPending ? "Signing in..." : "Login"}
+              {isPending ? "Anmelden..." : "Anmelden"}
             </Button>
           </form>
         </section>
@@ -145,8 +146,8 @@ function getSignInErrorMessage(error: unknown) {
     typeof error.message === "string" &&
     error.message
   ) {
-    return error.message;
+    return "Anmeldung fehlgeschlagen. Prüfe deine E-Mail-Adresse und dein Passwort.";
   }
 
-  return "Could not sign in. Check your email and password.";
+  return "Anmeldung fehlgeschlagen. Prüfe deine E-Mail-Adresse und dein Passwort.";
 }

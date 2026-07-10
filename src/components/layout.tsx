@@ -29,7 +29,7 @@ export function Layout({
         >
           <div
             className={cn(
-              "min-h-full",
+              "h-full",
               flex && "flex",
               !noConstrain && "mx-auto max-w-3xl",
             )}
