@@ -26,11 +26,12 @@ export const ensureSession = createServerFn({ method: "GET" }).handler(
 
 export const createUser = createServerFn({ method: "GET" }).handler(
   async () => {
-    auth.api.signUpEmail({
+    auth.api.createUser({
       body: {
-        email: "jutz@ubique.ch",
-        name: "Jeremias",
-        password: "jeremiasjutz",
+        email: "jutz.jeremias@gmail.com",
+        name: "test",
+        password: "jeremias",
+        role: "admin",
       },
     });
   },

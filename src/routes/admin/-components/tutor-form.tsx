@@ -19,6 +19,7 @@ import {
   getTutorOptions,
   getTutorsOptions,
 } from "@/lib/api/tutors/query-options";
+import { AdminHeader } from "@/routes/admin/-components/admin-header";
 
 const tutorFormSchema = z.object({
   tutorId: z.string().min(1),
@@ -106,11 +107,13 @@ export function TutorForm(props: TutorFormProps) {
   return (
     <Layout
       header={
-        <h1 className="text-3xl font-semibold">
-          {props.mode === "edit"
-            ? `Edit Tutor ${props.defaultValues.displayName}`
-            : "Create Tutor"}
-        </h1>
+        <AdminHeader
+          title={
+            props.mode === "edit"
+              ? `Edit Tutor ${props.defaultValues.displayName}`
+              : "Create Tutor"
+          }
+        />
       }
     >
       <form

@@ -20,7 +20,8 @@
     "db:migrations:generate": "npx drizzle-kit generate",
     "db:migrations:apply": "npx drizzle-kit migrate",
     "generate:tutors-index": "tsx generate-tutors-index.ts",
-    "prepare": "pnpm generate:tutors-index"
+    "prepare": "pnpm generate:tutors-index",
+    "auth:generate": "pnpm dlx auth generate --output src/lib/auth-schema.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "3.0.61",

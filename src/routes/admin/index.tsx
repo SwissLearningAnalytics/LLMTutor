@@ -9,6 +9,7 @@ import {
   PlusIcon,
   SearchIcon,
   Trash2Icon,
+  UserIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Layout } from "@/components/layout";
@@ -30,6 +31,8 @@ import {
   getTutorOptions,
   getTutorsOptions,
 } from "@/lib/api/tutors/query-options";
+import { authClient } from "@/lib/auth-client";
+import { AdminHeader } from "@/routes/admin/-components/admin-header";
 
 export const Route = createFileRoute("/admin/")({
   component: RouteComponent,
@@ -43,6 +46,8 @@ function RouteComponent() {
   const { data: tutors } = useSuspenseQuery(getTutorsOptions());
   const deleteMutation = useMutation(deleteTutorOptions());
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: session } = authClient.useSession();
+  const canManageUsers = hasAdminRole(session?.user);
   const filteredTutors = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
 
@@ -68,15 +73,22 @@ function RouteComponent() {
   return (
     <Layout
       header={
-        <>
-          <h1 className="text-3xl font-semibold">Tutors</h1>
-          <Button variant="destructive" className="-my-1" asChild>
+        <AdminHeader title="Tutors">
+          {canManageUsers && (
+            <Button asChild>
+              <Link to="/admin/users">
+                <UserIcon data-icon="inline-start" />
+                Manage Users
+              </Link>
+            </Button>
+          )}
+          <Button variant="destructive" asChild>
             <Link to="/admin/create">
               <PlusIcon data-icon="inline-start" />
               Create Tutor
             </Link>
           </Button>
-        </>
+        </AdminHeader>
       }
     >
       <div className="flex flex-col gap-8">
@@ -160,6 +172,12 @@ function RouteComponent() {
       </div>
     </Layout>
   );
+}
+
+function hasAdminRole(user: { role?: unknown } | undefined) {
+  const roles = typeof user?.role === "string" ? user.role.split(",") : [];
+
+  return roles.some((role) => role.trim() === "admin");
 }
 
 function DeleteTutorDialog({
