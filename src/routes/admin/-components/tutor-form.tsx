@@ -125,7 +125,7 @@ export function TutorForm(props: TutorFormProps) {
       >
         <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
           <Link to="/admin">
-            <ArrowLeftIcon data-icon="inline-start" />
+            <ArrowLeftIcon />
             Zurück zu den Tutoren
           </Link>
         </Button>

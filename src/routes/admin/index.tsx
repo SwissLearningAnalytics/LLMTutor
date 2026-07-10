@@ -77,14 +77,14 @@ function RouteComponent() {
           {canManageUsers && (
             <Button asChild>
               <Link to="/admin/users">
-                <UserIcon data-icon="inline-start" />
+                <UserIcon />
                 Benutzer verwalten
               </Link>
             </Button>
           )}
           <Button variant="destructive" asChild>
             <Link to="/admin/create">
-              <PlusIcon data-icon="inline-start" />
+              <PlusIcon />
               Tutor erstellen
             </Link>
           </Button>
@@ -162,7 +162,7 @@ function RouteComponent() {
               </div>
               <Button asChild>
                 <Link to="/admin/create">
-                  <PlusIcon data-icon="inline-start" />
+                  <PlusIcon />
                   Tutor erstellen
                 </Link>
               </Button>

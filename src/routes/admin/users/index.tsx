@@ -73,7 +73,7 @@ function RouteComponent() {
         <AdminHeader title="Benutzer">
           <Button variant="destructive" asChild>
             <Link to="/admin/users/create">
-              <PlusIcon data-icon="inline-start" />
+              <PlusIcon />
               Benutzer erstellen
             </Link>
           </Button>
@@ -83,7 +83,7 @@ function RouteComponent() {
       <div className="flex flex-col gap-8">
         <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
           <Link to="/admin">
-            <ArrowLeftIcon data-icon="inline-start" />
+            <ArrowLeftIcon />
             Zurück zu den Tutoren
           </Link>
         </Button>
@@ -167,7 +167,7 @@ function RouteComponent() {
               </div>
               <Button asChild>
                 <Link to="/admin/users/create">
-                  <PlusIcon data-icon="inline-start" />
+                  <PlusIcon />
                   Benutzer erstellen
                 </Link>
               </Button>
@@ -186,9 +186,9 @@ function UserRoleBadge({ role }: { role?: string | null }) {
   return (
     <Badge variant={isAdmin ? "green" : "gray"}>
       {isAdmin ? (
-        <ShieldIcon className="-mr-1 size-4" data-icon="inline-start" />
+        <ShieldIcon className="-mr-1 size-4" />
       ) : (
-        <UserIcon className="-mr-1 size-4" data-icon="inline-start" />
+        <UserIcon className="-mr-1 size-4" />
       )}
       {isAdmin ? "Admin" : "Benutzer"}
     </Badge>

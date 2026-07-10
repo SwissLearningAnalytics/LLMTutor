@@ -118,7 +118,7 @@ export function UserForm(props: UserFormProps) {
       >
         <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
           <Link to="/admin/users">
-            <ArrowLeftIcon data-icon="inline-start" />
+            <ArrowLeftIcon />
             Zurück zu den Benutzern
           </Link>
         </Button>
@@ -226,11 +226,7 @@ export function UserForm(props: UserFormProps) {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button type="submit" disabled={isPending} className="sm:w-fit">
-              {isEdit ? (
-                <SaveIcon data-icon="inline-start" />
-              ) : (
-                <UserPlusIcon data-icon="inline-start" />
-              )}
+              {isEdit ? <SaveIcon /> : <UserPlusIcon />}
               {isPending
                 ? "Speichern..."
                 : isEdit

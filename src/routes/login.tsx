@@ -119,7 +119,7 @@ function RouteComponent() {
             </Label>
 
             <Button type="submit" disabled={isPending}>
-              <LogInIcon data-icon="inline-start" />
+              <LogInIcon />
               {isPending ? "Anmelden..." : "Anmelden"}
             </Button>
           </form>

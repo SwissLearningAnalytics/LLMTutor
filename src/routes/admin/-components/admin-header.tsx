@@ -26,7 +26,7 @@ export function AdminHeader({
       <div className="ml-auto flex items-center gap-3">
         {children}
         <Button type="button" disabled={isSigningOut} onClick={signOut}>
-          <LogOutIcon data-icon="inline-start" />
+          <LogOutIcon />
           Abmelden
         </Button>
       </div>
