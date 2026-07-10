@@ -1,8 +1,34 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PlusIcon } from "lucide-react";
+import {
+  ChevronRightIcon,
+  PlusIcon,
+  SearchIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { getTutorsOptions } from "@/lib/api/tutors/query-options";
+import { Input } from "@/components/ui/input";
+import { deleteTutorOptions } from "@/lib/api/tutors/mutation-options";
+import {
+  getTutorOptions,
+  getTutorsOptions,
+} from "@/lib/api/tutors/query-options";
 
 export const Route = createFileRoute("/admin/")({
   component: RouteComponent,
@@ -12,16 +38,173 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function RouteComponent() {
+  const queryClient = useQueryClient();
   const { data: tutors } = useSuspenseQuery(getTutorsOptions());
+  const deleteMutation = useMutation(deleteTutorOptions());
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredTutors = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
+
+    if (!normalizedQuery) {
+      return tutors;
+    }
+
+    return tutors.filter((tutor) => {
+      return [tutor.displayName, tutor.tutorId].some((value) =>
+        value.toLocaleLowerCase().includes(normalizedQuery),
+      );
+    });
+  }, [searchQuery, tutors]);
+
+  async function deleteTutor(tutorId: string) {
+    await deleteMutation.mutateAsync({ data: { tutorId } });
+    queryClient.removeQueries({ queryKey: getTutorOptions(tutorId).queryKey });
+    await queryClient.invalidateQueries({
+      queryKey: getTutorsOptions().queryKey,
+    });
+  }
+
   return (
-    <div>
-      Hello "/admin/"!<pre>{JSON.stringify(tutors, null, 2)}</pre>
-      <Button className="absolute top-6 right-6" asChild>
-        <Link to="/admin/create">
-          <PlusIcon data-icon="inline-start" />
-          Create Tutor
-        </Link>
-      </Button>
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 py-12">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold text-primary">Tutors</h1>
+          <p className="max-w-2xl text-sm text-secondary">
+            Manage the tutor prompts available in the application.
+          </p>
+        </div>
+        <Button asChild>
+          <Link to="/admin/create">
+            <PlusIcon data-icon="inline-start" />
+            Create Tutor
+          </Link>
+        </Button>
+      </header>
+
+      <div className="relative">
+        <SearchIcon
+          aria-hidden
+          className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-secondary"
+        />
+        <Input
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search tutors"
+          aria-label="Search tutors"
+          className="bg-surface-primary pl-10"
+        />
+      </div>
+
+      <section className="overflow-hidden rounded-lg border border-border-primary bg-surface-primary shadow-sm">
+        {tutors.length > 0 ? (
+          filteredTutors.length > 0 ? (
+            <ul className="divide-y divide-border-primary">
+              {filteredTutors.map((tutor) => (
+                <li key={tutor.tutorId} className="group relative">
+                  <Link
+                    to="/admin/$tutorId"
+                    params={{ tutorId: tutor.tutorId }}
+                    aria-label={`Edit ${tutor.displayName}`}
+                    className="absolute inset-0 z-0 rounded-lg ring-offset-2 ring-inset focus-visible:ring-2 focus-visible:ring-black/50 focus-visible:outline-none"
+                  />
+                  <div className="pointer-events-none relative z-10 flex items-center justify-between gap-4 p-4 transition-colors group-hover:bg-surface-background-primary">
+                    <div className="pointer-events-none min-w-0">
+                      <h2 className="truncate text-base font-medium text-primary">
+                        {tutor.displayName}
+                      </h2>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <DeleteTutorDialog
+                        tutorId={tutor.tutorId}
+                        displayName={tutor.displayName}
+                        isDeleting={deleteMutation.isPending}
+                        onDelete={deleteTutor}
+                      />
+                      <ChevronRightIcon
+                        aria-hidden
+                        className="size-4 text-secondary"
+                      />
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="flex min-h-48 flex-col items-center justify-center gap-1 p-8 text-center">
+              <h2 className="text-lg font-semibold text-primary">
+                No matching tutors
+              </h2>
+              <p className="text-sm text-secondary">
+                Try a different search term.
+              </p>
+            </div>
+          )
+        ) : (
+          <div className="flex min-h-48 flex-col items-center justify-center gap-4 p-8 text-center">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-lg font-semibold text-primary">
+                No tutors yet
+              </h2>
+              <p className="text-sm text-secondary">
+                Create the first tutor to get started.
+              </p>
+            </div>
+            <Button asChild>
+              <Link to="/admin/create">
+                <PlusIcon data-icon="inline-start" />
+                Create Tutor
+              </Link>
+            </Button>
+          </div>
+        )}
+      </section>
     </div>
+  );
+}
+
+function DeleteTutorDialog({
+  tutorId,
+  displayName,
+  isDeleting,
+  onDelete,
+}: {
+  tutorId: string;
+  displayName: string;
+  isDeleting: boolean;
+  onDelete: (tutorId: string) => Promise<void>;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={`Delete ${displayName}`}
+          className="pointer-events-auto relative z-20 text-feedback-negative hover:bg-surface-feedback-negative-light hover:opacity-100"
+        >
+          <Trash2Icon />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent className="rounded-lg border border-border-primary bg-surface-primary text-primary shadow-floating">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete tutor?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete {displayName}. This action cannot be
+            undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={isDeleting}
+            className="bg-surface-button-accent text-button-outline"
+            onClick={() => onDelete(tutorId)}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

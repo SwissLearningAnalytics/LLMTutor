@@ -24,7 +24,12 @@ export const tutorUpdateSchema = z
 
 export const getTutors = createServerFn({ method: "GET" }).handler(async () => {
   try {
-    const tutors = await db.query.tutors.findMany();
+    const tutors = await db.query.tutors.findMany({
+      columns: {
+        tutorId: true,
+        displayName: true,
+      },
+    });
     return tutors;
   } catch {
     throw new Error("Tutors could not be loaded");
