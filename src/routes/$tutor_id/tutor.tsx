@@ -1,5 +1,6 @@
 import { useChat } from "@ai-sdk/react";
-import { ClientOnly, createFileRoute, notFound } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { DefaultChatTransport } from "ai";
 import { CornerDownLeftIcon, RefreshCwIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { LoadingDots } from "@/components/ui/loading-dots";
 import { MemoizedMarkdown } from "@/components/ui/memoized-markdown";
 import { AiModels, providerName } from "@/lib/ai/model";
+import { getTutorOptions } from "@/lib/api/tutors/query-options";
 import { nonStudyFeedback, studyFeedback } from "@/lib/feedback/feedback";
 import {
   submitSecondFeedback,
@@ -23,7 +25,6 @@ import { usePseudonymStore } from "@/lib/pseudonymStore";
 import { Phase } from "@/lib/types/phases";
 import { cn } from "@/lib/utils/cn";
 import { useIsStudyMode } from "@/lib/utils/use-is-study-mode";
-import { getTutor, tutorIds } from "@/tutors";
 
 const BACKOFF_INITIAL_VALUE = 5 / 2;
 
@@ -32,21 +33,12 @@ type Search = {
 };
 
 export const Route = createFileRoute("/$tutor_id/tutor")({
-  component: () => (
-    <ClientOnly fallback={<LoadingDots />}>
-      <RouteComponent />
-    </ClientOnly>
-  ),
-  beforeLoad: ({ params }) => {
-    if (!tutorIds.includes(params.tutor_id)) {
-      throw notFound();
-    }
-  },
-  loader: async ({ params }) => {
-    try {
-      return await getTutor(params.tutor_id);
-    } catch (error) {
-      console.error("Error loading tutor:", error);
+  component: RouteComponent,
+  loader: async ({ params, context: { queryClient } }) => {
+    const tutor = await queryClient.ensureQueryData(
+      getTutorOptions(params.tutor_id),
+    );
+    if (!tutor) {
       throw notFound();
     }
   },
@@ -80,7 +72,7 @@ function RouteComponent() {
     select: (params) => params.tutor_id,
   });
   const { model } = Route.useSearch();
-  const tutor = Route.useLoaderData();
+  const { data: tutor } = useSuspenseQuery(getTutorOptions(tutorId));
   const executionIdRef = useRef(nanoid(10));
   const executionId = executionIdRef.current;
   const [error, setError] = useState(false);
@@ -233,7 +225,7 @@ function RouteComponent() {
     try {
       await submitSecondFeedback({
         pseudonym,
-        promptName: tutor.tutor_id,
+        promptName: tutor.tutorId,
         executionId,
         model,
         messages,
@@ -271,7 +263,7 @@ function RouteComponent() {
     try {
       await submitUserAnswerWithFeedback({
         event,
-        promptName: tutor.tutor_id,
+        promptName: tutor.tutorId,
         pseudonym,
         model,
         executionId,
@@ -313,7 +305,7 @@ function RouteComponent() {
         !tutor.learningObjectives ? null : (
           <div className="prose font-semibold">
             <MemoizedMarkdown
-              id={`lernziele-${tutor.tutor_id}`}
+              id={`lernziele-${tutor.tutorId}`}
               parts={[
                 {
                   type: "text",

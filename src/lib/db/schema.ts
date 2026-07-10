@@ -30,7 +30,7 @@ export const messages = pgTable("t_messages", {
 export const tutors = pgTable("t_tutors", {
   id: serial("pk_tutor_id").primaryKey(),
   tutorId: text("tutor_id").notNull().unique(),
-  displayName: text("display_name").notNull().unique(),
+  displayName: text("display_name").notNull(),
   prompt: text().notNull(),
   learningObjectives: text("learning_objectives"),
 });

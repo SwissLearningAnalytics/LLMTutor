@@ -18,6 +18,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as Tutor_idIndexRouteImport } from './routes/$tutor_id/index'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminImportRouteImport } from './routes/admin/import'
 import { Route as AdminCreateRouteImport } from './routes/admin/create'
 import { Route as AdminTutorIdRouteImport } from './routes/admin/$tutorId'
 import { Route as Tutor_idTutorRouteImport } from './routes/$tutor_id/tutor'
@@ -68,6 +69,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminImportRoute = AdminImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminCreateRoute = AdminCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
   '/admin/$tutorId': typeof AdminTutorIdRoute
   '/admin/create': typeof AdminCreateRoute
+  '/admin/import': typeof AdminImportRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/$tutor_id/': typeof Tutor_idIndexRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
   '/admin/$tutorId': typeof AdminTutorIdRoute
   '/admin/create': typeof AdminCreateRoute
+  '/admin/import': typeof AdminImportRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/$tutor_id': typeof Tutor_idIndexRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
   '/admin/$tutorId': typeof AdminTutorIdRoute
   '/admin/create': typeof AdminCreateRoute
+  '/admin/import': typeof AdminImportRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/$tutor_id/': typeof Tutor_idIndexRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/$tutor_id/tutor'
     | '/admin/$tutorId'
     | '/admin/create'
+    | '/admin/import'
     | '/api/chat'
     | '/api/health'
     | '/$tutor_id/'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/$tutor_id/tutor'
     | '/admin/$tutorId'
     | '/admin/create'
+    | '/admin/import'
     | '/api/chat'
     | '/api/health'
     | '/$tutor_id'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/$tutor_id/tutor'
     | '/admin/$tutorId'
     | '/admin/create'
+    | '/admin/import'
     | '/api/chat'
     | '/api/health'
     | '/$tutor_id/'
@@ -259,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/import': {
+      id: '/admin/import'
+      path: '/import'
+      fullPath: '/admin/import'
+      preLoaderRoute: typeof AdminImportRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/create': {
       id: '/admin/create'
       path: '/create'
@@ -293,12 +312,14 @@ declare module '@tanstack/react-router' {
 interface AdminRouteRouteChildren {
   AdminTutorIdRoute: typeof AdminTutorIdRoute
   AdminCreateRoute: typeof AdminCreateRoute
+  AdminImportRoute: typeof AdminImportRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminTutorIdRoute: AdminTutorIdRoute,
   AdminCreateRoute: AdminCreateRoute,
+  AdminImportRoute: AdminImportRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

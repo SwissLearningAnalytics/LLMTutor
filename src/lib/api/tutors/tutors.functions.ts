@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 import z from "zod";
+import { ensureSession } from "@/lib/auth.functions";
 import { db } from "@/lib/db";
 import { type TutorInsert, tutors } from "@/lib/db/schema";
 
@@ -29,6 +30,9 @@ export const getTutors = createServerFn({ method: "GET" }).handler(async () => {
         tutorId: true,
         displayName: true,
       },
+      orderBy(fields, { asc }) {
+        return asc(fields.displayName);
+      },
     });
     return tutors;
   } catch {
@@ -45,6 +49,9 @@ export const getTutor = createServerFn({ method: "GET" })
           return eq(fields.tutorId, tutorId);
         },
       });
+      if (!tutor) {
+        throw new Error();
+      }
       return tutor;
     } catch {
       throw new Error(`Tutor ${tutorId} could not be loaded`);
@@ -54,6 +61,8 @@ export const getTutor = createServerFn({ method: "GET" })
 export const createTutor = createServerFn({ method: "POST" })
   .inputValidator(tutorInsertSchema)
   .handler(async ({ data }) => {
+    await ensureSession();
+
     try {
       const [newTutor] = await db
         .insert(tutors)
@@ -73,6 +82,8 @@ export const updateTutor = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data: { tutorId, tutor } }) => {
+    await ensureSession();
+
     try {
       const [updatedTutor] = await db
         .update(tutors)
@@ -93,6 +104,8 @@ export const updateTutor = createServerFn({ method: "POST" })
 export const deleteTutor = createServerFn({ method: "POST" })
   .inputValidator(z.object({ tutorId: z.string().min(1) }))
   .handler(async ({ data: { tutorId } }) => {
+    await ensureSession();
+
     try {
       const [deletedTutor] = await db
         .delete(tutors)
@@ -108,3 +121,11 @@ export const deleteTutor = createServerFn({ method: "POST" })
       throw new Error(`Tutor ${tutorId} could not be deleted`);
     }
   });
+
+export const importTutors = createServerFn({ method: "POST" }).handler(
+  async () => {
+    await ensureSession();
+    const { importTutorsFromGeneratedIndex } = await import("./import-tutors");
+    return await importTutorsFromGeneratedIndex();
+  },
+);
