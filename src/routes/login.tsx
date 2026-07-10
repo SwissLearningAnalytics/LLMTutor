@@ -67,9 +67,11 @@ function RouteComponent() {
     <main className="grid min-h-dvh bg-surface-background-secondary px-4 py-8 text-primary sm:px-6">
       <div className="mx-auto grid w-full max-w-5xl items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(22rem,26rem)]">
         <section className="hidden max-w-xl flex-col gap-5 text-white md:flex">
-          <div className="flex size-12 items-center justify-center rounded-lg bg-surface-button-accent text-xl font-semibold text-button-outline">
-            S
-          </div>
+          <img
+            src="/favicon_insitura.svg"
+            alt=""
+            className="size-12 mix-blend-screen"
+          />
           <div className="flex flex-col gap-3">
             <h1 className="text-3xl font-semibold">Tutor Administration</h1>
             <p className="text-base text-white/75">
