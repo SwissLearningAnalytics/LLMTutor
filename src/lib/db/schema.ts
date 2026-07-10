@@ -7,6 +7,8 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+export * from "@/lib/auth-schema";
+
 const timestamps = {
   createdAt: timestamp().defaultNow().notNull(),
 };
@@ -25,4 +27,14 @@ export const messages = pgTable("t_messages", {
   ...timestamps,
 });
 
+export const tutors = pgTable("t_tutors", {
+  id: serial("pk_tutor_id").primaryKey(),
+  tutorId: text("tutor_id").notNull().unique(),
+  displayName: text("display_name").notNull().unique(),
+  prompt: text().notNull(),
+  learningObjectives: text("learning_objectives"),
+});
+
 export type MessagesSelect = typeof messages.$inferSelect;
+export type TutorSelect = typeof tutors.$inferSelect;
+export type TutorInsert = typeof tutors.$inferInsert;

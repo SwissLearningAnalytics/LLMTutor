@@ -11,11 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as OverviewRouteImport } from './routes/overview'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as DataRouteImport } from './routes/data'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as Tutor_idIndexRouteImport } from './routes/$tutor_id/index'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminCreateRouteImport } from './routes/admin/create'
+import { Route as AdminTutorIdRouteImport } from './routes/admin/$tutorId'
 import { Route as Tutor_idTutorRouteImport } from './routes/$tutor_id/tutor'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const TutorRoute = TutorRouteImport.update({
   id: '/tutor',
@@ -27,10 +33,25 @@ const OverviewRoute = OverviewRouteImport.update({
   path: '/overview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DataRoute = DataRouteImport.update({
   id: '/data',
   path: '/data',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const Tutor_idIndexRoute = Tutor_idIndexRouteImport.update({
   id: '/$tutor_id/',
@@ -47,78 +68,130 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCreateRoute = AdminCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminTutorIdRoute = AdminTutorIdRouteImport.update({
+  id: '/$tutorId',
+  path: '/$tutorId',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const Tutor_idTutorRoute = Tutor_idTutorRouteImport.update({
   id: '/$tutor_id/tutor',
   path: '/$tutor_id/tutor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/admin': typeof AdminRouteRouteWithChildren
   '/data': typeof DataRoute
+  '/login': typeof LoginRoute
   '/overview': typeof OverviewRoute
   '/tutor': typeof TutorRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
+  '/admin/$tutorId': typeof AdminTutorIdRoute
+  '/admin/create': typeof AdminCreateRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/$tutor_id/': typeof Tutor_idIndexRoute
+  '/admin/': typeof AdminIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/data': typeof DataRoute
+  '/login': typeof LoginRoute
   '/overview': typeof OverviewRoute
   '/tutor': typeof TutorRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
+  '/admin/$tutorId': typeof AdminTutorIdRoute
+  '/admin/create': typeof AdminCreateRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/$tutor_id': typeof Tutor_idIndexRoute
+  '/admin': typeof AdminIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/admin': typeof AdminRouteRouteWithChildren
   '/data': typeof DataRoute
+  '/login': typeof LoginRoute
   '/overview': typeof OverviewRoute
   '/tutor': typeof TutorRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
+  '/admin/$tutorId': typeof AdminTutorIdRoute
+  '/admin/create': typeof AdminCreateRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/$tutor_id/': typeof Tutor_idIndexRoute
+  '/admin/': typeof AdminIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/admin'
     | '/data'
+    | '/login'
     | '/overview'
     | '/tutor'
     | '/$tutor_id/tutor'
+    | '/admin/$tutorId'
+    | '/admin/create'
     | '/api/chat'
     | '/api/health'
     | '/$tutor_id/'
+    | '/admin/'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/data'
+    | '/login'
     | '/overview'
     | '/tutor'
     | '/$tutor_id/tutor'
+    | '/admin/$tutorId'
+    | '/admin/create'
     | '/api/chat'
     | '/api/health'
     | '/$tutor_id'
+    | '/admin'
+    | '/api/auth/$'
   id:
     | '__root__'
+    | '/admin'
     | '/data'
+    | '/login'
     | '/overview'
     | '/tutor'
     | '/$tutor_id/tutor'
+    | '/admin/$tutorId'
+    | '/admin/create'
     | '/api/chat'
     | '/api/health'
     | '/$tutor_id/'
+    | '/admin/'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   DataRoute: typeof DataRoute
+  LoginRoute: typeof LoginRoute
   OverviewRoute: typeof OverviewRoute
   TutorRoute: typeof TutorRoute
   Tutor_idTutorRoute: typeof Tutor_idTutorRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiHealthRoute: typeof ApiHealthRoute
   Tutor_idIndexRoute: typeof Tutor_idIndexRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -137,12 +210,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OverviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/data': {
       id: '/data'
       path: '/data'
       fullPath: '/data'
       preLoaderRoute: typeof DataRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/$tutor_id/': {
       id: '/$tutor_id/'
@@ -165,6 +259,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/create': {
+      id: '/admin/create'
+      path: '/create'
+      fullPath: '/admin/create'
+      preLoaderRoute: typeof AdminCreateRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/$tutorId': {
+      id: '/admin/$tutorId'
+      path: '/$tutorId'
+      fullPath: '/admin/$tutorId'
+      preLoaderRoute: typeof AdminTutorIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/$tutor_id/tutor': {
       id: '/$tutor_id/tutor'
       path: '/$tutor_id/tutor'
@@ -172,17 +280,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Tutor_idTutorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminTutorIdRoute: typeof AdminTutorIdRoute
+  AdminCreateRoute: typeof AdminCreateRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminTutorIdRoute: AdminTutorIdRoute,
+  AdminCreateRoute: AdminCreateRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   DataRoute: DataRoute,
+  LoginRoute: LoginRoute,
   OverviewRoute: OverviewRoute,
   TutorRoute: TutorRoute,
   Tutor_idTutorRoute: Tutor_idTutorRoute,
   ApiChatRoute: ApiChatRoute,
   ApiHealthRoute: ApiHealthRoute,
   Tutor_idIndexRoute: Tutor_idIndexRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
