@@ -65,7 +65,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 py-12">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-12">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold text-primary">Tutors</h1>
