@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { LogOutIcon } from "lucide-react";
 import { type ReactNode, useState } from "react";
@@ -12,11 +13,13 @@ export function AdminHeader({
   title: string;
 }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function signOut() {
     setIsSigningOut(true);
     await authClient.signOut();
+    queryClient.clear();
     await navigate({ to: "/login" });
   }
 

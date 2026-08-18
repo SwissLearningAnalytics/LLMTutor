@@ -8,7 +8,7 @@ export type TutorImportResult = {
   warnings: string[];
 };
 
-function toTutorInsert(tutor: Tutor): TutorInsert {
+function toTutorInsert(tutor: Tutor): Omit<TutorInsert, "userId"> {
   return {
     tutorId: tutor.tutor_id,
     displayName: tutor.displayName,
@@ -40,9 +40,14 @@ function getDuplicateDisplayNameWarnings(tutorRows: TutorInsert[]) {
   );
 }
 
-export async function importTutorsFromGeneratedIndex(): Promise<TutorImportResult> {
+export async function importTutorsFromGeneratedIndex(
+  userId: string,
+): Promise<TutorImportResult> {
   const tutorRows = await Promise.all(
-    tutorIds.map(async (tutorId) => toTutorInsert(await getTutor(tutorId))),
+    tutorIds.map(async (tutorId) => ({
+      ...toTutorInsert(await getTutor(tutorId)),
+      userId,
+    })),
   );
   const warnings = getDuplicateDisplayNameWarnings(tutorRows);
 

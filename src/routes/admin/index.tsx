@@ -25,11 +25,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { deleteTutorOptions } from "@/lib/api/tutors/mutation-options";
 import {
+  deleteTutorOptions,
+  updateTutorOptions,
+} from "@/lib/api/tutors/mutation-options";
+import {
+  getOwnTutorOptions,
+  getOwnTutorsOptions,
   getTutorOptions,
-  getTutorsOptions,
 } from "@/lib/api/tutors/query-options";
 import { authClient } from "@/lib/auth-client";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
@@ -37,14 +42,15 @@ import { AdminHeader } from "@/routes/admin/-components/admin-header";
 export const Route = createFileRoute("/admin/")({
   component: RouteComponent,
   loader({ context: { queryClient } }) {
-    queryClient.ensureQueryData(getTutorsOptions());
+    queryClient.ensureQueryData(getOwnTutorsOptions());
   },
 });
 
 function RouteComponent() {
   const queryClient = useQueryClient();
-  const { data: tutors } = useSuspenseQuery(getTutorsOptions());
+  const { data: tutors } = useSuspenseQuery(getOwnTutorsOptions());
   const deleteMutation = useMutation(deleteTutorOptions());
+  const publishMutation = useMutation(updateTutorOptions());
   const [searchQuery, setSearchQuery] = useState("");
   const { data: session } = authClient.useSession();
   const canManageUsers = hasAdminRole(session?.user);
@@ -64,10 +70,33 @@ function RouteComponent() {
 
   async function deleteTutor(tutorId: string) {
     await deleteMutation.mutateAsync({ data: { tutorId } });
+    queryClient.removeQueries({
+      queryKey: getOwnTutorOptions(tutorId).queryKey,
+    });
     queryClient.removeQueries({ queryKey: getTutorOptions(tutorId).queryKey });
     await queryClient.invalidateQueries({
-      queryKey: getTutorsOptions().queryKey,
+      queryKey: getOwnTutorsOptions().queryKey,
     });
+  }
+
+  async function setPublished(tutorId: string, published: boolean) {
+    const queryKey = getOwnTutorsOptions().queryKey;
+    const previousTutors = queryClient.getQueryData(queryKey);
+
+    queryClient.setQueryData(queryKey, (tutors) =>
+      tutors?.map((tutor) =>
+        tutor.tutorId === tutorId ? { ...tutor, published } : tutor,
+      ),
+    );
+
+    try {
+      await publishMutation.mutateAsync({
+        data: { tutorId, tutor: { published } },
+      });
+    } catch (error) {
+      queryClient.setQueryData(queryKey, previousTutors);
+      throw error;
+    }
   }
 
   return (
@@ -125,6 +154,27 @@ function RouteComponent() {
                         </h2>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
+                        <div className="pointer-events-auto relative z-20 flex items-center gap-2">
+                          <Checkbox
+                            id={`published-${tutor.tutorId}`}
+                            checked={tutor.published}
+                            disabled={
+                              publishMutation.isPending &&
+                              publishMutation.variables?.data.tutorId ===
+                                tutor.tutorId
+                            }
+                            onCheckedChange={(checked) =>
+                              setPublished(tutor.tutorId, checked === true)
+                            }
+                            checkIcon
+                          />
+                          <label
+                            htmlFor={`published-${tutor.tutorId}`}
+                            className="cursor-pointer text-sm text-primary"
+                          >
+                            Veröffentlicht
+                          </label>
+                        </div>
                         <DeleteTutorDialog
                           tutorId={tutor.tutorId}
                           displayName={tutor.displayName}

@@ -8,17 +8,20 @@ import { z } from "zod";
 import { Layout } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createTutorOptions,
   updateTutorOptions,
 } from "@/lib/api/tutors/mutation-options";
-import {
-  getTutorOptions,
-  getTutorsOptions,
-} from "@/lib/api/tutors/query-options";
+import { getOwnTutorsOptions } from "@/lib/api/tutors/query-options";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
 
 const tutorFormSchema = z.object({
@@ -26,6 +29,7 @@ const tutorFormSchema = z.object({
   displayName: z.string().min(1),
   prompt: z.string().min(1),
   learningObjectives: z.string().optional(),
+  published: z.boolean(),
 });
 
 type TutorFormValues = z.infer<typeof tutorFormSchema>;
@@ -34,6 +38,7 @@ const defaultValues: TutorFormValues = {
   displayName: "",
   learningObjectives: undefined,
   prompt: "",
+  published: false,
   tutorId: "",
 };
 
@@ -67,21 +72,16 @@ export function TutorForm(props: TutorFormProps) {
         await updateMutation.mutateAsync({
           data: { tutorId: props.tutorId, tutor },
         });
-        await Promise.all([
-          queryClient.invalidateQueries({
-            queryKey: getTutorsOptions().queryKey,
-          }),
-          queryClient.invalidateQueries({
-            queryKey: getTutorOptions(props.tutorId).queryKey,
-          }),
-        ]);
+        await queryClient.invalidateQueries({
+          queryKey: getOwnTutorsOptions().queryKey,
+        });
         setSuccessMessage("Tutor aktualisiert.");
         return;
       }
 
       const createdTutor = await createMutation.mutateAsync({ data: value });
       await queryClient.invalidateQueries({
-        queryKey: getTutorsOptions().queryKey,
+        queryKey: getOwnTutorsOptions().queryKey,
       });
       await navigate({
         to: "/admin/$tutorId",
@@ -129,6 +129,29 @@ export function TutorForm(props: TutorFormProps) {
             Zurück zu den Tutoren
           </Link>
         </Button>
+        <form.Field name="published">
+          {(field) => (
+            <Field orientation="horizontal">
+              <Checkbox
+                id={field.name}
+                name={field.name}
+                checked={field.state.value}
+                onCheckedChange={(checked) =>
+                  field.handleChange(checked === true)
+                }
+                onBlur={field.handleBlur}
+                disabled={isPending}
+                checkIcon
+              />
+              <div className="flex flex-col gap-1">
+                <FieldLabel htmlFor={field.name}>Veröffentlicht</FieldLabel>
+                <FieldDescription>
+                  Veröffentlichte Tutoren sind für Studierende zugänglich.
+                </FieldDescription>
+              </div>
+            </Field>
+          )}
+        </form.Field>
         <form.Field name="displayName">
           {(field) => {
             const isInvalid =

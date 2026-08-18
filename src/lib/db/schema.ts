@@ -1,4 +1,6 @@
+import { relations } from "drizzle-orm";
 import {
+  boolean,
   json,
   pgTable,
   serial,
@@ -6,6 +8,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+import { user } from "@/lib/auth-schema";
 
 export * from "@/lib/auth-schema";
 
@@ -33,7 +36,18 @@ export const tutors = pgTable("t_tutors", {
   displayName: text("display_name").notNull(),
   prompt: text().notNull(),
   learningObjectives: text("learning_objectives"),
+  published: boolean().default(false).notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
 });
+
+export const tutorsRelations = relations(tutors, ({ one }) => ({
+  user: one(user, {
+    fields: [tutors.userId],
+    references: [user.id],
+  }),
+}));
 
 export type MessagesSelect = typeof messages.$inferSelect;
 export type TutorSelect = typeof tutors.$inferSelect;
