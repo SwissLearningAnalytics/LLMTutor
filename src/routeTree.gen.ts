@@ -21,13 +21,14 @@ import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminImportRouteImport } from './routes/admin/import'
 import { Route as AdminCreateRouteImport } from './routes/admin/create'
-import { Route as AdminTutorIdRouteImport } from './routes/admin/$tutorId'
 import { Route as Tutor_idTutorRouteImport } from './routes/$tutor_id/tutor'
 import { Route as AdminUsersRouteRouteImport } from './routes/admin/users/route'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
+import { Route as AdminTutorIdIndexRouteImport } from './routes/admin/$tutorId/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminUsersCreateRouteImport } from './routes/admin/users/create'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
+import { Route as AdminTutorIdEditRouteImport } from './routes/admin/$tutorId/edit'
 
 const TutorRoute = TutorRouteImport.update({
   id: '/tutor',
@@ -89,11 +90,6 @@ const AdminCreateRoute = AdminCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminTutorIdRoute = AdminTutorIdRouteImport.update({
-  id: '/$tutorId',
-  path: '/$tutorId',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
 const Tutor_idTutorRoute = Tutor_idTutorRouteImport.update({
   id: '/$tutor_id/tutor',
   path: '/$tutor_id/tutor',
@@ -108,6 +104,11 @@ const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminUsersRouteRoute,
+} as any)
+const AdminTutorIdIndexRoute = AdminTutorIdIndexRouteImport.update({
+  id: '/$tutorId/',
+  path: '/$tutorId/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -124,6 +125,11 @@ const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
   path: '/$userId',
   getParentRoute: () => AdminUsersRouteRoute,
 } as any)
+const AdminTutorIdEditRoute = AdminTutorIdEditRouteImport.update({
+  id: '/$tutorId/edit',
+  path: '/$tutorId/edit',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
@@ -134,16 +140,17 @@ export interface FileRoutesByFullPath {
   '/tutor': typeof TutorRoute
   '/admin/users': typeof AdminUsersRouteRouteWithChildren
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
-  '/admin/$tutorId': typeof AdminTutorIdRoute
   '/admin/create': typeof AdminCreateRoute
   '/admin/import': typeof AdminImportRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/$tutor_id/': typeof Tutor_idIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/$tutorId/edit': typeof AdminTutorIdEditRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/users/create': typeof AdminUsersCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/$tutorId/': typeof AdminTutorIdIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -153,16 +160,17 @@ export interface FileRoutesByTo {
   '/test': typeof TestRoute
   '/tutor': typeof TutorRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
-  '/admin/$tutorId': typeof AdminTutorIdRoute
   '/admin/create': typeof AdminCreateRoute
   '/admin/import': typeof AdminImportRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/$tutor_id': typeof Tutor_idIndexRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/$tutorId/edit': typeof AdminTutorIdEditRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/users/create': typeof AdminUsersCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/$tutorId': typeof AdminTutorIdIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesById {
@@ -175,16 +183,17 @@ export interface FileRoutesById {
   '/tutor': typeof TutorRoute
   '/admin/users': typeof AdminUsersRouteRouteWithChildren
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
-  '/admin/$tutorId': typeof AdminTutorIdRoute
   '/admin/create': typeof AdminCreateRoute
   '/admin/import': typeof AdminImportRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/$tutor_id/': typeof Tutor_idIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/$tutorId/edit': typeof AdminTutorIdEditRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/users/create': typeof AdminUsersCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/$tutorId/': typeof AdminTutorIdIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRouteTypes {
@@ -198,16 +207,17 @@ export interface FileRouteTypes {
     | '/tutor'
     | '/admin/users'
     | '/$tutor_id/tutor'
-    | '/admin/$tutorId'
     | '/admin/create'
     | '/admin/import'
     | '/api/chat'
     | '/api/health'
     | '/$tutor_id/'
     | '/admin/'
+    | '/admin/$tutorId/edit'
     | '/admin/users/$userId'
     | '/admin/users/create'
     | '/api/auth/$'
+    | '/admin/$tutorId/'
     | '/admin/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -217,16 +227,17 @@ export interface FileRouteTypes {
     | '/test'
     | '/tutor'
     | '/$tutor_id/tutor'
-    | '/admin/$tutorId'
     | '/admin/create'
     | '/admin/import'
     | '/api/chat'
     | '/api/health'
     | '/$tutor_id'
     | '/admin'
+    | '/admin/$tutorId/edit'
     | '/admin/users/$userId'
     | '/admin/users/create'
     | '/api/auth/$'
+    | '/admin/$tutorId'
     | '/admin/users'
   id:
     | '__root__'
@@ -238,16 +249,17 @@ export interface FileRouteTypes {
     | '/tutor'
     | '/admin/users'
     | '/$tutor_id/tutor'
-    | '/admin/$tutorId'
     | '/admin/create'
     | '/admin/import'
     | '/api/chat'
     | '/api/health'
     | '/$tutor_id/'
     | '/admin/'
+    | '/admin/$tutorId/edit'
     | '/admin/users/$userId'
     | '/admin/users/create'
     | '/api/auth/$'
+    | '/admin/$tutorId/'
     | '/admin/users/'
   fileRoutesById: FileRoutesById
 }
@@ -351,13 +363,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCreateRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/admin/$tutorId': {
-      id: '/admin/$tutorId'
-      path: '/$tutorId'
-      fullPath: '/admin/$tutorId'
-      preLoaderRoute: typeof AdminTutorIdRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
     '/$tutor_id/tutor': {
       id: '/$tutor_id/tutor'
       path: '/$tutor_id/tutor'
@@ -378,6 +383,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/users/'
       preLoaderRoute: typeof AdminUsersIndexRouteImport
       parentRoute: typeof AdminUsersRouteRoute
+    }
+    '/admin/$tutorId/': {
+      id: '/admin/$tutorId/'
+      path: '/$tutorId'
+      fullPath: '/admin/$tutorId/'
+      preLoaderRoute: typeof AdminTutorIdIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -400,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersUserIdRouteImport
       parentRoute: typeof AdminUsersRouteRoute
     }
+    '/admin/$tutorId/edit': {
+      id: '/admin/$tutorId/edit'
+      path: '/$tutorId/edit'
+      fullPath: '/admin/$tutorId/edit'
+      preLoaderRoute: typeof AdminTutorIdEditRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
@@ -421,18 +440,20 @@ const AdminUsersRouteRouteWithChildren = AdminUsersRouteRoute._addFileChildren(
 
 interface AdminRouteRouteChildren {
   AdminUsersRouteRoute: typeof AdminUsersRouteRouteWithChildren
-  AdminTutorIdRoute: typeof AdminTutorIdRoute
   AdminCreateRoute: typeof AdminCreateRoute
   AdminImportRoute: typeof AdminImportRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminTutorIdEditRoute: typeof AdminTutorIdEditRoute
+  AdminTutorIdIndexRoute: typeof AdminTutorIdIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminUsersRouteRoute: AdminUsersRouteRouteWithChildren,
-  AdminTutorIdRoute: AdminTutorIdRoute,
   AdminCreateRoute: AdminCreateRoute,
   AdminImportRoute: AdminImportRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminTutorIdEditRoute: AdminTutorIdEditRoute,
+  AdminTutorIdIndexRoute: AdminTutorIdIndexRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(

@@ -1,0 +1,107 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { ArrowLeftIcon, MessageSquareIcon } from "lucide-react";
+import { Layout } from "@/components/layout";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { getOwnTutorConversationsOptions } from "@/lib/api/messages/query-options";
+import { getOwnTutorOptions } from "@/lib/api/tutors/query-options";
+import { AdminHeader } from "@/routes/admin/-components/admin-header";
+
+export const Route = createFileRoute("/admin/$tutorId/")({
+  loader: ({ context: { queryClient }, params }) => {
+    queryClient.ensureQueryData(getOwnTutorOptions(params.tutorId));
+    queryClient.ensureQueryData(
+      getOwnTutorConversationsOptions(params.tutorId),
+    );
+  },
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  const { tutorId } = Route.useParams();
+  const { data: tutor } = useSuspenseQuery(getOwnTutorOptions(tutorId));
+  const { data: conversations } = useSuspenseQuery(
+    getOwnTutorConversationsOptions(tutorId),
+  );
+
+  if (!tutor) {
+    throw notFound();
+  }
+
+  return (
+    <Layout
+      header={<AdminHeader title={`Konversationen mit ${tutor.displayName}`} />}
+    >
+      <div className="flex flex-col gap-8">
+        <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
+          <Link to="/admin">
+            <ArrowLeftIcon />
+            Zurück zu den Tutoren
+          </Link>
+        </Button>
+
+        <section className="overflow-hidden rounded-lg border border-border-primary bg-surface-primary shadow-sm">
+          {conversations.length > 0 ? (
+            <ul className="divide-y divide-border-primary">
+              {conversations.map((conversation) => (
+                <li
+                  key={conversation.executionId}
+                  className="flex items-center justify-between gap-4 p-4"
+                >
+                  <div className="min-w-0">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <MessageSquareIcon
+                        aria-hidden
+                        className="size-4 shrink-0 text-secondary"
+                      />
+                      <h2 className="truncate text-base font-medium text-primary">
+                        {conversation.pseudonym}
+                      </h2>
+                    </div>
+                    <p className="truncate text-sm text-secondary">
+                      {conversation.executionId}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <Badge variant="gray">
+                      {formatMessageCount(conversation.messageCount)}
+                    </Badge>
+                    <time
+                      dateTime={new Date(
+                        conversation.lastMessageAt,
+                      ).toISOString()}
+                      className="text-sm text-secondary"
+                    >
+                      Zuletzt aktiv: {formatDate(conversation.lastMessageAt)}
+                    </time>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="flex min-h-48 flex-col items-center justify-center gap-1 p-8 text-center">
+              <h2 className="text-lg font-semibold text-primary">
+                Noch keine Konversationen
+              </h2>
+              <p className="text-sm text-secondary">
+                Über diesen Tutor wurden bisher keine Nachrichten gesendet.
+              </p>
+            </div>
+          )}
+        </section>
+      </div>
+    </Layout>
+  );
+}
+
+function formatDate(date: string | Date) {
+  return new Intl.DateTimeFormat("de-CH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(date));
+}
+
+function formatMessageCount(messageCount: number) {
+  return messageCount === 1 ? "1 Nachricht" : `${messageCount} Nachrichten`;
+}

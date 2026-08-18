@@ -5,7 +5,11 @@ import {
 } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ChevronRightIcon,
+  EllipsisVerticalIcon,
+  ExternalLinkIcon,
+  EyeIcon,
+  EyeOffIcon,
+  PencilIcon,
   PlusIcon,
   SearchIcon,
   Trash2Icon,
@@ -22,10 +26,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   deleteTutorOptions,
@@ -144,8 +153,8 @@ function RouteComponent() {
                     <Link
                       to="/admin/$tutorId"
                       params={{ tutorId: tutor.tutorId }}
-                      aria-label={`${tutor.displayName} bearbeiten`}
-                      className="absolute inset-0 z-0 rounded-lg ring-offset-2 ring-inset focus-visible:ring-2 focus-visible:ring-black/50 focus-visible:outline-none"
+                      aria-label={`Konversationen mit ${tutor.displayName} anzeigen`}
+                      className="absolute inset-0 z-0 cursor-pointer rounded-lg ring-offset-2 ring-inset focus-visible:ring-2 focus-visible:ring-black/50 focus-visible:outline-none"
                     />
                     <div className="pointer-events-none relative z-10 flex items-center justify-between gap-4 p-4 transition-colors group-hover:bg-surface-background-primary">
                       <div className="pointer-events-none min-w-0">
@@ -154,36 +163,17 @@ function RouteComponent() {
                         </h2>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
-                        <div className="pointer-events-auto relative z-20 flex items-center gap-2">
-                          <Checkbox
-                            id={`published-${tutor.tutorId}`}
-                            checked={tutor.published}
-                            disabled={
-                              publishMutation.isPending &&
-                              publishMutation.variables?.data.tutorId ===
-                                tutor.tutorId
-                            }
-                            onCheckedChange={(checked) =>
-                              setPublished(tutor.tutorId, checked === true)
-                            }
-                            checkIcon
-                          />
-                          <label
-                            htmlFor={`published-${tutor.tutorId}`}
-                            className="cursor-pointer text-sm text-primary"
-                          >
-                            Veröffentlicht
-                          </label>
-                        </div>
-                        <DeleteTutorDialog
-                          tutorId={tutor.tutorId}
-                          displayName={tutor.displayName}
+                        <TutorPublicationStatus published={tutor.published} />
+                        <TutorActions
+                          tutor={tutor}
+                          isPublishing={
+                            publishMutation.isPending &&
+                            publishMutation.variables?.data.tutorId ===
+                              tutor.tutorId
+                          }
                           isDeleting={deleteMutation.isPending}
+                          onPublishedChange={setPublished}
                           onDelete={deleteTutor}
-                        />
-                        <ChevronRightIcon
-                          aria-hidden
-                          className="size-4 text-secondary"
                         />
                       </div>
                     </div>
@@ -230,30 +220,123 @@ function hasAdminRole(user: { role?: unknown } | undefined) {
   return roles.some((role) => role.trim() === "admin");
 }
 
+function TutorPublicationStatus({ published }: { published: boolean }) {
+  const Icon = published ? EyeIcon : EyeOffIcon;
+  const label = published ? "Veröffentlicht" : "Entwurf";
+
+  return (
+    <span className="flex items-center gap-2 px-2 text-sm text-secondary">
+      <Icon aria-hidden className="size-4" />
+      {label}
+    </span>
+  );
+}
+
+function TutorActions({
+  tutor,
+  isPublishing,
+  isDeleting,
+  onPublishedChange,
+  onDelete,
+}: {
+  tutor: { tutorId: string; displayName: string; published: boolean };
+  isPublishing: boolean;
+  isDeleting: boolean;
+  onPublishedChange: (tutorId: string, published: boolean) => Promise<void>;
+  onDelete: (tutorId: string) => Promise<void>;
+}) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={`Aktionen für ${tutor.displayName}`}
+            className="pointer-events-auto relative z-20"
+          >
+            <EllipsisVerticalIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-56 rounded-lg border-border-primary bg-surface-primary text-primary shadow-floating"
+        >
+          <DropdownMenuItem
+            disabled={isPublishing}
+            onSelect={(event) => {
+              event.preventDefault();
+              onPublishedChange(tutor.tutorId, !tutor.published);
+            }}
+          >
+            {tutor.published ? <EyeOffIcon /> : <EyeIcon />}
+            {tutor.published
+              ? "Veröffentlichung aufheben"
+              : "Tutor veröffentlichen"}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-border-primary" />
+          <DropdownMenuItem asChild>
+            <Link to="/admin/$tutorId/edit" params={{ tutorId: tutor.tutorId }}>
+              <PencilIcon />
+              Bearbeiten
+            </Link>
+          </DropdownMenuItem>
+          {tutor.published ? (
+            <DropdownMenuItem asChild>
+              <Link to="/$tutor_id" params={{ tutor_id: tutor.tutorId }}>
+                <ExternalLinkIcon />
+                Öffentlichen Tutor öffnen
+              </Link>
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem disabled>
+              <ExternalLinkIcon />
+              Öffentlichen Tutor öffnen
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator className="bg-border-primary" />
+          <DropdownMenuItem
+            className="text-feedback-negative focus:bg-surface-feedback-negative-light focus:text-feedback-negative"
+            onSelect={() => setDeleteDialogOpen(true)}
+          >
+            <Trash2Icon />
+            Löschen
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DeleteTutorDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        tutorId={tutor.tutorId}
+        displayName={tutor.displayName}
+        isDeleting={isDeleting}
+        onDelete={onDelete}
+      />
+    </>
+  );
+}
+
 function DeleteTutorDialog({
+  open,
+  onOpenChange,
   tutorId,
   displayName,
   isDeleting,
   onDelete,
 }: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   tutorId: string;
   displayName: string;
   isDeleting: boolean;
   onDelete: (tutorId: string) => Promise<void>;
 }) {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={`${displayName} löschen`}
-          className="pointer-events-auto relative z-20 text-feedback-negative hover:bg-surface-feedback-negative-light hover:opacity-100"
-        >
-          <Trash2Icon />
-        </Button>
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="rounded-lg border border-border-primary bg-surface-primary text-primary shadow-floating">
         <AlertDialogHeader>
           <AlertDialogTitle>Tutor löschen?</AlertDialogTitle>

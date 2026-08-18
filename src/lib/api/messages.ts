@@ -1,5 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { count, desc, eq, max, sql } from "drizzle-orm";
+import { z } from "zod";
 import { AiModels, providerName } from "@/lib/ai/model";
+import { ensureSession } from "@/lib/auth.functions";
 import { db } from "@/lib/db";
 import { type MessagesSelect, messages } from "@/lib/db/schema";
 
@@ -79,5 +82,40 @@ export const getMessages = createServerFn({ method: "POST" })
     } catch (error) {
       console.error("Error fetching data:", error);
       throw new Error("Failed to fetch data");
+    }
+  });
+
+export const getOwnTutorConversations = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ tutorId: z.string().min(1) }))
+  .handler(async ({ data: { tutorId } }) => {
+    const session = await ensureSession();
+    const tutor = await db.query.tutors.findFirst({
+      columns: { tutorId: true },
+      where(fields, { and, eq }) {
+        return and(
+          eq(fields.tutorId, tutorId),
+          eq(fields.userId, session.user.id),
+        );
+      },
+    });
+
+    if (!tutor) {
+      throw new Error(`Tutor ${tutorId} could not be loaded`);
+    }
+
+    try {
+      return await db
+        .select({
+          executionId: messages.executionId,
+          pseudonym: sql<string>`max(${messages.pseudonym})`,
+          messageCount: count(),
+          lastMessageAt: sql<Date>`max(${messages.createdAt})`,
+        })
+        .from(messages)
+        .where(eq(messages.promptName, tutorId))
+        .groupBy(messages.executionId)
+        .orderBy(desc(max(messages.createdAt)));
+    } catch {
+      throw new Error(`Conversations for tutor ${tutorId} could not be loaded`);
     }
   });
