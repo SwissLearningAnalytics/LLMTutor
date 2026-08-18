@@ -1,6 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { and, eq } from "drizzle-orm";
 import { createOllama } from "ollama-ai-provider-v2";
 import {
   AiModels,
@@ -8,6 +9,36 @@ import {
   defaultModel,
   providerName,
 } from "@/lib/ai/model";
+import { createTutorModelMessages } from "@/lib/ai/tutor-chat";
+import { db } from "@/lib/db";
+import { messages as storedMessages, tutors } from "@/lib/db/schema";
+
+async function persistInitialAssistantMessage({
+  executionId,
+  message,
+  mode,
+  modelName,
+  pseudonym,
+  tutorId,
+}: {
+  executionId: string;
+  message: string;
+  mode: string;
+  modelName: string;
+  pseudonym: string;
+  tutorId: string;
+}) {
+  await db.insert(storedMessages).values({
+    executionId,
+    pseudonym,
+    promptName: tutorId,
+    modelName,
+    role: "ai",
+    message,
+    feedback: {},
+    mode,
+  });
+}
 
 const provider = (() => {
   switch (providerName) {
@@ -39,9 +70,13 @@ export const Route = createFileRoute("/api/chat")({
     handlers: {
       POST: async ({ request }) => {
         const data: {
+          executionId: string;
           messages: UIMessage[];
           model?: string;
-          systemPrompt: string;
+          mode: string;
+          pseudonym: string;
+          shouldStartConversation: boolean;
+          tutorId: string;
         } = await request.json();
 
         if (process.env.MODE === "prod") {
@@ -55,10 +90,27 @@ export const Route = createFileRoute("/api/chat")({
 
         const model = data.model ?? defaultModel;
         try {
+          const tutor = await db.query.tutors.findFirst({
+            columns: { prompt: true },
+            where: and(
+              eq(tutors.tutorId, data.tutorId),
+              eq(tutors.published, true),
+            ),
+          });
+          if (!tutor) {
+            return new Response("Tutor not found", { status: 404 });
+          }
+
           const result = await streamText({
             model: provider(model),
-            messages: await convertToModelMessages(data.messages),
-            system: data.systemPrompt,
+            messages: await convertToModelMessages(
+              createTutorModelMessages(
+                data.messages,
+                data.shouldStartConversation,
+              ),
+            ),
+            system: tutor.prompt,
+            allowSystemInMessages: false,
             ...(providerName === AiProviders.OpenAI && {
               temperature: model.startsWith("gpt-5") ? 1 : 0.6, // for gpt-5 only the default is 1
               providerOptions: {
@@ -67,6 +119,18 @@ export const Route = createFileRoute("/api/chat")({
                 },
               },
             }),
+            onFinish: data.shouldStartConversation
+              ? async ({ text }) => {
+                  await persistInitialAssistantMessage({
+                    executionId: data.executionId,
+                    message: text,
+                    mode: data.mode,
+                    modelName: model,
+                    pseudonym: data.pseudonym,
+                    tutorId: data.tutorId,
+                  });
+                }
+              : undefined,
             onError: (error) => {
               console.error("Error generating response:", error);
             },

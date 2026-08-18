@@ -16,6 +16,10 @@ import { Button } from "@/components/ui/button";
 import { LoadingDots } from "@/components/ui/loading-dots";
 import { MemoizedMarkdown } from "@/components/ui/memoized-markdown";
 import { AiModels, providerName } from "@/lib/ai/model";
+import {
+  isInitialAssistantResponse,
+  prepareTutorChatMessages,
+} from "@/lib/ai/tutor-chat";
 import { getTutorOptions } from "@/lib/api/tutors/query-options";
 import { nonStudyFeedback, studyFeedback } from "@/lib/feedback/feedback";
 import {
@@ -78,14 +82,20 @@ function RouteComponent() {
   const executionId = executionIdRef.current;
   const [error, setError] = useState(false);
   const [backoff, setBackoff] = useState(BACKOFF_INITIAL_VALUE);
+  const { pseudonym } = usePseudonymStore();
+  const mode = isStudyMode ? "study" : "non-study";
   const { messages, sendMessage, regenerate, status } = useChat({
     transport: new DefaultChatTransport({
       prepareSendMessagesRequest: ({ messages }) => {
+        const preparedChat = prepareTutorChatMessages(messages);
         return {
           body: {
-            messages,
+            ...preparedChat,
             model,
-            systemPrompt: tutor.prompt,
+            tutorId: tutor.tutorId,
+            executionId,
+            pseudonym,
+            mode,
           },
         };
       },
@@ -101,7 +111,6 @@ function RouteComponent() {
     },
   });
   const lastBotMessage = messages.filter((m) => m.role === "assistant").at(-1);
-  const { pseudonym } = usePseudonymStore();
   const navigate = Route.useNavigate();
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -111,7 +120,6 @@ function RouteComponent() {
   const [phase, setPhase] = useState<Phase>(Phase.init);
   const [userAnswer, setUserAnswer] = useState("");
   const [showError, setShowError] = useState(false);
-  const mode = isStudyMode ? "study" : "non-study";
 
   const [submittedFeedbackMessageId, setSubmittedFeedbackMessageId] = useState<
     string | null
@@ -255,7 +263,9 @@ function RouteComponent() {
 
   async function submitUserMessage(event: React.FormEvent) {
     if (!isStudyMode) {
-      submitReflectionOnOwnAnswer();
+      if (!isInitialAssistantResponse(messages)) {
+        await submitReflectionOnOwnAnswer();
+      }
       setReflectionOnOwnAnswer({
         externalResource: undefined,
         thoughtAboutIndex: undefined,
