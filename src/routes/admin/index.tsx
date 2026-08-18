@@ -256,7 +256,7 @@ function TutorActions({
             variant="ghost"
             size="icon"
             aria-label={`Aktionen für ${tutor.displayName}`}
-            className="pointer-events-auto relative z-20"
+            className="pointer-events-auto relative z-20 hover:bg-surface-background-tertiary hover:opacity-100 data-[state=open]:bg-surface-background-tertiary"
           >
             <EllipsisVerticalIcon />
           </Button>
@@ -299,7 +299,7 @@ function TutorActions({
           )}
           <DropdownMenuSeparator className="bg-border-primary" />
           <DropdownMenuItem
-            className="text-feedback-negative focus:bg-surface-feedback-negative-light focus:text-feedback-negative"
+            className="text-feedback-negative hover:bg-surface-feedback-negative-light focus:bg-surface-feedback-negative-light focus:text-feedback-negative"
             onSelect={() => setDeleteDialogOpen(true)}
           >
             <Trash2Icon />
