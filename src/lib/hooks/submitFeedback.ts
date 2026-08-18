@@ -45,7 +45,7 @@ export async function submitSecondFeedback({
   promptName,
   executionId,
   model,
-  messages,
+  message,
   reflectionOnOwnAnswer,
   mode,
 }: {
@@ -53,13 +53,14 @@ export async function submitSecondFeedback({
   promptName: string;
   executionId: string;
   model?: string;
-  messages: UIMessage[];
+  message: UIMessage;
   reflectionOnOwnAnswer: Record<string, string | undefined>;
   mode: string;
 }) {
-  const part = messages[messages.length - 1].parts.find(
-    (part) => part.type === "text",
-  );
+  const text = message.parts
+    .filter((part) => part.type === "text")
+    .map((part) => part.text)
+    .join("");
   try {
     await addMessage({
       data: {
@@ -68,7 +69,7 @@ export async function submitSecondFeedback({
         executionId: executionId,
         modelName: model,
         role: "ai",
-        message: part?.text,
+        message: text,
         feedback: reflectionOnOwnAnswer,
         mode,
       },

@@ -1,6 +1,7 @@
 import { useChat } from "@ai-sdk/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { CornerDownLeftIcon, RefreshCwIcon } from "lucide-react";
 import { AnimatePresence } from "motion/react";
@@ -82,6 +83,9 @@ function RouteComponent() {
   const executionId = executionIdRef.current;
   const [error, setError] = useState(false);
   const [backoff, setBackoff] = useState(BACKOFF_INITIAL_VALUE);
+  const [completedAssistantMessage, setCompletedAssistantMessage] = useState<
+    UIMessage | undefined
+  >();
   const { pseudonym } = usePseudonymStore();
   const mode = isStudyMode ? "study" : "non-study";
   const { messages, sendMessage, regenerate, status } = useChat({
@@ -101,8 +105,16 @@ function RouteComponent() {
       },
     }),
     experimental_throttle: 100,
-    onFinish: () => {
+    onFinish: ({ message, isAbort, isDisconnect, isError }) => {
       setBackoff(BACKOFF_INITIAL_VALUE);
+      if (
+        message.role === "assistant" &&
+        !isAbort &&
+        !isDisconnect &&
+        !isError
+      ) {
+        setCompletedAssistantMessage(message);
+      }
     },
     onError: (error) => {
       setError(true);
@@ -111,6 +123,7 @@ function RouteComponent() {
     },
   });
   const lastBotMessage = messages.filter((m) => m.role === "assistant").at(-1);
+  const latestMessage = messages.at(-1);
   const navigate = Route.useNavigate();
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -120,6 +133,9 @@ function RouteComponent() {
   const [phase, setPhase] = useState<Phase>(Phase.init);
   const [userAnswer, setUserAnswer] = useState("");
   const [showError, setShowError] = useState(false);
+  const [pendingFeedbackSubmission, setPendingFeedbackSubmission] = useState<
+    Record<string, string | undefined> | undefined
+  >();
 
   const [submittedFeedbackMessageId, setSubmittedFeedbackMessageId] = useState<
     string | null
@@ -137,12 +153,14 @@ function RouteComponent() {
         feedback.ai.every((f) => !!reflectionOnChatbotFeedback[f.label]))) ||
     !isStudyMode;
 
-  const disableSubmitButton = !canSubmit({
-    status,
-    phase,
-    userAnswer,
-    reflectionOnChatbotFeedback,
-  });
+  const disableSubmitButton =
+    Boolean(pendingFeedbackSubmission) ||
+    !canSubmit({
+      status,
+      phase,
+      userAnswer,
+      reflectionOnChatbotFeedback,
+    });
 
   function canSubmit({
     status,
@@ -211,47 +229,58 @@ function RouteComponent() {
   }, [phase, reflectionOnChatbotFeedback, enableInputArea]);
 
   useEffect(() => {
-    if (
-      (!isStudyMode ||
-        feedback.user.every((f) => !!reflectionOnOwnAnswer[f.label])) &&
-      phase === Phase.answer_with_feedback_and_response_hidden
-    ) {
-      if (lastBotMessage && !isStudyMode) {
-        setPhase(Phase.question_with_feedback);
-      }
-      if (
-        isStudyMode &&
-        status === "ready" &&
-        lastBotMessage &&
-        submittedFeedbackMessageId !== lastBotMessage.id
-      ) {
-        submitReflectionOnOwnAnswer();
-      }
-    }
-  }, [reflectionOnOwnAnswer, status, lastBotMessage, phase]);
+    const questionnaireCompleted =
+      !isStudyMode ||
+      feedback.user.every((field) => !!reflectionOnOwnAnswer[field.label]);
 
-  async function submitReflectionOnOwnAnswer() {
+    if (
+      phase !== Phase.answer_with_feedback_and_response_hidden ||
+      !questionnaireCompleted ||
+      latestMessage?.role !== "assistant"
+    ) {
+      return;
+    }
+
+    setPhase(Phase.question_with_feedback);
+
+    if (isStudyMode) {
+      const feedbackSnapshot = { ...reflectionOnOwnAnswer };
+      setReflectionOnOwnAnswer({
+        externalResource: undefined,
+        thoughtAboutIndex: undefined,
+      });
+      setPendingFeedbackSubmission(feedbackSnapshot);
+    }
+  }, [reflectionOnOwnAnswer, latestMessage, phase]);
+
+  useEffect(() => {
+    if (!pendingFeedbackSubmission || !completedAssistantMessage) {
+      return;
+    }
+
+    void submitReflectionOnOwnAnswer(pendingFeedbackSubmission);
+  }, [pendingFeedbackSubmission, completedAssistantMessage]);
+
+  async function submitReflectionOnOwnAnswer(
+    feedbackSnapshot = reflectionOnOwnAnswer,
+  ) {
+    if (!completedAssistantMessage) {
+      return;
+    }
+
     try {
       await submitSecondFeedback({
         pseudonym,
         promptName: tutor.tutorId,
         executionId,
         model,
-        messages,
-        reflectionOnOwnAnswer,
+        message: completedAssistantMessage,
+        reflectionOnOwnAnswer: feedbackSnapshot,
         mode,
       });
-      setPhase(Phase.question_with_feedback);
-      if (isStudyMode) {
-        setReflectionOnOwnAnswer({
-          externalResource: undefined,
-          thoughtAboutIndex: undefined,
-        });
-      }
 
-      if (lastBotMessage) {
-        setSubmittedFeedbackMessageId(lastBotMessage.id);
-      }
+      setPendingFeedbackSubmission(undefined);
+      setSubmittedFeedbackMessageId(completedAssistantMessage.id);
       setShowError(false);
       setTimeout(() => {
         setSubmittedFeedbackMessageId(null);
@@ -283,6 +312,7 @@ function RouteComponent() {
         mode,
       });
 
+      setCompletedAssistantMessage(undefined);
       sendMessage({ text: userAnswer });
 
       setShowError(false);
@@ -343,27 +373,11 @@ function RouteComponent() {
                     phase === Phase.question_with_feedback &&
                     !isFirstMessage &&
                     isLastMessage)) && (
-                  <>
-                    <Feedback
-                      feedbackFields={feedback.user}
-                      feedback={reflectionOnOwnAnswer}
-                      setFeedback={setReflectionOnOwnAnswer}
-                    />
-                    {showError && (
-                      <div className="flex items-center justify-center">
-                        <Badge variant={"red"} className="px-3">
-                          Es ist ein Fehler aufgetreten
-                          <Button
-                            onClick={() => submitReflectionOnOwnAnswer()}
-                            variant={"neutral"}
-                            className="ml-3"
-                          >
-                            <RefreshCwIcon />
-                          </Button>
-                        </Badge>
-                      </div>
-                    )}
-                  </>
+                  <Feedback
+                    feedbackFields={feedback.user}
+                    feedback={reflectionOnOwnAnswer}
+                    setFeedback={setReflectionOnOwnAnswer}
+                  />
                 )}
 
                 <AnimatePresence>
@@ -396,7 +410,13 @@ function RouteComponent() {
                           <Badge variant={"red"} className="px-3">
                             Es ist ein Fehler aufgetreten
                             <Button
-                              onClick={(event) => submitUserMessage(event)}
+                              onClick={(event) =>
+                                pendingFeedbackSubmission
+                                  ? submitReflectionOnOwnAnswer(
+                                      pendingFeedbackSubmission,
+                                    )
+                                  : submitUserMessage(event)
+                              }
                               variant={"neutral"}
                               className="ml-2"
                             >
@@ -423,6 +443,7 @@ function RouteComponent() {
               waitTime={backoff}
               onClick={() => {
                 setError(false);
+                setCompletedAssistantMessage(undefined);
                 regenerate();
               }}
             />
