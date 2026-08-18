@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, DownloadIcon } from "lucide-react";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { Layout } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { getOwnTutorConversationOptions } from "@/lib/api/messages/query-options";
 import { getOwnTutorOptions } from "@/lib/api/tutors/query-options";
 import { nonStudyFeedback, studyFeedback } from "@/lib/feedback/feedback";
-import type { FeedbackField, QuestionnaireMode } from "@/lib/feedback/types";
+import type { QuestionnaireMode } from "@/lib/feedback/types";
 import { cn } from "@/lib/utils/cn";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
 
@@ -16,6 +16,14 @@ const feedbackByMode = {
   study: studyFeedback,
   "non-study": nonStudyFeedback,
 } satisfies Record<QuestionnaireMode, typeof studyFeedback>;
+
+type ConversationMessage = {
+  id: number;
+  feedback: Record<string, string | number | boolean>;
+  message: string;
+  mode: QuestionnaireMode;
+  role: "ai" | "user";
+};
 
 export const Route = createFileRoute(
   "/admin/$tutorId/conversations/$executionId",
@@ -57,12 +65,28 @@ function RouteComponent() {
       }
     >
       <div className="flex flex-col gap-8">
-        <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
-          <Link to="/admin/$tutorId" params={{ tutorId }}>
-            <ArrowLeftIcon />
-            Zurück zu den Konversationen
-          </Link>
-        </Button>
+        <div className="flex items-center justify-between gap-4">
+          <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
+            <Link to="/admin/$tutorId" params={{ tutorId }}>
+              <ArrowLeftIcon />
+              Zurück zu den Konversationen
+            </Link>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              downloadConversationCsv({
+                conversation,
+                executionId,
+                pseudonym,
+              })
+            }
+          >
+            <DownloadIcon />
+            CSV exportieren
+          </Button>
+        </div>
 
         <div>
           {conversation.map((storedMessage) => (
@@ -99,17 +123,11 @@ function QuestionnaireAnswers({
   mode: QuestionnaireMode;
   role: "ai" | "user";
 }) {
-  const answers = getQuestionnaireAnswers(feedback);
+  const responses = getQuestionnaireResponses({ feedback, mode, role });
 
-  if (answers.length === 0) {
+  if (responses.length === 0) {
     return null;
   }
-
-  const feedbackConfig = feedbackByMode[mode];
-  const fields = role === "ai" ? feedbackConfig.user : feedbackConfig.ai;
-  const questionsByLabel = new Map(
-    fields.map((field) => [field.label, field] as const),
-  );
 
   return (
     <div
@@ -120,12 +138,11 @@ function QuestionnaireAnswers({
     >
       <p className="mb-3 text-sm font-semibold">Antworten auf den Fragebogen</p>
       <dl className="space-y-3">
-        {answers.map(([label, answer]) => (
+        {responses.map(({ answer, label, question }) => (
           <QuestionnaireAnswer
             key={label}
             answer={answer}
-            field={questionsByLabel.get(label)}
-            label={label}
+            question={question}
           />
         ))}
       </dl>
@@ -135,16 +152,14 @@ function QuestionnaireAnswers({
 
 function QuestionnaireAnswer({
   answer,
-  field,
-  label,
+  question,
 }: {
   answer: string;
-  field?: FeedbackField;
-  label: string;
+  question: string;
 }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <dt className="text-sm text-secondary">{field?.text ?? label}</dt>
+      <dt className="text-sm text-secondary">{question}</dt>
       <dd>
         <Badge variant="blue">{answer}</Badge>
       </dd>
@@ -152,11 +167,116 @@ function QuestionnaireAnswer({
   );
 }
 
-function getQuestionnaireAnswers(
-  feedback: Record<string, string | number | boolean>,
-) {
-  return Object.entries(feedback).map(([label, value]) => [
+function getQuestionnaireResponses({
+  feedback,
+  mode,
+  role,
+}: Pick<ConversationMessage, "feedback" | "mode" | "role">) {
+  const feedbackConfig = feedbackByMode[mode];
+  const fields = role === "ai" ? feedbackConfig.user : feedbackConfig.ai;
+  const questionsByLabel = new Map(
+    fields.map((field) => [field.label, field.text] as const),
+  );
+
+  return Object.entries(feedback).map(([label, value]) => ({
+    answer:
+      typeof value === "boolean" ? (value ? "Ja" : "Nein") : String(value),
     label,
-    typeof value === "boolean" ? (value ? "Ja" : "Nein") : String(value),
+    question: questionsByLabel.get(label) ?? label,
+  }));
+}
+
+function downloadConversationCsv({
+  conversation,
+  executionId,
+  pseudonym,
+}: {
+  conversation: ConversationMessage[];
+  executionId: string;
+  pseudonym: string;
+}) {
+  const header = [
+    "Typ",
+    "Nachrichten-ID",
+    "Rolle",
+    "Nachricht",
+    "Frage",
+    "Antwort",
+  ];
+  const leadingQuestionnaireRows = getQuestionnaireCsvRows({
+    feedbackMessage: conversation[0],
+    pseudonym,
+  });
+  const rows = [
+    ...leadingQuestionnaireRows,
+    ...conversation.flatMap((storedMessage, index) => {
+      const followingMessage = conversation[index + 1];
+      const messageRow = [
+        "Nachricht",
+        ...getMessageCsvColumns(storedMessage, pseudonym),
+        "",
+        "",
+      ];
+      const questionnaireRows = followingMessage
+        ? getQuestionnaireCsvRows({
+            feedbackMessage: followingMessage,
+            relatedMessage: storedMessage,
+            pseudonym,
+          })
+        : [];
+
+      return [messageRow, ...questionnaireRows];
+    }),
+  ];
+  const csv = [header, ...rows]
+    .map((row) => row.map(escapeCsvCell).join(","))
+    .join("\r\n");
+  const blob = new Blob(["\uFEFF", csv], {
+    type: "text/csv;charset=utf-8",
+  });
+  const downloadUrl = URL.createObjectURL(blob);
+  const downloadLink = document.createElement("a");
+  const safeExecutionId = executionId.replaceAll(/[^a-zA-Z0-9_-]/g, "_");
+
+  downloadLink.href = downloadUrl;
+  downloadLink.download = `konversation-${safeExecutionId}.csv`;
+  document.body.append(downloadLink);
+  downloadLink.click();
+  downloadLink.remove();
+  window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
+}
+
+function escapeCsvCell(value: string) {
+  const spreadsheetSafeValue = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return `"${spreadsheetSafeValue.replaceAll('"', '""')}"`;
+}
+
+function getQuestionnaireCsvRows({
+  feedbackMessage,
+  relatedMessage,
+  pseudonym,
+}: {
+  feedbackMessage: ConversationMessage;
+  relatedMessage?: ConversationMessage;
+  pseudonym: string;
+}) {
+  const responses = getQuestionnaireResponses(feedbackMessage);
+  const relatedMessageColumns = relatedMessage
+    ? getMessageCsvColumns(relatedMessage, pseudonym)
+    : ["", feedbackMessage.role === "user" ? "Tutor" : pseudonym, ""];
+
+  return responses.map(({ answer, question }) => [
+    "Fragebogen",
+    ...relatedMessageColumns,
+    question,
+    answer,
   ]);
+}
+
+function getMessageCsvColumns(message: ConversationMessage, pseudonym: string) {
+  return [
+    String(message.id),
+    message.role === "ai" ? "Tutor" : pseudonym,
+    message.message,
+  ];
 }
