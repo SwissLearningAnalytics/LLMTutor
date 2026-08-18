@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { count, desc, eq, max, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, max, sql } from "drizzle-orm";
 import { z } from "zod";
 import { AiModels, providerName } from "@/lib/ai/model";
 import { ensureSession } from "@/lib/auth.functions";
@@ -85,23 +85,27 @@ export const getMessages = createServerFn({ method: "POST" })
     }
   });
 
+async function ensureOwnTutor(tutorId: string) {
+  const session = await ensureSession();
+  const tutor = await db.query.tutors.findFirst({
+    columns: { tutorId: true },
+    where(fields, { and, eq }) {
+      return and(
+        eq(fields.tutorId, tutorId),
+        eq(fields.userId, session.user.id),
+      );
+    },
+  });
+
+  if (!tutor) {
+    throw new Error(`Tutor ${tutorId} could not be loaded`);
+  }
+}
+
 export const getOwnTutorConversations = createServerFn({ method: "GET" })
   .inputValidator(z.object({ tutorId: z.string().min(1) }))
   .handler(async ({ data: { tutorId } }) => {
-    const session = await ensureSession();
-    const tutor = await db.query.tutors.findFirst({
-      columns: { tutorId: true },
-      where(fields, { and, eq }) {
-        return and(
-          eq(fields.tutorId, tutorId),
-          eq(fields.userId, session.user.id),
-        );
-      },
-    });
-
-    if (!tutor) {
-      throw new Error(`Tutor ${tutorId} could not be loaded`);
-    }
+    await ensureOwnTutor(tutorId);
 
     try {
       return await db
@@ -117,5 +121,36 @@ export const getOwnTutorConversations = createServerFn({ method: "GET" })
         .orderBy(desc(max(messages.createdAt)));
     } catch {
       throw new Error(`Conversations for tutor ${tutorId} could not be loaded`);
+    }
+  });
+
+export const getOwnTutorConversation = createServerFn({ method: "GET" })
+  .inputValidator(
+    z.object({
+      tutorId: z.string().min(1),
+      executionId: z.string().min(1),
+    }),
+  )
+  .handler(async ({ data: { tutorId, executionId } }) => {
+    await ensureOwnTutor(tutorId);
+
+    try {
+      return await db
+        .select({
+          id: messages.id,
+          pseudonym: messages.pseudonym,
+          role: messages.role,
+          message: messages.message,
+        })
+        .from(messages)
+        .where(
+          and(
+            eq(messages.promptName, tutorId),
+            eq(messages.executionId, executionId),
+          ),
+        )
+        .orderBy(asc(messages.createdAt), asc(messages.id));
+    } catch {
+      throw new Error(`Conversation ${executionId} could not be loaded`);
     }
   });

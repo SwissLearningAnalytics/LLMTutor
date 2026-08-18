@@ -29,6 +29,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminUsersCreateRouteImport } from './routes/admin/users/create'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
 import { Route as AdminTutorIdEditRouteImport } from './routes/admin/$tutorId/edit'
+import { Route as AdminTutorIdConversationsExecutionIdRouteImport } from './routes/admin/$tutorId/conversations/$executionId'
 
 const TutorRoute = TutorRouteImport.update({
   id: '/tutor',
@@ -130,6 +131,12 @@ const AdminTutorIdEditRoute = AdminTutorIdEditRouteImport.update({
   path: '/$tutorId/edit',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminTutorIdConversationsExecutionIdRoute =
+  AdminTutorIdConversationsExecutionIdRouteImport.update({
+    id: '/$tutorId/conversations/$executionId',
+    path: '/$tutorId/conversations/$executionId',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
@@ -152,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/$tutorId/': typeof AdminTutorIdIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/admin/$tutorId/conversations/$executionId': typeof AdminTutorIdConversationsExecutionIdRoute
 }
 export interface FileRoutesByTo {
   '/data': typeof DataRoute
@@ -172,6 +180,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/$tutorId': typeof AdminTutorIdIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
+  '/admin/$tutorId/conversations/$executionId': typeof AdminTutorIdConversationsExecutionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -195,6 +204,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/$tutorId/': typeof AdminTutorIdIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/admin/$tutorId/conversations/$executionId': typeof AdminTutorIdConversationsExecutionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/admin/$tutorId/'
     | '/admin/users/'
+    | '/admin/$tutorId/conversations/$executionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/data'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/admin/$tutorId'
     | '/admin/users'
+    | '/admin/$tutorId/conversations/$executionId'
   id:
     | '__root__'
     | '/admin'
@@ -261,6 +273,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/admin/$tutorId/'
     | '/admin/users/'
+    | '/admin/$tutorId/conversations/$executionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -419,6 +432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTutorIdEditRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/$tutorId/conversations/$executionId': {
+      id: '/admin/$tutorId/conversations/$executionId'
+      path: '/$tutorId/conversations/$executionId'
+      fullPath: '/admin/$tutorId/conversations/$executionId'
+      preLoaderRoute: typeof AdminTutorIdConversationsExecutionIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
@@ -445,6 +465,7 @@ interface AdminRouteRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminTutorIdEditRoute: typeof AdminTutorIdEditRoute
   AdminTutorIdIndexRoute: typeof AdminTutorIdIndexRoute
+  AdminTutorIdConversationsExecutionIdRoute: typeof AdminTutorIdConversationsExecutionIdRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
@@ -454,6 +475,8 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminTutorIdEditRoute: AdminTutorIdEditRoute,
   AdminTutorIdIndexRoute: AdminTutorIdIndexRoute,
+  AdminTutorIdConversationsExecutionIdRoute:
+    AdminTutorIdConversationsExecutionIdRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(

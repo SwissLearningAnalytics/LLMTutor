@@ -3,9 +3,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { DefaultChatTransport } from "ai";
 import { CornerDownLeftIcon, RefreshCwIcon } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence } from "motion/react";
 import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
+import { ChatMessage } from "@/components/chat/chat-message";
 import { Feedback } from "@/components/feedback/feedback";
 import { FeedbackReaction } from "@/components/feedback/feedback-reaction";
 import { Layout } from "@/components/layout";
@@ -360,34 +361,14 @@ function RouteComponent() {
                     isStudyMode && <FeedbackReaction />}
                 </AnimatePresence>
 
-                {message.role === "user" ? (
-                  <motion.div layout={false}>
-                    <div
-                      className={cn(
-                        "prose max-w-none! overflow-auto rounded-lg border border-primary bg-surface-feedback-neutral-light p-4 text-base leading-6",
-                        "ml-auto w-1/2",
-                      )}
-                    >
-                      <MemoizedMarkdown id={message.id} parts={message.parts} />
-                    </div>
-                  </motion.div>
-                ) : message.role === "assistant" ? (
-                  <motion.div layout={false}>
-                    <div
-                      className={cn(
-                        "prose mt-8 mb-4 max-w-full! overflow-auto rounded-lg border text-base leading-6 font-bold text-secondary shadow group-first:mt-0",
-                        "bg-white p-4",
-                        phase ===
-                          Phase.answer_with_feedback_and_response_hidden &&
-                          isLastMessage &&
-                          isStudyMode &&
-                          "blur-sm",
-                      )}
-                    >
-                      <MemoizedMarkdown id={message.id} parts={message.parts} />
-                    </div>
-                  </motion.div>
-                ) : null}
+                <ChatMessage
+                  message={message}
+                  blurAssistant={
+                    phase === Phase.answer_with_feedback_and_response_hidden &&
+                    isLastMessage &&
+                    isStudyMode
+                  }
+                />
                 {status === "submitted" && isLastMessage && <LoadingDots />}
 
                 {phase === Phase.question_with_feedback &&

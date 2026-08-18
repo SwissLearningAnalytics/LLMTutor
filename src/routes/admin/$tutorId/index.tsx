@@ -1,6 +1,10 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeftIcon, MessageSquareIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  ChevronRightIcon,
+  MessageSquareIcon,
+} from "lucide-react";
 import { Layout } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,37 +49,47 @@ function RouteComponent() {
           {conversations.length > 0 ? (
             <ul className="divide-y divide-border-primary">
               {conversations.map((conversation) => (
-                <li
-                  key={conversation.executionId}
-                  className="flex items-center justify-between gap-4 p-4"
-                >
-                  <div className="min-w-0">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <MessageSquareIcon
-                        aria-hidden
-                        className="size-4 shrink-0 text-secondary"
-                      />
-                      <h2 className="truncate text-base font-medium text-primary">
-                        {conversation.pseudonym}
-                      </h2>
+                <li key={conversation.executionId}>
+                  <Link
+                    to="/admin/$tutorId/conversations/$executionId"
+                    params={{
+                      tutorId,
+                      executionId: conversation.executionId,
+                    }}
+                    className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-surface-background-primary focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <MessageSquareIcon
+                          aria-hidden
+                          className="size-4 shrink-0 text-secondary"
+                        />
+                        <h2 className="truncate text-base font-medium text-primary">
+                          {conversation.pseudonym}
+                        </h2>
+                      </div>
+                      <p className="truncate text-sm text-secondary">
+                        {conversation.executionId}
+                      </p>
                     </div>
-                    <p className="truncate text-sm text-secondary">
-                      {conversation.executionId}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3">
-                    <Badge variant="gray">
-                      {formatMessageCount(conversation.messageCount)}
-                    </Badge>
-                    <time
-                      dateTime={new Date(
-                        conversation.lastMessageAt,
-                      ).toISOString()}
-                      className="text-sm text-secondary"
-                    >
-                      Zuletzt aktiv: {formatDate(conversation.lastMessageAt)}
-                    </time>
-                  </div>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <Badge variant="gray">
+                        {formatMessageCount(conversation.messageCount)}
+                      </Badge>
+                      <time
+                        dateTime={new Date(
+                          conversation.lastMessageAt,
+                        ).toISOString()}
+                        className="text-sm text-secondary"
+                      >
+                        Zuletzt aktiv: {formatDate(conversation.lastMessageAt)}
+                      </time>
+                      <ChevronRightIcon
+                        aria-hidden
+                        className="size-4 text-secondary"
+                      />
+                    </div>
+                  </Link>
                 </li>
               ))}
             </ul>
