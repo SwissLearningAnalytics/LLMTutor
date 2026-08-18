@@ -47,6 +47,7 @@ export async function importTutorsFromGeneratedIndex(
     tutorIds.map(async (tutorId) => ({
       ...toTutorInsert(await getTutor(tutorId)),
       userId,
+      published: true,
     })),
   );
   const warnings = getDuplicateDisplayNameWarnings(tutorRows);
