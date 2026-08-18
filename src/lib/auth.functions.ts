@@ -23,16 +23,3 @@ export const ensureSession = createServerFn({ method: "GET" }).handler(
     return session;
   },
 );
-
-export const createUser = createServerFn({ method: "GET" }).handler(
-  async () => {
-    auth.api.createUser({
-      body: {
-        email: "jutz.jeremias@gmail.com",
-        name: "test",
-        password: "jeremias",
-        role: "admin",
-      },
-    });
-  },
-);

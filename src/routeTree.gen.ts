@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TutorRouteImport } from './routes/tutor'
-import { Route as TestRouteImport } from './routes/test'
 import { Route as OverviewRouteImport } from './routes/overview'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DataRouteImport } from './routes/data'
@@ -34,11 +33,6 @@ import { Route as AdminTutorIdConversationsExecutionIdRouteImport } from './rout
 const TutorRoute = TutorRouteImport.update({
   id: '/tutor',
   path: '/tutor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TestRoute = TestRouteImport.update({
-  id: '/test',
-  path: '/test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OverviewRoute = OverviewRouteImport.update({
@@ -143,7 +137,6 @@ export interface FileRoutesByFullPath {
   '/data': typeof DataRoute
   '/login': typeof LoginRoute
   '/overview': typeof OverviewRoute
-  '/test': typeof TestRoute
   '/tutor': typeof TutorRoute
   '/admin/users': typeof AdminUsersRouteRouteWithChildren
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
@@ -165,7 +158,6 @@ export interface FileRoutesByTo {
   '/data': typeof DataRoute
   '/login': typeof LoginRoute
   '/overview': typeof OverviewRoute
-  '/test': typeof TestRoute
   '/tutor': typeof TutorRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
   '/admin/create': typeof AdminCreateRoute
@@ -188,7 +180,6 @@ export interface FileRoutesById {
   '/data': typeof DataRoute
   '/login': typeof LoginRoute
   '/overview': typeof OverviewRoute
-  '/test': typeof TestRoute
   '/tutor': typeof TutorRoute
   '/admin/users': typeof AdminUsersRouteRouteWithChildren
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
@@ -213,7 +204,6 @@ export interface FileRouteTypes {
     | '/data'
     | '/login'
     | '/overview'
-    | '/test'
     | '/tutor'
     | '/admin/users'
     | '/$tutor_id/tutor'
@@ -235,7 +225,6 @@ export interface FileRouteTypes {
     | '/data'
     | '/login'
     | '/overview'
-    | '/test'
     | '/tutor'
     | '/$tutor_id/tutor'
     | '/admin/create'
@@ -257,7 +246,6 @@ export interface FileRouteTypes {
     | '/data'
     | '/login'
     | '/overview'
-    | '/test'
     | '/tutor'
     | '/admin/users'
     | '/$tutor_id/tutor'
@@ -281,7 +269,6 @@ export interface RootRouteChildren {
   DataRoute: typeof DataRoute
   LoginRoute: typeof LoginRoute
   OverviewRoute: typeof OverviewRoute
-  TestRoute: typeof TestRoute
   TutorRoute: typeof TutorRoute
   Tutor_idTutorRoute: typeof Tutor_idTutorRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -297,13 +284,6 @@ declare module '@tanstack/react-router' {
       path: '/tutor'
       fullPath: '/tutor'
       preLoaderRoute: typeof TutorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/test': {
-      id: '/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof TestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/overview': {
@@ -488,7 +468,6 @@ const rootRouteChildren: RootRouteChildren = {
   DataRoute: DataRoute,
   LoginRoute: LoginRoute,
   OverviewRoute: OverviewRoute,
-  TestRoute: TestRoute,
   TutorRoute: TutorRoute,
   Tutor_idTutorRoute: Tutor_idTutorRoute,
   ApiChatRoute: ApiChatRoute,
