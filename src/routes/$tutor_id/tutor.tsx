@@ -306,6 +306,7 @@ function RouteComponent() {
 
   return (
     <Layout
+      className="h-full"
       noConstrain={true}
       header={
         <div className="flex flex-col">

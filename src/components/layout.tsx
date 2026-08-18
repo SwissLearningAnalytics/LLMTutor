@@ -6,12 +6,14 @@ export function Layout({
   header,
   noConstrain = false,
   flex = false,
+  className = "",
   sidebox,
 }: {
   children: ReactNode;
   header?: ReactNode;
   noConstrain?: boolean;
   flex?: boolean;
+  className?: string;
   sidebox?: ReactNode;
 }) {
   return (
@@ -29,9 +31,9 @@ export function Layout({
         >
           <div
             className={cn(
-              "h-full",
               flex && "flex",
               !noConstrain && "mx-auto max-w-3xl",
+              className,
             )}
           >
             {children}

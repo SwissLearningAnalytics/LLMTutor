@@ -88,7 +88,7 @@ function RouteComponent() {
     }
   }
   return (
-    <Layout flex header={""}>
+    <Layout flex header={""} className="h-full">
       <Card
         variant="question"
         className="mx-auto my-auto flex w-full flex-col justify-center"
