@@ -12,3 +12,5 @@ export type Feedback = {
   ai: FeedbackField[];
   required: boolean;
 };
+
+export type QuestionnaireMode = "study" | "non-study";
