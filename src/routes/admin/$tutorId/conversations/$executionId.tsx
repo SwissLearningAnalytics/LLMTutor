@@ -10,6 +10,12 @@ import { getOwnTutorOptions } from "@/lib/api/tutors/query-options";
 import { nonStudyFeedback, studyFeedback } from "@/lib/feedback/feedback";
 import type { QuestionnaireMode } from "@/lib/feedback/types";
 import { cn } from "@/lib/utils/cn";
+import {
+  downloadCsv,
+  getExportFilenameTimestamp,
+  getConversationCsvRows,
+  sanitizeFilenamePart,
+} from "@/routes/admin/-utils/conversation-csv";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
 
 const feedbackByMode = {
@@ -19,6 +25,7 @@ const feedbackByMode = {
 
 type ConversationMessage = {
   id: number;
+  createdAt: Date | string;
   feedback: Record<string, string | number | boolean>;
   message: string;
   mode: QuestionnaireMode;
@@ -76,11 +83,10 @@ function RouteComponent() {
             type="button"
             variant="outline"
             onClick={() =>
-              downloadConversationCsv({
-                conversation,
-                executionId,
-                pseudonym,
-              })
+              downloadCsv(
+                getConversationCsvRows(conversation, tutorId),
+                `${sanitizeFilenamePart(tutor.displayName)}-konversation-${getExportFilenameTimestamp()}.csv`,
+              )
             }
           >
             <DownloadIcon />
@@ -184,99 +190,4 @@ function getQuestionnaireResponses({
     label,
     question: questionsByLabel.get(label) ?? label,
   }));
-}
-
-function downloadConversationCsv({
-  conversation,
-  executionId,
-  pseudonym,
-}: {
-  conversation: ConversationMessage[];
-  executionId: string;
-  pseudonym: string;
-}) {
-  const header = [
-    "Typ",
-    "Nachrichten-ID",
-    "Rolle",
-    "Nachricht",
-    "Frage",
-    "Antwort",
-  ];
-  const leadingQuestionnaireRows = getQuestionnaireCsvRows({
-    feedbackMessage: conversation[0],
-    pseudonym,
-  });
-  const rows = [
-    ...leadingQuestionnaireRows,
-    ...conversation.flatMap((storedMessage, index) => {
-      const followingMessage = conversation[index + 1];
-      const messageRow = [
-        "Nachricht",
-        ...getMessageCsvColumns(storedMessage, pseudonym),
-        "",
-        "",
-      ];
-      const questionnaireRows = followingMessage
-        ? getQuestionnaireCsvRows({
-            feedbackMessage: followingMessage,
-            relatedMessage: storedMessage,
-            pseudonym,
-          })
-        : [];
-
-      return [messageRow, ...questionnaireRows];
-    }),
-  ];
-  const csv = [header, ...rows]
-    .map((row) => row.map(escapeCsvCell).join(","))
-    .join("\r\n");
-  const blob = new Blob(["\uFEFF", csv], {
-    type: "text/csv;charset=utf-8",
-  });
-  const downloadUrl = URL.createObjectURL(blob);
-  const downloadLink = document.createElement("a");
-  const safeExecutionId = executionId.replaceAll(/[^a-zA-Z0-9_-]/g, "_");
-
-  downloadLink.href = downloadUrl;
-  downloadLink.download = `konversation-${safeExecutionId}.csv`;
-  document.body.append(downloadLink);
-  downloadLink.click();
-  downloadLink.remove();
-  window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
-}
-
-function escapeCsvCell(value: string) {
-  const spreadsheetSafeValue = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
-  return `"${spreadsheetSafeValue.replaceAll('"', '""')}"`;
-}
-
-function getQuestionnaireCsvRows({
-  feedbackMessage,
-  relatedMessage,
-  pseudonym,
-}: {
-  feedbackMessage: ConversationMessage;
-  relatedMessage?: ConversationMessage;
-  pseudonym: string;
-}) {
-  const responses = getQuestionnaireResponses(feedbackMessage);
-  const relatedMessageColumns = relatedMessage
-    ? getMessageCsvColumns(relatedMessage, pseudonym)
-    : ["", feedbackMessage.role === "user" ? "Tutor" : pseudonym, ""];
-
-  return responses.map(({ answer, question }) => [
-    "Fragebogen",
-    ...relatedMessageColumns,
-    question,
-    answer,
-  ]);
-}
-
-function getMessageCsvColumns(message: ConversationMessage, pseudonym: string) {
-  return [
-    String(message.id),
-    message.role === "ai" ? "Tutor" : pseudonym,
-    message.message,
-  ];
 }

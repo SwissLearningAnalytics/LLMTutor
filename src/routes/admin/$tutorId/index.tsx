@@ -3,14 +3,24 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
   ArrowLeftIcon,
   ChevronRightIcon,
+  DownloadIcon,
   MessageSquareIcon,
 } from "lucide-react";
 import { Layout } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getOwnTutorConversationsOptions } from "@/lib/api/messages/query-options";
+import {
+  getOwnTutorConversationsOptions,
+  getOwnTutorMessagesOptions,
+} from "@/lib/api/messages/query-options";
 import { getOwnTutorOptions } from "@/lib/api/tutors/query-options";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import {
+  downloadCsv,
+  getExportFilenameTimestamp,
+  getConversationCsvRows,
+  sanitizeFilenamePart,
+} from "@/routes/admin/-utils/conversation-csv";
 
 export const Route = createFileRoute("/admin/$tutorId/")({
   loader: ({ context: { queryClient }, params }) => {
@@ -18,6 +28,7 @@ export const Route = createFileRoute("/admin/$tutorId/")({
     queryClient.ensureQueryData(
       getOwnTutorConversationsOptions(params.tutorId),
     );
+    queryClient.ensureQueryData(getOwnTutorMessagesOptions(params.tutorId));
   },
   component: RouteComponent,
 });
@@ -27,6 +38,9 @@ function RouteComponent() {
   const { data: tutor } = useSuspenseQuery(getOwnTutorOptions(tutorId));
   const { data: conversations } = useSuspenseQuery(
     getOwnTutorConversationsOptions(tutorId),
+  );
+  const { data: messages } = useSuspenseQuery(
+    getOwnTutorMessagesOptions(tutorId),
   );
 
   if (!tutor) {
@@ -38,12 +52,27 @@ function RouteComponent() {
       header={<AdminHeader title={`Konversationen mit ${tutor.displayName}`} />}
     >
       <div className="flex flex-col gap-8">
-        <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
-          <Link to="/admin">
-            <ArrowLeftIcon />
-            Zurück zu den Tutoren
-          </Link>
-        </Button>
+        <div className="flex items-center justify-between gap-4">
+          <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
+            <Link to="/admin">
+              <ArrowLeftIcon />
+              Zurück zu den Tutoren
+            </Link>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              downloadCsv(
+                getConversationCsvRows(messages, tutor.tutorId),
+                `${sanitizeFilenamePart(tutor.displayName)}-tutor-${getExportFilenameTimestamp()}.csv`,
+              )
+            }
+          >
+            <DownloadIcon />
+            Alle Nachrichten als CSV exportieren
+          </Button>
+        </div>
 
         <section className="overflow-hidden rounded-lg border border-border-primary bg-surface-primary shadow-sm">
           {conversations.length > 0 ? (
@@ -113,6 +142,7 @@ function formatDate(date: string | Date) {
   return new Intl.DateTimeFormat("de-CH", {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: "Europe/Zurich",
   }).format(new Date(date));
 }
 

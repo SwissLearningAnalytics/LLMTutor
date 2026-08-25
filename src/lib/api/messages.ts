@@ -114,7 +114,8 @@ export const getOwnTutorConversations = createServerFn({ method: "GET" })
           executionId: messages.executionId,
           pseudonym: sql<string>`max(${messages.pseudonym})`,
           messageCount: count(),
-          lastMessageAt: sql<Date>`max(${messages.createdAt})`,
+          // t_messages.createdAt is a timestamp without timezone and stores UTC wall time.
+          lastMessageAt: sql<Date>`max(${messages.createdAt}) AT TIME ZONE 'UTC'`,
         })
         .from(messages)
         .where(eq(messages.promptName, tutorId))
@@ -139,6 +140,8 @@ export const getOwnTutorConversation = createServerFn({ method: "GET" })
       const conversation = await db
         .select({
           id: messages.id,
+          executionId: messages.executionId,
+          createdAt: sql<Date>`${messages.createdAt} AT TIME ZONE 'UTC'`,
           pseudonym: messages.pseudonym,
           role: messages.role,
           message: messages.message,
@@ -161,6 +164,37 @@ export const getOwnTutorConversation = createServerFn({ method: "GET" })
       }));
     } catch {
       throw new Error(`Conversation ${executionId} could not be loaded`);
+    }
+  });
+
+export const getOwnTutorMessages = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ tutorId: z.string().min(1) }))
+  .handler(async ({ data: { tutorId } }) => {
+    await ensureOwnTutor(tutorId);
+
+    try {
+      const tutorMessages = await db
+        .select({
+          id: messages.id,
+          executionId: messages.executionId,
+          pseudonym: messages.pseudonym,
+          createdAt: sql<Date>`${messages.createdAt} AT TIME ZONE 'UTC'`,
+          role: messages.role,
+          message: messages.message,
+          feedback: messages.feedback,
+          mode: messages.mode,
+        })
+        .from(messages)
+        .where(eq(messages.promptName, tutorId))
+        .orderBy(asc(messages.createdAt), asc(messages.id));
+
+      return tutorMessages.map((message) => ({
+        ...message,
+        feedback: normalizeQuestionnaireFeedback(message.feedback),
+        mode: normalizeQuestionnaireMode(message.mode),
+      }));
+    } catch {
+      throw new Error(`Messages for tutor ${tutorId} could not be loaded`);
     }
   });
 

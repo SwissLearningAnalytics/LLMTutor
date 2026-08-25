@@ -2,7 +2,15 @@ import { queryOptions } from "@tanstack/react-query";
 import {
   getOwnTutorConversation,
   getOwnTutorConversations,
+  getOwnTutorMessages,
 } from "@/lib/api/messages";
+
+export function getOwnTutorMessagesOptions(tutorId: string) {
+  return queryOptions({
+    queryKey: ["tutors", "mine", tutorId, "messages"],
+    queryFn: () => getOwnTutorMessages({ data: { tutorId } }),
+  });
+}
 
 export function getOwnTutorConversationsOptions(tutorId: string) {
   return queryOptions({
