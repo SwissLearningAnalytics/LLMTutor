@@ -1,3 +1,12 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  createFileRoute,
+  Link,
+  linkOptions,
+  notFound,
+} from "@tanstack/react-router";
+import { InfoIcon } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -9,11 +18,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { AiModels, providerName } from "@/lib/ai/model";
+import { getTutorOptions } from "@/lib/api/tutors/query-options";
 import { usePseudonymStore } from "@/lib/pseudonymStore";
-import { getTutor, tutorIds } from "@/tutors";
-import { Link, createFileRoute, notFound } from "@tanstack/react-router";
-import { InfoIcon } from "lucide-react";
-import { useEffect, useRef } from "react";
 
 type Search = {
   model?: string;
@@ -21,15 +27,13 @@ type Search = {
 
 export const Route = createFileRoute("/$tutor_id/")({
   component: RouteComponent,
-  beforeLoad: ({ params }) => {
-    if (!tutorIds.includes(params.tutor_id)) {
+  loader: async ({ params, context: { queryClient } }) => {
+    const tutor = await queryClient.ensureQueryData(
+      getTutorOptions(params.tutor_id),
+    );
+    if (!tutor) {
       throw notFound();
     }
-  },
-  loader: async ({ params }) => {
-    const t = await getTutor(params.tutor_id);
-    console.log(t);
-    return t;
   },
   validateSearch: (search: Record<string, string>): Search => {
     if (search.model) {
@@ -62,20 +66,20 @@ function RouteComponent() {
   const tutorId = Route.useParams({
     select: (params) => params.tutor_id,
   });
-  const tutor = Route.useLoaderData();
+  const { data: tutor } = useSuspenseQuery(getTutorOptions(tutorId));
   const { model } = Route.useSearch();
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  const toTutorOptions = {
+  const toTutorOptions = linkOptions({
     to: "/$tutor_id/tutor",
     params: { tutor_id: tutorId },
     search: {
       model,
     },
-  };
+  });
 
   function handleEnter(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey && pseudonym) {
@@ -84,7 +88,7 @@ function RouteComponent() {
     }
   }
   return (
-    <Layout flex header={""}>
+    <Layout flex header={""} className="h-full">
       <Card
         variant="question"
         className="mx-auto my-auto flex w-full flex-col justify-center"
@@ -97,7 +101,7 @@ function RouteComponent() {
 
             <Label
               htmlFor="audience"
-              className="mb-1 flex items-center gap-1 text-base font-bold leading-none"
+              className="mb-1 flex items-center gap-1 text-base leading-none font-bold"
             >
               <div>Pseudonym</div>
               <Popover>
@@ -110,7 +114,7 @@ function RouteComponent() {
                     size="icon"
                     className="-m-1.5 size-10 rounded-sm bg-transparent focus-visible:ring-offset-0"
                   >
-                    <InfoIcon className="!size-5 shrink-0" />
+                    <InfoIcon className="size-5! shrink-0" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="start">

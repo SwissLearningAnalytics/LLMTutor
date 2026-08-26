@@ -26,3 +26,4 @@ dist-ssr
 bin
 .tanstack
 .nitro
+.env

@@ -15,7 +15,6 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "verbatimModuleSyntax": false,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@/tutors": ["./tutors/index"]

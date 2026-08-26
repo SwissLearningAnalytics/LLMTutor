@@ -22,6 +22,13 @@
       "when": 1756905645451,
       "tag": "0002_short_silhouette",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787051769509,
+      "tag": "0003_great_molten_man",
+      "breakpoints": true
     }
   ]
 }

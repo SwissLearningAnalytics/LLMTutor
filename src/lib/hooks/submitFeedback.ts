@@ -1,7 +1,5 @@
-import { addMessage } from "@/lib/api/messages";
-import { Role } from "@/lib/types/role";
 import type { UIMessage } from "ai";
-import { nanoid } from "nanoid";
+import { addMessage } from "@/lib/api/messages";
 
 export async function submitUserAnswerWithFeedback({
   event,
@@ -11,8 +9,6 @@ export async function submitUserAnswerWithFeedback({
   executionId,
   userAnswer,
   reflectionOnChatbotFeedback,
-  messages,
-  setMessages,
   mode,
 }: {
   event: React.FormEvent;
@@ -22,8 +18,6 @@ export async function submitUserAnswerWithFeedback({
   executionId: string;
   userAnswer: string;
   reflectionOnChatbotFeedback: Record<string, string | undefined>;
-  messages: UIMessage[];
-  setMessages: (messages: UIMessage[]) => void;
   mode: string;
 }) {
   event.preventDefault();
@@ -35,27 +29,12 @@ export async function submitUserAnswerWithFeedback({
         executionId,
         promptName: promptName,
         modelName: model,
-        role: Role.User,
+        role: "user",
         message: userAnswer,
         feedback: reflectionOnChatbotFeedback,
         mode,
       },
     });
-
-    setMessages([
-      ...messages,
-      {
-        id: nanoid(),
-        role: Role.User,
-        content: userAnswer,
-        parts: [
-          {
-            type: "text",
-            text: userAnswer,
-          },
-        ],
-      },
-    ]);
   } catch (error) {
     throw Error("Error saving answer from user and feedback:", error as Error);
   }
@@ -66,7 +45,7 @@ export async function submitSecondFeedback({
   promptName,
   executionId,
   model,
-  messages,
+  message,
   reflectionOnOwnAnswer,
   mode,
 }: {
@@ -74,10 +53,14 @@ export async function submitSecondFeedback({
   promptName: string;
   executionId: string;
   model?: string;
-  messages: { content: string }[];
+  message: UIMessage;
   reflectionOnOwnAnswer: Record<string, string | undefined>;
   mode: string;
 }) {
+  const text = message.parts
+    .filter((part) => part.type === "text")
+    .map((part) => part.text)
+    .join("");
   try {
     await addMessage({
       data: {
@@ -85,8 +68,8 @@ export async function submitSecondFeedback({
         promptName: promptName,
         executionId: executionId,
         modelName: model,
-        role: Role.Ai,
-        message: messages[messages.length - 1].content,
+        role: "ai",
+        message: text,
         feedback: reflectionOnOwnAnswer,
         mode,
       },

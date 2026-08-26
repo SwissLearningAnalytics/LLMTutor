@@ -1,17 +1,19 @@
-import { cn } from "@/lib/utils/cn";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils/cn";
 
 export function Layout({
   children,
   header,
   noConstrain = false,
   flex = false,
+  className = "",
   sidebox,
 }: {
   children: ReactNode;
-  header: ReactNode;
+  header?: ReactNode;
   noConstrain?: boolean;
   flex?: boolean;
+  className?: string;
   sidebox?: ReactNode;
 }) {
   return (
@@ -22,16 +24,16 @@ export function Layout({
       <div className="flex flex-1 gap-4 overflow-hidden">
         <main
           className={cn(
-            "w-full overflow-y-auto rounded-t-lg bg-surface-background-primary",
+            "w-full overflow-y-auto overscroll-y-none rounded-t-lg bg-surface-background-primary",
             !noConstrain && "p-3 py-14 sm:p-6 sm:py-28",
             !!sidebox && "w-2/3",
           )}
         >
           <div
             className={cn(
-              "h-full",
               flex && "flex",
               !noConstrain && "mx-auto max-w-3xl",
+              className,
             )}
           >
             {children}

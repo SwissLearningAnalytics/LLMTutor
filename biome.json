@@ -1,49 +1,41 @@
 {
-  "$schema": "node_modules/@biomejs/biome/configuration_schema.json",
-  "organizeImports": {
-    "enabled": true
+  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
   },
   "files": {
-    "include": [
-      "index.html",
-      "src/**/*.tsx",
-      "src/**/*.ts",
-      "src/**/*.jsx",
-      "src/**/*.js"
-    ],
-    "ignore": ["src/routeTree.gen.ts"]
+    "ignoreUnknown": false,
+    "includes": [
+      "**/src/**/*",
+      "**/.vscode/**/*",
+      "**/index.html",
+      "**/vite.config.ts",
+      "!**/src/routeTree.gen.ts",
+      "!**/src/styles.css"
+    ]
   },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab"
+  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
-    "ignore": ["node_modules", "dist"],
     "enabled": true,
     "rules": {
       "recommended": true,
-      "a11y": {
-        "noSvgWithoutTitle": "off"
-      },
-      "style": {
-        "noNonNullAssertion": "off",
-        "noDefaultExport": "info",
-        "useBlockStatements": "error"
-      },
       "correctness": {
-        "useExhaustiveDependencies": "off",
-        "noUnusedImports": {
-          "fix": "safe",
-          "level": "warn"
+        "useExhaustiveDependencies": {
+          "level": "warn",
+          "fix": "none"
         }
-      },
-      "nursery": {
-        "noEnum": "info"
       }
     }
   },
-  "formatter": {
-    "enabled": false
-  },
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
   }
 }

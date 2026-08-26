@@ -1,0 +1,16 @@
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { getSession } from "@/lib/auth.functions";
+
+export const Route = createFileRoute("/admin")({
+  beforeLoad: async ({ location }) => {
+    const session = await getSession();
+    if (!session) {
+      throw redirect({
+        to: "/login",
+        search: {
+          redirect: location.href,
+        },
+      });
+    }
+  },
+});

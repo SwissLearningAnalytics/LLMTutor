@@ -1,3 +1,13 @@
+import { useChat } from "@ai-sdk/react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import type { UIMessage } from "ai";
+import { DefaultChatTransport } from "ai";
+import { CornerDownLeftIcon, RefreshCwIcon } from "lucide-react";
+import { AnimatePresence } from "motion/react";
+import { nanoid } from "nanoid";
+import { useEffect, useRef, useState } from "react";
+import { ChatMessage } from "@/components/chat/chat-message";
 import { Feedback } from "@/components/feedback/feedback";
 import { FeedbackReaction } from "@/components/feedback/feedback-reaction";
 import { Layout } from "@/components/layout";
@@ -6,25 +16,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LoadingDots } from "@/components/ui/loading-dots";
 import { MemoizedMarkdown } from "@/components/ui/memoized-markdown";
-import { chatHandler } from "@/lib/ai/chat";
 import { AiModels, providerName } from "@/lib/ai/model";
+import {
+  isInitialAssistantResponse,
+  prepareTutorChatMessages,
+} from "@/lib/ai/tutor-chat";
+import { getTutorOptions } from "@/lib/api/tutors/query-options";
 import { nonStudyFeedback, studyFeedback } from "@/lib/feedback/feedback";
 import {
   submitSecondFeedback,
   submitUserAnswerWithFeedback,
 } from "@/lib/hooks/submitFeedback";
 import { usePseudonymStore } from "@/lib/pseudonymStore";
-import { getTutor, tutorIds } from "@/tutors";
 import { Phase } from "@/lib/types/phases";
-import { Role } from "@/lib/types/role";
 import { cn } from "@/lib/utils/cn";
 import { useIsStudyMode } from "@/lib/utils/use-is-study-mode";
-import { useChat } from "@ai-sdk/react";
-import { ClientOnly, createFileRoute, notFound } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "framer-motion";
-import { CornerDownLeftIcon, RefreshCwIcon } from "lucide-react";
-import { nanoid } from "nanoid";
-import { useEffect, useRef, useState } from "react";
 
 const BACKOFF_INITIAL_VALUE = 5 / 2;
 
@@ -33,21 +39,12 @@ type Search = {
 };
 
 export const Route = createFileRoute("/$tutor_id/tutor")({
-  component: () => (
-    <ClientOnly fallback={<LoadingDots />}>
-      <RouteComponent />
-    </ClientOnly>
-  ),
-  beforeLoad: ({ params }) => {
-    if (!tutorIds.includes(params.tutor_id)) {
-      throw notFound();
-    }
-  },
-  loader: async ({ params }) => {
-    try {
-      return await getTutor(params.tutor_id);
-    } catch (error) {
-      console.error("Error loading tutor:", error);
+  component: RouteComponent,
+  loader: async ({ params, context: { queryClient } }) => {
+    const tutor = await queryClient.ensureQueryData(
+      getTutorOptions(params.tutor_id),
+    );
+    if (!tutor) {
       throw notFound();
     }
   },
@@ -81,23 +78,43 @@ function RouteComponent() {
     select: (params) => params.tutor_id,
   });
   const { model } = Route.useSearch();
-  const tutor = Route.useLoaderData();
+  const { data: tutor } = useSuspenseQuery(getTutorOptions(tutorId));
   const executionIdRef = useRef(nanoid(10));
   const executionId = executionIdRef.current;
   const [error, setError] = useState(false);
   const [backoff, setBackoff] = useState(BACKOFF_INITIAL_VALUE);
-  const { messages, setMessages, reload, status } = useChat({
-    fetch: (_, init) =>
-      chatHandler({
-        data: {
-          body: init?.body as string,
-          model: model, // normally undefined, will use default model
-        },
-        signal: init?.signal ?? undefined,
-      }),
+  const [completedAssistantMessage, setCompletedAssistantMessage] = useState<
+    UIMessage | undefined
+  >();
+  const { pseudonym } = usePseudonymStore();
+  const mode = isStudyMode ? "study" : "non-study";
+  const { messages, sendMessage, regenerate, status } = useChat({
+    transport: new DefaultChatTransport({
+      prepareSendMessagesRequest: ({ messages }) => {
+        const preparedChat = prepareTutorChatMessages(messages);
+        return {
+          body: {
+            ...preparedChat,
+            model,
+            tutorId: tutor.tutorId,
+            executionId,
+            pseudonym,
+            mode,
+          },
+        };
+      },
+    }),
     experimental_throttle: 100,
-    onFinish: () => {
+    onFinish: ({ message, isAbort, isDisconnect, isError }) => {
       setBackoff(BACKOFF_INITIAL_VALUE);
+      if (
+        message.role === "assistant" &&
+        !isAbort &&
+        !isDisconnect &&
+        !isError
+      ) {
+        setCompletedAssistantMessage(message);
+      }
     },
     onError: (error) => {
       setError(true);
@@ -105,17 +122,20 @@ function RouteComponent() {
       console.error("Error generating response: ", error);
     },
   });
-  const lastBotMessage = messages.filter((m) => m.role !== Role.User).at(-1);
-  const { pseudonym } = usePseudonymStore();
+  const lastBotMessage = messages.filter((m) => m.role === "assistant").at(-1);
+  const latestMessage = messages.at(-1);
   const navigate = Route.useNavigate();
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const systemMessageSent = useRef(false);
 
   const [phase, setPhase] = useState<Phase>(Phase.init);
   const [userAnswer, setUserAnswer] = useState("");
   const [showError, setShowError] = useState(false);
-  const mode = isStudyMode ? "study" : "non-study";
+  const [pendingFeedbackSubmission, setPendingFeedbackSubmission] = useState<
+    Record<string, string | undefined> | undefined
+  >();
 
   const [submittedFeedbackMessageId, setSubmittedFeedbackMessageId] = useState<
     string | null
@@ -133,12 +153,14 @@ function RouteComponent() {
         feedback.ai.every((f) => !!reflectionOnChatbotFeedback[f.label]))) ||
     !isStudyMode;
 
-  const disableSubmitButton = !canSubmit({
-    status,
-    phase,
-    userAnswer,
-    reflectionOnChatbotFeedback,
-  });
+  const disableSubmitButton =
+    Boolean(pendingFeedbackSubmission) ||
+    !canSubmit({
+      status,
+      phase,
+      userAnswer,
+      reflectionOnChatbotFeedback,
+    });
 
   function canSubmit({
     status,
@@ -183,16 +205,16 @@ function RouteComponent() {
         search: { model },
       });
     } else if (phase === Phase.init) {
-      // Send the hidden prompt to AI (never rendered in the UI)
-      setMessages([
-        {
-          id: nanoid(),
-          role: Role.User,
-          content: tutor.prompt,
-        },
-      ]);
-      reload();
-      setPhase(Phase.question_with_feedback);
+      if (systemMessageSent.current) {
+        return;
+      }
+      systemMessageSent.current = true;
+      sendMessage({
+        role: "system",
+        parts: [{ type: "text", text: "Beginne die Unterhaltung." }],
+      }).then(() => {
+        setPhase(Phase.question_with_feedback);
+      });
     }
   }, []);
 
@@ -204,50 +226,61 @@ function RouteComponent() {
     if (enableInputArea) {
       inputRef.current?.focus();
     }
-  }, [phase, reflectionOnChatbotFeedback]);
+  }, [phase, reflectionOnChatbotFeedback, enableInputArea]);
 
   useEffect(() => {
-    if (
-      (!isStudyMode ||
-        feedback.user.every((f) => !!reflectionOnOwnAnswer[f.label])) &&
-      phase === Phase.answer_with_feedback_and_response_hidden
-    ) {
-      if (lastBotMessage && !isStudyMode) {
-        setPhase(Phase.question_with_feedback);
-      }
-      if (
-        isStudyMode &&
-        status === "ready" &&
-        lastBotMessage &&
-        submittedFeedbackMessageId !== lastBotMessage.id
-      ) {
-        submitReflectionOnOwnAnswer();
-      }
-    }
-  }, [reflectionOnOwnAnswer, status, lastBotMessage, phase]);
+    const questionnaireCompleted =
+      !isStudyMode ||
+      feedback.user.every((field) => !!reflectionOnOwnAnswer[field.label]);
 
-  async function submitReflectionOnOwnAnswer() {
+    if (
+      phase !== Phase.answer_with_feedback_and_response_hidden ||
+      !questionnaireCompleted ||
+      latestMessage?.role !== "assistant"
+    ) {
+      return;
+    }
+
+    setPhase(Phase.question_with_feedback);
+
+    if (isStudyMode) {
+      const feedbackSnapshot = { ...reflectionOnOwnAnswer };
+      setReflectionOnOwnAnswer({
+        externalResource: undefined,
+        thoughtAboutIndex: undefined,
+      });
+      setPendingFeedbackSubmission(feedbackSnapshot);
+    }
+  }, [reflectionOnOwnAnswer, latestMessage, phase]);
+
+  useEffect(() => {
+    if (!pendingFeedbackSubmission || !completedAssistantMessage) {
+      return;
+    }
+
+    void submitReflectionOnOwnAnswer(pendingFeedbackSubmission);
+  }, [pendingFeedbackSubmission, completedAssistantMessage]);
+
+  async function submitReflectionOnOwnAnswer(
+    feedbackSnapshot = reflectionOnOwnAnswer,
+  ) {
+    if (!completedAssistantMessage) {
+      return;
+    }
+
     try {
       await submitSecondFeedback({
         pseudonym,
-        promptName: tutor.tutor_id,
+        promptName: tutor.tutorId,
         executionId,
         model,
-        messages,
-        reflectionOnOwnAnswer,
+        message: completedAssistantMessage,
+        reflectionOnOwnAnswer: feedbackSnapshot,
         mode,
       });
-      setPhase(Phase.question_with_feedback);
-      if (isStudyMode) {
-        setReflectionOnOwnAnswer({
-          externalResource: undefined,
-          thoughtAboutIndex: undefined,
-        });
-      }
 
-      if (lastBotMessage) {
-        setSubmittedFeedbackMessageId(lastBotMessage.id);
-      }
+      setPendingFeedbackSubmission(undefined);
+      setSubmittedFeedbackMessageId(completedAssistantMessage.id);
       setShowError(false);
       setTimeout(() => {
         setSubmittedFeedbackMessageId(null);
@@ -259,7 +292,9 @@ function RouteComponent() {
 
   async function submitUserMessage(event: React.FormEvent) {
     if (!isStudyMode) {
-      submitReflectionOnOwnAnswer();
+      if (!isInitialAssistantResponse(messages)) {
+        await submitReflectionOnOwnAnswer();
+      }
       setReflectionOnOwnAnswer({
         externalResource: undefined,
         thoughtAboutIndex: undefined,
@@ -268,16 +303,18 @@ function RouteComponent() {
     try {
       await submitUserAnswerWithFeedback({
         event,
-        promptName: tutor.tutor_id,
+        promptName: tutor.tutorId,
         pseudonym,
         model,
         executionId,
         userAnswer,
         reflectionOnChatbotFeedback,
-        messages,
-        setMessages,
         mode,
       });
+
+      setCompletedAssistantMessage(undefined);
+      sendMessage({ text: userAnswer });
+
       setShowError(false);
       setUserAnswer("");
       setReflectionOnChatbotFeedback({
@@ -292,8 +329,6 @@ function RouteComponent() {
         }, 5000);
       }
       setPhase(Phase.answer_with_feedback_and_response_hidden);
-
-      reload();
     } catch {
       setShowError(true);
     }
@@ -301,6 +336,7 @@ function RouteComponent() {
 
   return (
     <Layout
+      className="h-full"
       noConstrain={true}
       header={
         <div className="flex flex-col">
@@ -311,48 +347,78 @@ function RouteComponent() {
         !tutor.learningObjectives ? null : (
           <div className="prose font-semibold">
             <MemoizedMarkdown
-              id={`lernziele-${tutor.tutor_id}`}
-              content={tutor.learningObjectives}
+              id={`lernziele-${tutor.tutorId}`}
+              parts={[
+                {
+                  type: "text",
+                  text: tutor.learningObjectives,
+                },
+              ]}
             />
           </div>
         )
       }
     >
       <div className="mx-auto flex h-full max-w-7xl flex-col sm:p-6">
-        <div className="no-scrollbar flex flex-grow flex-col overflow-auto px-4 sm:px-0">
-          {status === "submitted" && messages.length === 1 && <LoadingDots />}
-          {messages
-            .filter((msg) => msg.content !== tutor.prompt)
-            .map((message, index) => {
-              const isLastMessage = index === messages.length - 2;
-              const isFirstMessage = index === 0;
+        <div className="no-scrollbar flex grow flex-col overflow-auto px-4 sm:px-0">
+          {messages.map((message, index) => {
+            const isLastMessage = index === messages.length - 1;
+            const isFirstMessage = index === 0;
+            return (
+              <div key={message.id} className="group mt-6 flex w-full flex-col">
+                {((phase === Phase.answer_with_feedback_and_response_hidden &&
+                  message.role !== "user" &&
+                  isLastMessage) ||
+                  (!isStudyMode &&
+                    phase === Phase.question_with_feedback &&
+                    !isFirstMessage &&
+                    isLastMessage)) && (
+                  <Feedback
+                    feedbackFields={feedback.user}
+                    feedback={reflectionOnOwnAnswer}
+                    setFeedback={setReflectionOnOwnAnswer}
+                  />
+                )}
 
-              return (
-                <div
-                  key={message.id}
-                  className={cn("mt-6 flex w-full flex-col")}
-                >
-                  {((phase === Phase.answer_with_feedback_and_response_hidden &&
-                    message.role !== Role.User &&
-                    isLastMessage) ||
-                    (!isStudyMode &&
-                      phase === Phase.question_with_feedback &&
-                      !isFirstMessage &&
-                      isLastMessage)) && (
+                <AnimatePresence>
+                  {phase === Phase.question_with_feedback &&
+                    submittedFeedbackMessageId === message.id &&
+                    isStudyMode && <FeedbackReaction />}
+                </AnimatePresence>
+
+                <ChatMessage
+                  message={message}
+                  blurAssistant={
+                    phase === Phase.answer_with_feedback_and_response_hidden &&
+                    isLastMessage &&
+                    isStudyMode
+                  }
+                />
+                {status === "submitted" && isLastMessage && <LoadingDots />}
+
+                {phase === Phase.question_with_feedback &&
+                  status === "ready" &&
+                  isLastMessage && (
                     <>
                       <Feedback
-                        feedbackFields={feedback.user}
-                        feedback={reflectionOnOwnAnswer}
-                        setFeedback={setReflectionOnOwnAnswer}
+                        feedbackFields={feedback.ai}
+                        feedback={reflectionOnChatbotFeedback}
+                        setFeedback={setReflectionOnChatbotFeedback}
                       />
                       {showError && (
-                        <div className="flex items-center justify-center">
+                        <div className="mt-4 flex items-center justify-center">
                           <Badge variant={"red"} className="px-3">
                             Es ist ein Fehler aufgetreten
                             <Button
-                              onClick={() => submitReflectionOnOwnAnswer()}
+                              onClick={(event) =>
+                                pendingFeedbackSubmission
+                                  ? submitReflectionOnOwnAnswer(
+                                      pendingFeedbackSubmission,
+                                    )
+                                  : submitUserMessage(event)
+                              }
                               variant={"neutral"}
-                              className="ml-3"
+                              className="ml-2"
                             >
                               <RefreshCwIcon />
                             </Button>
@@ -361,92 +427,24 @@ function RouteComponent() {
                       )}
                     </>
                   )}
-
-                  <AnimatePresence>
-                    {phase === Phase.question_with_feedback &&
-                      submittedFeedbackMessageId === message.id &&
-                      isStudyMode && <FeedbackReaction />}
-                  </AnimatePresence>
-
-                  {message.role === Role.User ? (
-                    <motion.div layout={false}>
-                      <div
-                        className={cn(
-                          "prose !max-w-none overflow-auto rounded-lg border border-primary bg-surface-feedback-neutral-light p-4 text-base leading-6",
-                          "ml-auto w-1/2",
-                        )}
-                      >
-                        <MemoizedMarkdown
-                          id={message.id}
-                          content={message.content}
-                        />
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <motion.div layout={false}>
-                      <div
-                        className={cn(
-                          "prose mb-4 mt-8 !max-w-full overflow-auto rounded-lg border text-base font-bold leading-6 text-secondary shadow",
-                          "bg-white p-4",
-                          phase ===
-                            Phase.answer_with_feedback_and_response_hidden &&
-                            isLastMessage &&
-                            message.role === "assistant" &&
-                            isStudyMode &&
-                            "blur-sm",
-                        )}
-                      >
-                        <MemoizedMarkdown
-                          id={message.id}
-                          content={message.content}
-                        />
-                      </div>
-                    </motion.div>
+                {phase === Phase.answer_with_feedback_and_response_hidden &&
+                  submittedFeedbackMessageId === message.id &&
+                  isStudyMode && (
+                    <AnimatePresence>
+                      <FeedbackReaction />
+                    </AnimatePresence>
                   )}
-                  {status === "submitted" && isLastMessage && <LoadingDots />}
-
-                  {phase === Phase.question_with_feedback &&
-                    status === "ready" &&
-                    isLastMessage && (
-                      <>
-                        <Feedback
-                          feedbackFields={feedback.ai}
-                          feedback={reflectionOnChatbotFeedback}
-                          setFeedback={setReflectionOnChatbotFeedback}
-                        />
-                        {showError && (
-                          <div className="mt-4 flex items-center justify-center">
-                            <Badge variant={"red"} className="px-3">
-                              Es ist ein Fehler aufgetreten
-                              <Button
-                                onClick={(event) => submitUserMessage(event)}
-                                variant={"neutral"}
-                                className="ml-2"
-                              >
-                                <RefreshCwIcon />
-                              </Button>
-                            </Badge>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  {phase === Phase.answer_with_feedback_and_response_hidden &&
-                    submittedFeedbackMessageId === message.id &&
-                    isStudyMode && (
-                      <AnimatePresence>
-                        <FeedbackReaction />
-                      </AnimatePresence>
-                    )}
-                </div>
-              );
-            })}
+              </div>
+            );
+          })}
 
           {error && (
             <RetryButton
               waitTime={backoff}
               onClick={() => {
                 setError(false);
-                reload();
+                setCompletedAssistantMessage(undefined);
+                regenerate();
               }}
             />
           )}
@@ -469,7 +467,7 @@ function RouteComponent() {
             onChange={(e) => setUserAnswer(e.target.value)}
             className={cn(
               enableInputArea ? "shadow-focus" : "border",
-              "max-h-96 min-h-32 cursor-text scroll-pb-16 overflow-auto rounded-md bg-surface-primary p-3 pb-16 text-sm ring-offset-surface-background-primary [grid-area:1/1] focus-within:outline-none focus-within:ring-2 focus-within:ring-black/50 focus-within:ring-offset-2",
+              "max-h-96 min-h-32 cursor-text scroll-pb-16 overflow-auto rounded-md bg-surface-primary p-3 pb-16 text-sm ring-offset-surface-background-primary [grid-area:1/1] focus-within:ring-2 focus-within:ring-black/50 focus-within:ring-offset-2 focus-within:outline-none",
             )}
             textareaClassName="placeholder:text-secondary"
             placeholder={

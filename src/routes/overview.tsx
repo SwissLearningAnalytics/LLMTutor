@@ -1,39 +1,32 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
-import { getTutor, tutorIds } from "@/tutors";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { getTutorsOptions } from "@/lib/api/tutors/query-options";
 
 export const Route = createFileRoute("/overview")({
   component: RouteComponent,
-  loader: async () => {
-    const tutors = await Promise.all(
-      tutorIds.map(async (id) => {
-        try {
-          return await getTutor(id);
-        } catch (error) {
-          console.error("Error loading tutor:", error);
-          return undefined;
-        }
-      }),
-    );
-    return tutors;
+  loader({ context: { queryClient } }) {
+    queryClient.ensureQueryData(getTutorsOptions());
   },
 });
 
 function RouteComponent() {
-  const tutors = Route.useLoaderData();
+  const { data: tutors } = useSuspenseQuery(getTutorsOptions());
   return (
     <div>
       <Layout header={""}>
         <ul className="space-y-2">
           {Object.values(tutors).map((tutor) => (
-            <li key={tutor?.tutor_id}>
-              <Link
-                to={"/$tutor_id"}
-                params={{ tutor_id: tutor?.tutor_id ?? "" }}
-              >
-                <Button>{tutor?.displayName}</Button>
-              </Link>
+            <li key={tutor?.tutorId}>
+              <Button asChild>
+                <Link
+                  to={"/$tutor_id"}
+                  params={{ tutor_id: tutor?.tutorId ?? "" }}
+                >
+                  {tutor?.displayName}
+                </Link>
+              </Button>
             </li>
           ))}
         </ul>

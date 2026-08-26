@@ -1,3 +1,6 @@
+import { InfoIcon } from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -9,9 +12,6 @@ import {
 import type { FeedbackField } from "@/lib/feedback/types";
 import { cn } from "@/lib/utils/cn";
 import { useIsStudyMode } from "@/lib/utils/use-is-study-mode";
-import { motion } from "framer-motion";
-import { InfoIcon } from "lucide-react";
-import { useEffect, useRef } from "react";
 
 export function Feedback({
   feedbackFields,
@@ -27,7 +27,7 @@ export function Feedback({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [feedback]);
+  }, []);
 
   const inFocusState = feedbackFields.every((field) => !feedback[field.label]);
 
@@ -110,7 +110,7 @@ function FeedbackQuestion({
               size="icon"
               className="-m-1.5 size-10 rounded-sm bg-transparent focus-visible:ring-offset-0"
             >
-              <InfoIcon className="!size-5 shrink-0" />
+              <InfoIcon className="size-5! shrink-0" />
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start">{tooltip}</PopoverContent>
@@ -156,7 +156,7 @@ function FeedbackCheckbox({
   const isSelected = Boolean(feedback[feedbackField.label]);
 
   return (
-    <Label className="flex items-center gap-3 rounded-lg border p-3 text-secondary has-[[aria-checked=true]]:border-black has-[[aria-checked=true]]:text-black">
+    <Label className="flex items-center gap-3 rounded-lg border p-3 text-secondary has-aria-checked:border-black has-aria-checked:text-black">
       <Checkbox
         id={`toggle-${feedbackField.label}`}
         checked={isSelected}
@@ -171,7 +171,7 @@ function FeedbackCheckbox({
         }}
       />
       <div className="flex w-full items-center justify-between gap-1.5 font-normal">
-        <p className="text-sm font-medium leading-none">{feedbackField.text}</p>
+        <p className="text-sm leading-none font-medium">{feedbackField.text}</p>
         {feedbackField.tooltip && (
           <Popover>
             <PopoverTrigger
@@ -183,7 +183,7 @@ function FeedbackCheckbox({
                 size="icon"
                 className="-m-1.5 size-10 rounded-sm bg-transparent focus-visible:ring-offset-0"
               >
-                <InfoIcon className="!size-5 shrink-0" />
+                <InfoIcon className="size-5! shrink-0" />
               </Button>
             </PopoverTrigger>
             <PopoverContent align="start">
