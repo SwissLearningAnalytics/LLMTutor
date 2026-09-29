@@ -32,30 +32,43 @@ Wir hoffen, dass Ihnen dieses Projekt dabei hilft, Ihre Expertise und Erfahrung 
    pnpm install
    ```
 
-2. **Entwicklungsdatenbank starten:**
+2. **Umgebung konfigurieren:** Kopieren Sie `.env.example` nach `.env`. Setzen Sie `BETTER_AUTH_SECRET` auf einen zufälligen Wert und tragen Sie `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` und `SEED_ADMIN_NAME` für das erste Admin-Konto ein. Die lokale Datenbank-URL ist in der Beispieldatei bereits enthalten.
+
+   ```bash
+   cp .env.example .env
+   openssl rand -base64 32
+   ```
+
+   Tragen Sie den erzeugten Wert als `BETTER_AUTH_SECRET` in `.env` ein. Halten Sie das Admin-Passwort und den geheimen Schlüssel vertraulich.
+
+3. **Entwicklungsdatenbank starten:**
    ```bash
    pnpm db:up
    ```
 
-3. **Schema auf die Entwicklungsdatenbank anwenden:**
+4. **Schema auf die Entwicklungsdatenbank anwenden:**
    ```bash
    pnpm db:push
    ```
 
-4. **Benötigtes Modell herunterladen (`mistral:v0.3` standardmässig) und Ollama starten:**
+5. **Lokales Standardmodell (`qwen3.5:latest`) herunterladen und Ollama starten:**
    ```bash
-   ollama pull mistral:v0.3
+   ollama pull qwen3.5:latest
    ollama serve
    ```
 
-5. **Entwicklungsserver starten:**
+6. **Entwicklungsserver starten:**
    ```bash
    pnpm dev
    ```
 
-6. **Auf die Anwendung zugreifen:**
-   Öffnen Sie Ihren Browser und rufen Sie  
-   [http://localhost:3000/overview](http://localhost:3000/overview) auf.
+7. **Auf die Anwendung zugreifen:** Öffnen Sie [http://localhost:3000/admin](http://localhost:3000/admin), melden Sie sich mit dem angelegten Admin-Konto an und erstellen Sie Ihren ersten Tutor. Veröffentlichte Tutoren erscheinen unter [http://localhost:3000/overview](http://localhost:3000/overview).
+
+### Admin-Konto und `/admin`
+
+Beim Serverstart erstellt die Anwendung aus `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` und `SEED_ADMIN_NAME` ein Konto mit der Rolle `admin`. Alle drei Variablen müssen gesetzt sein; fehlt eine davon, wird das Seeding übersprungen. Existiert die E-Mail-Adresse bereits, bleibt das Konto einschliesslich Passwort und Rolle unverändert. Wenden Sie das Datenbankschema vor dem Serverstart an; ein separater Seed-Befehl ist nicht nötig.
+
+`/admin` erfordert eine Anmeldung und leitet nicht angemeldete Personen zu `/login` weiter. Angemeldete Benutzer können eigene Tutoren erstellen, bearbeiten, veröffentlichen, die Veröffentlichung aufheben und löschen. Sie können die Konversationen und Fragebogenantworten ihrer Tutoren ansehen und Konversationsdaten als CSV exportieren. Benutzer mit der Rolle `admin` können unter `/admin/users` ausserdem Konten verwalten und die Rollen `user` oder `admin` vergeben. Neue Konten werden dort von einem Admin erstellt; auf der Anmeldeseite gibt es keine öffentliche Registrierung.
 
 
 ## Konfiguration
@@ -78,6 +91,10 @@ VITE_AI_PROVIDER=ollama-local
 ```
 
 Bei Verwendung von OpenAI muss der API-Key über die Umgebungsvariable `OPENAI_API_KEY` gesetzt werden.
+
+### Datenbank und Authentifizierung
+
+Setzen Sie `PG_CONNECTION_STRING` für PostgreSQL und `BETTER_AUTH_SECRET` für die Sitzungen. `BETTER_AUTH_URL` ist die kanonische URL der Anwendung (im Beispiel `http://localhost:3000`). Wird die Anwendung über weitere Hosts aufgerufen, können diese mit `BETTER_AUTH_ALLOWED_HOSTS` als kommaseparierte Liste zugelassen werden. Für das erste Admin-Konto setzen Sie `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` und `SEED_ADMIN_NAME` in der Serverumgebung. Wenden Sie vor dem Start des Produktionsservers die Migrationen an, damit die Benutzer- und Tutor-Tabellen beim Seeding vorhanden sind.
 
 
 ### Modellauswahl
@@ -111,28 +128,31 @@ Die URL für den Nicht-Studienmodus kann über die Umgebungsvariable `VITE_NON_S
 
 ## Entwicklung
 
-### YAML-Datei erstellen
+### YAML-Tutor-Definitionen
 
-Die YAML-Datei enthält alle Informationen zur Erstellung eines neuen Tutors.  
-Insbesondere enthält sie die System Message. Das Verhalten des Tutors wird durch diese System Message gesteuert – eine versteckte Instruktion, die das Verhalten des LLM kontrolliert.  
+Eine YAML-Datei ist eine optionale Möglichkeit, einen Tutor für den Import zu definieren. Sie enthält unter anderem den Systemprompt, der das Verhalten des LLM steuert.
 Auf Basis der System Messages der bestehenden Tutoren wurden Richtlinien erstellt, wie eine effektive System Message formuliert werden soll. Diese finden Sie hier:  
 [Guidelines YAML File](./tutors/tutors/guidelines_tutor_yaml_file.pdf).  
 
 ### Tutoren hinzufügen
 
-Tutoren werden in YAML-Dateien im Verzeichnis `tutors/tutors/` definiert.
+Im normalen Ablauf melden Sie sich unter `/admin` an, wählen **Tutor erstellen** und tragen Anzeigename, Tutor-ID, Systemprompt und optional Lernziele ein. Neue Tutoren sind zunächst unveröffentlicht. Erst nach der Veröffentlichung sind sie unter `/overview` und über ihre Tutor-URL für Lernende zugänglich.
+
+Vorhandene YAML-Tutor-Definitionen im Verzeichnis `tutors/tutors/` können weiterhin in die Datenbank importiert werden:
 
 1. **Tutor-Datei erstellen oder anpassen:**
    ```bash
    # Beispiel: tutors/tutors/my-new-tutor.yaml
    ```
 
-2. **Notwendigen Code generieren:**
+2. **Tutor-Index generieren:**
    ```bash
    pnpm prepare
    ```
    
    Dieses Skript erzeugt `tutors/index.ts`, das alle Tutoren lädt.
+
+3. **In die Datenbank importieren:** Melden Sie sich bei laufendem Server an und rufen Sie `/admin/import` auf. Importierte Tutoren gehören dem angemeldeten Benutzer und werden veröffentlicht. Ein erneuter Import aktualisiert Anzeigename, Prompt und Lernziele bei übereinstimmenden Tutor-IDs.
 
 
 ### Datenbankverwaltung
@@ -153,7 +173,7 @@ pnpm db:push
 pnpm db:migrations:generate
 
 # Migrationen anwenden
-pnpm db:migrations:appu
+pnpm db:migrations:apply
 
 # Drizzle-Datenbankviewer starten
 pnpm db:studio
@@ -183,8 +203,10 @@ Die Ausgabe wird im Ordner `.output` abgelegt.
 src/
 ├── lib/
 │   ├── ai/          # Konfiguration der KI-Anbieter
+│   ├── auth.ts      # Authentifizierung
 │   ├── db/          # Datenbankschema und Hilfsfunktionen
-│   └── feedback/    # Feedbacksystem
+│   ├── feedback/    # Feedbacksystem
+│   └── seed/        # Seeding des ersten Admin-Kontos
 ├── routes/          # Applikationsrouten
 ├── components/      # React-Komponenten
 └── styles/          # Globale Styles
