@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schulung: Effizientes Lernen mit LLMs</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #222;
+      background: #fafafa;
+    }
+
+    /* ── Top nav ── */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 10px 24px;
+      display: flex;
+      gap: 12px;
+    }
+    .top-nav a {
+      text-decoration: none;
+      color: #555;
+      font-size: 14px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      transition: background .2s;
+    }
+    .top-nav a:hover { background: #f0f0f0; color: #000; }
+
+    /* ── Page wrapper ── */
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ── Progress bar strip ── */
+    .progress-strip {
+      display: flex;
+      gap: 12px;
+      margin: 0 0 40px;
+    }
+    .progress-part {
+      flex: 1;
+      background: #f5f5f5;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,.05);
+    }
+    .progress-part .label {
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .progress-part .label strong { display: block; }
+    .progress-part .bar-track {
+      height: 8px;
+      background: #e0e0e0;
+    }
+    .progress-part .bar-fill {
+      height: 100%;
+      background: #f28b82;
+    }
+
+    /* ── Section dividers ── */
+    section {
+      margin-bottom: 60px;
+    }
+    section + section {
+      border-top: 2px solid #eee;
+      padding-top: 48px;
+    }
+
+    /* ── Typography ── */
+    h1 {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 24px;
+      color: #111;
+    }
+    h2 {
+      font-size: 1.4rem;
+      text-align: center;
+      margin: 32px 0 16px;
+      color: #333;
+    }
+    h3 {
+      font-size: 1.1rem;
+      text-align: center;
+      margin: 28px 0 12px;
+      color: #444;
+    }
+    p { margin-bottom: 14px; }
+    ul, ol {
+      margin: 10px 0 14px 24px;
+    }
+    li { margin-bottom: 6px; }
+    em { color: #555; }
+
+    /* ── Intro card grid ── */
+    .part-cards {
+      display: flex;
+      gap: 12px;
+      margin: 30px 0;
+    }
+    .part-card {
+      flex: 1;
+      background: #f5f5f5;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.05);
+      text-align: center;
+    }
+    .part-card strong { display: block; margin-bottom: 4px; }
+
+    /* ── Callout / summary box ── */
+    .summary-box {
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 24px 0;
+    }
+    .summary-box ul { margin-left: 20px; }
+
+    /* ── Example block ── */
+    .example {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 12px 0;
+      font-style: italic;
+    }
+
+    /* ── Prompt Engineering table-like blocks ── */
+    .prompt-technique {
+      margin: 20px 0;
+    }
+    .prompt-technique .tech-label {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    /* ── References ── */
+    .references {
+      font-size: 13px;
+      color: #666;
+      border-top: 1px solid #ddd;
+      margin-top: 32px;
+      padding-top: 16px;
+    }
+    .references p { margin-bottom: 6px; }
+
+    /* ── Conclusion section ── */
+    .conclusion {
+      background: #e8f5e9;
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-top: 40px;
+    }
+    .conclusion h2 { margin-top: 0; text-align: left; }
+
+    .links-section h3 { text-align: left; margin-top: 20px; }
+    .links-section ul { margin-left: 20px; }
+    .links-section a { color: #1565c0; }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="#overview">Übersicht</a>
+  <a href="#teil1">Teil 1 – KI &amp; LLMs</a>
+  <a href="#teil2">Teil 2 – Prompt Engineering</a>
+  <a href="#teil3">Teil 3 – Lernen mit LLMs</a>
+  <a href="#abschluss">Abschluss</a>
+</nav>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════════════
+       OVERVIEW
+  ═══════════════════════════════════════════ -->
+  <section id="overview">
+    <h1>Schulung: Effizientes Lernen mit LLMs</h1>
+
+    <p>Im Folgenden werden Sie eine Schulung zum effizienten Lernen mit Large Language Models (LLMs) absolvieren. Dabei werden Sie zunächst in die Funktionsweise von LLMs eingeführt und anschliessend darin angeleitet, wie Sie diese so nutzen können, dass Sie damit mehr – und nicht weniger – lernen. Die Schulung gliedert sich in drei Teile: Grundlagen der KI und LLMs, Prompt Engineering und Effizient Lernen mit LLMs.  </p>
+
+
+
+    <p>Am Ende haben Sie die Möglichkeit, weiterführende Materialien zu allen drei Teilen zu finden, falls Sie die Inhalte der Schulung später noch einmal vertiefen möchten.</p>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       TEIL 1
+  ═══════════════════════════════════════════ -->
+  <section id="teil1">
+
+    <div class="progress-strip">
+      <div class="progress-part">
+        <div class="label"><strong>Teil 1</strong>Grundlagen der KI und LLMs</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      </div>
+      <div class="progress-part">
+        <div class="label"><strong>Teil 2</strong>Prompt Engineering</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      </div>
+      <div class="progress-part">
+        <div class="label"><strong>Teil 3</strong>Effizient Lernen mit LLMs</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <h1>Teil 1: Grundlagen der KI und LLMs</h1>
+
+    <p><strong>Lernziele für diesen Teil:</strong></p>
+    <ul>
+      <li>Wissen, was LLMs sind und wie sie funktionieren</li>
+      <li>Wissen, was die Limitationen von KI und LLMs sind</li>
+    </ul>
+
+    <p>Die hier vorgestellten Informationen bieten einen kurzen Einstieg in das umfassende und sich rasant entwickelnde Feld der künstlichen Intelligenz (KI). Schon heutige KI-Systeme erbringen beeindruckende Leistungen. Angesichts der rasanten technologischen Entwicklung ist jedoch davon auszugehen, dass zukünftige Systeme deutlich leistungsfähiger und vielseitiger sein werden. Daher ist es ziemlich wahrscheinlich, dass die aktuelle KI die „am wenigsten leistungsfähige" ist, die wir je erleben werden.</p>
+
+    <!-- ── Was sind LLMs? ── -->
+    <h2>Was sind LLMs?</h2>
+
+    <p>LLMs sind KI-Modelle, welche mit riesigen Mengen an Text trainiert wurden, um Sprache zu verarbeiten und zu erzeugen. Um besser zu verstehen, wie LLMs einzuordnen sind, hilft es, sich die KI als ein System mit mehreren Ebenen vorzustellen:</p>
+ 
+<p style="font-weight:bold; margin-top:18px; text-align:center;">
+Abbildung 1: Künstliche Intelligenz in Schichten
+</p>
+
+<div style="text-align:center;">
+  <img src="KISchichten.png"
+       alt="Künstliche Intelligenz in Schichten: KI, Maschinelles Lernen, Deep Learning, LLMs"
+       style="width:50%; height:auto;">
+</div>
+
+<p style="font-style:italic; font-size:14px; margin-top:6px; text-align:center;">
+Anmerkung: Adaptiert aus How large language models work, von A. Stöffelbauer, 2023.
+</p>
+
+
+    <p><strong>Ganz oben steht die KI.</strong> Dieser Begriff bezeichnet Systeme oder Maschinen, die Aufgaben ausführen, für die normalerweise menschliche Intelligenz erforderlich ist – zum Beispiel Lernen, Problemlösen, Sprachverstehen oder Entscheidungsfindung.</p>
+
+    <p><strong>Eine Ebene darunter liegt das maschinelle Lernen (ML).</strong> ML ist ein Teilgebiet der KI, bei dem Systeme lernen, Muster und Zusammenhänge in Daten zu erkennen. Auf dieser Grundlage können sie neue, unbekannte Daten einordnen oder Vorhersagen treffen – ohne dafür explizit programmiert zu sein.</p>
+
+    <p><strong>Ein Teilbereich des ML ist das Deep Learning.</strong> Dieser Bereich beschäftigt sich mit besonders komplexen Modellen, die mit sogenannten künstlichen neuronalen Netzen arbeiten. Diese Netze sind – stark vereinfacht – vom menschlichen Gehirn inspiriert und können mit unstrukturierten Daten wie Texten oder Bildern umgehen.</p>
+
+    <p><strong>LLMs</strong> sind schliesslich eine spezielle Form von Deep Learning-Modellen. Sie wurden darauf trainiert, auf menschliche Sprache zu reagieren und diese zu erzeugen. Das „large" (deutsch: gross) im Namen bezieht sich auf die enorme Anzahl von Parametern (vergleichbar mit „Neuronen") in ihren Netzwerken. Ein bekanntes Beispiel für ein solches Modell ist GPT von OpenAI, das Modell, worauf ChatGPT basiert.</p>
+
+    <p>LLMs funktionieren grundsätzlich so: Basierend auf den riesigen Mengen an Textdaten, mit denen sie trainiert wurden, sagen sie das nächste Wort in einem Text vorher. Die Auswahl basiert auf Wahrscheinlichkeiten. Im Training haben sie „gelernt", wie Sprache aufgebaut ist, welche Wörter gut zusammenpassen und wie bestimmte Inhalte typischerweise formuliert werden. Die Abkürzung „GPT" in ChatGPT steht für <em>Generative Pre-trained Transformer</em>. Das bedeutet: Das Modell wurde zunächst auf eine Vielzahl von Texten vortrainiert („Pre-trained") und nutzt eine spezielle Architektur („Transformer"), die besonders gut darin ist, Muster in Texten zu erkennen.</p>
+
+    <div class="references">
+      <p>Stöffelbauer, A. (2023, 24. Oktober). How large language models work: From zero to ChatGPT. <em>Medium.</em> Abgerufen am 12. Mai 2025, von https://medium.com/data-science-at-microsoft/how-large-language-models-work-91c362f5b78f.</p>
+    </div>
+
+    <!-- ── Training ── -->
+    <h2>Training von LLMs</h2>
+
+    <p>Um die Funktionsweise und auch die Limitationen von LLMs besser zu verstehen, ist es wichtig nachzuvollziehen, wie LLMs trainiert werden. Das Training von LLMs verläuft in der Regel in drei aufeinanderfolgenden Phasen:</p>
+
+    <p><strong>1. Vortraining (Pre-Training):</strong><br>
+    In dieser ersten Phase wird das Modell mit sehr grossen Mengen an Texten „gefüttert". Dabei lernt es, wie Sprache aufgebaut ist, welche Wörter häufig zusammen vorkommen und sammelt gleichzeitig ein breites Allgemeinwissen aus den Texten. Bei den Texten, die dem Modell zum Training zur Verfügung gestellt werden, handelt es sich meist um öffentlich zugängliche Daten. Das beinhaltet Texte von Webseiten, aus Büchern, Artikeln usw.</p>
+
+    <p><strong>2. Finetuning auf Anweisungen (Instruction Fine-Tuning):</strong><br>
+    Nach dem Vortraining bekommt das Modell gezielt Beispiele dafür, wie es auf menschliche Anweisungen reagieren soll. Dazu nutzt man Datensätze, die aus vielen Paaren bestehen: jeweils eine Aufgabe oder Frage und eine gute, passende Antwort dazu. Das Modell wird nun so trainiert, dass es lernt, bei ähnlichen Eingaben ebenfalls passende und hilfreiche Antworten zu geben. Es passt sich also an die Art und Weise an, wie Menschen Anweisungen formulieren – und wie sie sinnvolle Antworten erwarten.</p>
+
+    <p><strong>3. Verstärkendes Lernen mit menschlichem Feedback (RLHF – Reinforcement Learning from Human Feedback):</strong><br>
+    In dieser optionalen dritten Phase geben Menschen dem Modell Rückmeldungen dazu, welche Antworten besonders hilfreich, klar oder angemessen sind. Das Modell lernt daraus, sich stärker an menschlichen Erwartungen und Werten zu orientieren.</p>
+
+    <!-- ── Limitationen ── -->
+    <h2>Limitationen von LLMs</h2>
+
+    <p>LLMs erzeugen keine „echten" Gedanken oder Fakten. Sie arbeiten rein auf der Basis von Wahrscheinlichkeiten und Mustern, die sie aus ihren Trainingsdaten gelernt haben. Das hat einige wichtige Konsequenzen:</p>
+
+    <p><strong>Halluzinationen.</strong> LLMs wissen nicht, ob etwas wahr ist. Wie ein Papagei plappern sie aus, was sie aus den Daten gelernt haben. Dabei können Fehler entstehen, wenn falsche Informationen in den Daten stecken, die das Modell übernimmt, oder wenn bestimmte Inhalte fehlen und das Modell basierend auf ähnlichen Mustern eine Antwort „erfindet". In beiden Fällen können Aussagen entstehen, die zwar plausibel klingen, aber inhaltlich falsch oder frei erfunden sind. Solche Fehler werden als Halluzinationen bezeichnet.</p>
+
+    <p><strong>Nicht deterministisch.</strong> LLMs sind meistens so eingestellt, dass sie nicht deterministisch sind. Das bedeutet, dass dieselbe Anfrage unterschiedliche Antworten liefern kann.</p>
+
+    <p><strong>Inkonsequente Befolgung von Anweisungen.</strong> Wir können uns nie ganz sicher sein, dass LLMs sich genau an unsere Anweisungen halten. Es kann sein, dass sie Teile davon nicht oder anders umsetzen.</p>
+
+    <p><strong>Verzerrte Antworten.</strong> Die Modelle wurden so trainiert, dass sie bevorzugt „gute" Antworten geben. „Gute" Antworten sind solche, die überzeugend wirken. Das ist unter anderem auf das Reinforcement Learning from Human Feedback zurückzuführen. Antworten, die flüssig klingen, werden dabei häufig als besser beurteilt – auch wenn sie inhaltlich falsch sind. Das verstärkt die Tendenz von LLMs, fehlende Informationen durch erfundene Inhalte zu ersetzen, statt anzugeben, dass nicht ausreichend Information vorliegt.</p>
+
+    <p><strong>Wissensstand der KIs.</strong> LLMs haben nur Zugriff auf Informationen bis zu dem Zeitpunkt, an dem sie trainiert wurden. Über alles, was danach passiert ist, verfügen sie über keine Kenntnisse – es sei denn, sie haben direkten Zugang zum Internet. Deshalb können sie zu aktuellen Ereignissen oft keine verlässlichen Aussagen machen, da solche Informationen nicht Teil ihrer Trainingsdaten sind.</p>
+
+    <p><strong>Verzerrungen in Trainingsdaten.</strong> Texte im Internet oder in Büchern enthalten manchmal Fehler, veraltete Informationen oder einseitige Sichtweisen. Auch Diskriminierung und stereotype Darstellungen können darin enthalten sein. Diese Einstellungen werden vom Modell unter Umständen übernommen, was zu verzerrten Aussagen führen kann.</p>
+
+    <p><strong>Fehlende Quellenangaben.</strong> LLMs wie GPT nennen in ihren Antworten meist keine oder ungenaue Quellen. Zudem kann es vorkommen, dass LLMs wissenschaftliche Quellen erfinden und so beispielsweise Paper zitieren, die nicht existieren. Das erschwert die Überprüfung der Inhalte.</p>
+
+    <div class="summary-box">
+      <p><strong>Fazit:</strong> Es ist wichtig, dass Sie als Lernende die Grenzen von LLM-generierten Inhalten kennen und diese immer kritisch hinterfragen. Verlassen Sie sich nicht blind auf die Richtigkeit der generierten Texte. Prüfen Sie die Inhalte auf Plausibilität und suchen Sie im Zweifelsfall immer nach verlässlichen Quellen. Nur so können Sie sicherstellen, dass Sie nicht falsche oder verzerrte Informationen übernehmen.</p>
+    </div>
+
+    <!-- ── Summary Teil 1 ── -->
+    <div class="summary-box">
+      <p><strong>Die wichtigsten Punkte aus diesem Teil:</strong></p>
+      <ul>
+        <li>LLMs sind keine Wahrheitsgeneratoren. Sie erzeugen wahrscheinliche Wortfolgen, die sprachlich plausibel klingen, aber nicht automatisch wahr sind.</li>
+        <li>Die Aussagen von LLMs müssen kritisch betrachtet und überprüft werden.</li>
+      </ul>
+    </div>
+
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       TEIL 2
+  ═══════════════════════════════════════════ -->
+  <section id="teil2">
+
+    <div class="progress-strip">
+      <div class="progress-part">
+        <div class="label"><strong>Teil 1</strong>Grundlagen der KI und LLMs</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      </div>
+      <div class="progress-part">
+        <div class="label"><strong>Teil 2</strong>Prompt Engineering</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      </div>
+      <div class="progress-part">
+        <div class="label"><strong>Teil 3</strong>Effizient Lernen mit LLMs</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <h1>Teil 2: Prompt Engineering</h1>
+
+    <p><strong>Lernziel für diesen Teil:</strong></p>
+    <ul>
+      <li>Die grundlegenden Aspekte des Prompt Engineerings kennen</li>
+    </ul>
+
+    <p>Was ist Prompt Engineering? Prompt Engineering ist die Wissenschaft, KI-Systeme präzise und strategisch zu steuern, um optimale Ergebnisse zu erzielen. Es geht darum, durch gezielte und gut formulierte Eingaben (Prompts) die gewünschten Outputs von KI-Modellen zu erhalten. Je klarer und präziser ein Prompt formuliert ist, desto höher ist die Wahrscheinlichkeit, eine passende und hilfreiche Antwort zu erhalten, die dem eigenen Bedürfnis entspricht. Gute Prompts enthalten unter anderem relevante Hintergrundinformationen, Beispiele und andere Details, die der KI helfen, die Aufgabe effektiv zu erledigen (Sollberger, 2025).</p>
+
+    <p>In einem nächsten Schritt werden wir uns anschauen, wie Sie einen guten Prompt aufbauen können.</p>
+
+    <div class="references">
+      <p>Sollberger, M. (2025). Leitfaden für fortgeschrittenes Prompt Engineering. FOMA.</p>
+    </div>
+
+    <!-- ── Grundprinzipien ── -->
+    <h2>Grundprinzipien des Prompt Engineerings</h2>
+
+    <h3>Klarheit und Prägnanz</h3>
+
+    <p>Ein guter Prompt vermeidet ungenaue oder mehrdeutige Formulierungen. LLMs arbeiten rein sprachbasiert – je präziser der Input, desto besser der Output.</p>
+
+    <p><strong>Technik:</strong> Vage Begriffe wie „irgendwie" oder „etwas" sollen durch konkrete Fachbegriffe oder Fragestellungen ersetzt werden. Ihr Ziel ist es, der KI deutlich zu machen, was genau erklärt oder analysiert werden soll.</p>
+
+    <div class="example">
+      <p><strong>Schwach:</strong> „Erkläre Stress."</p>
+      <p><strong>Stark:</strong> „Erkläre das transaktionale Stressmodell nach Lazarus und wie es bei Studierenden in Prüfungssituationen angewendet werden kann."</p>
+    </div>
+
+    <h3>Kontext bereitstellen</h3>
+
+    <p>LLMs antworten spezifischer, wenn sie instruiert werden, in welcher Rolle sie agieren und welches Ziel sie verfolgen sollen.</p>
+
+    <p><strong>Technik:</strong> Rolle zuweisen (<em>„Du bist ein klinischer Psychologe…"</em>) und Ziel nennen (<em>„Ziel ist es, Interventionsmöglichkeiten bei Prüfungsangst darzustellen."</em>)</p>
+
+    <p>Wo möglich Vorkenntnisse integrieren: <em>„Berücksichtige, dass wir zuvor über kognitive Verzerrungen gesprochen haben."</em></p>
+
+    <div class="example">
+      <p><strong>Beispiel:</strong> <em>„Du bist ein klinischer Psychologe. Ziel ist es, Interventionsmöglichkeiten bei Prüfungsangst darzustellen. Berücksichtige, dass wir zuvor über kognitive Verzerrungen gesprochen haben. Nenne konkrete Ansätze, erkläre kurz ihre Wirkweise und gib ein Beispiel aus der Praxis."</em></p>
+    </div>
+
+    <h3>Beispiele verwenden</h3>
+
+    <p>Beispiele helfen dem Modell, Format, Ton und Tiefe Ihrer gewünschten Antwort besser zu erfassen. Zudem verbessert die Verwendung von Beispielen die Qualität der Ausgabe.</p>
+
+    <p>Die Beispiele werden auch «Shots» genannt. In gewissen Fällen kann es hilfreich sein, ein solches Beispiel zur Verfügung zu stellen und bei komplexeren Anfragen mehrere.</p>
+
+    <ul>
+      <li><strong>Zero-Shot-Prompts:</strong> <em>Keine</em> spezifischen Beispiele im Prompt</li>
+      <li><strong>One-Shot-Prompts:</strong> <em>Ein</em> spezifisches Beispiel im Prompt</li>
+      <li><strong>Few-Shot-Prompts:</strong> <em>Mehrere</em> spezifische Beispiele im Prompt – hilfreich bei komplexen Fragestellungen, zu denen bereits Ideen oder Daten vorliegen</li>
+    </ul>
+
+    <p><strong>Shots können beispielsweise folgende Angaben sein:</strong></p>
+
+    <p><strong>Formatvorgabe:</strong> Geben Sie dem LLM vor, in welcher Struktur die Ausgabe erfolgen soll.<br>
+    <em>„Stelle die Ergebnisse mit den folgenden Spalten in einer Tabelle dar: Technik, Ziel, psychologischer Wirkmechanismus."</em></p>
+
+    <p><strong>Beispielantwort:</strong> Machen Sie dem LLM deutlich, welcher Detaillierungsgrad gewünscht ist.<br>
+    <em>„Die Vorteile sollten ähnlich strukturiert sein wie: 1. Niedrigschwelliger Zugang, 2. wissenschaftlich fundierte Wirksamkeit, 3. Flexible Integration in den Alltag."</em></p>
+
+    <h3>Ausgabeformat spezifizieren</h3>
+
+    <p>Die Wahl des Ausgabeformats bestimmt, wie die Antwort strukturiert und präsentiert wird. Dies ist besonders entscheidend, wenn die Ergebnisse in formellen Dokumenten wie Berichten oder Präsentationen verwendet werden sollen.</p>
+
+    <p><strong>Technik (Beispielhafte Formate):</strong></p>
+    <ul>
+      <li><strong>Tabelle:</strong> <em>„Liste die Daten in einer Tabelle auf: Name, Ziel, Evidenzlage."</em></li>
+      <li><strong>Liste/Aufzählungen:</strong> <em>„Erstelle mir eine Liste mit den fünf häufigsten kognitiven Verzerrungen bei Depression, mit je einem Beispiel."</em></li>
+      <li><strong>Code:</strong> <em>„Schreib mir einen R-Code, der mir die relativen Häufigkeiten der Geschlechter anzeigt."</em></li>
+    </ul>
+
+    <h3>Iterative Verfeinerung</h3>
+
+    <p>Gute Prompts entstehen durch Ausprobieren, Feedback und schrittweises Präzisieren. Geben Sie nicht gleich nach dem ersten Mal auf, verbessern Sie den Prompt Schritt für Schritt.</p>
+
+    <p><strong>Beispielhafte Verfeinerung:</strong></p>
+    <ol>
+      <li><strong>Initialer Prompt:</strong> <em>„Erkläre die Wirkung von Achtsamkeit."</em></li>
+      <li><strong>Feedback:</strong> <em>„Bitte differenziere die Wirkung von Achtsamkeit mit Blick auf psychische Störungen und nenne ein konkretes Anwendungsbeispiel."</em></li>
+      <li><strong>Feinabstimmung:</strong> <em>„Fokussiere dich auf die Wirkung von Achtsamkeit bei Angststörungen und nenne spezifische Therapieprogramme (z. B. MBSR)."</em></li>
+      <li><strong>Weitere Iteration:</strong> <em>„Nenne empirische Studien oder Metaanalysen zur Wirksamkeit achtsamkeitsbasierter Interventionen bei generalisierter Angststörung oder sozialer Phobie. Gib auch Informationen zu Stichprobengrösse und Effektstärke an."</em></li>
+      <li><strong>Finaler Prompt:</strong> <em>„Erstelle eine tabellarische Übersicht empirischer Metaanalysen seit 2015 zur Wirkung von Achtsamkeit bei Angststörungen, mit Angaben zu Stichprobe, Methode und Effektstärke."</em></li>
+    </ol>
+
+    <h3>Der Super-Prompt</h3>
+
+    <p>Der Super-Prompt fasst mehrere Prompt-Techniken in einem strukturierten Ansatz zusammen. Er ist so aufgebaut, dass er das LLM in sechs Schritten durch alle wichtigen Aspekte führt.</p>
+
+    <ol>
+      <li><strong>Rolle</strong> – Welche Identität nimmt das LLM ein?<br>
+      <em>„Du bist ein erfahrener klinischer Psychologe, spezialisiert auf kognitive Verhaltenstherapie…"</em></li>
+      <li><strong>Aufgabe</strong> – Was soll konkret getan werden?<br>
+      <em>„Erstelle eine tabellarische Übersicht empirischer Metaanalysen seit 2015 zur Wirkung von Achtsamkeit bei Angststörungen, mit Angaben zu Stichprobe, Methode und Effektstärke."</em></li>
+      <li><strong>Besonderheiten</strong> – Regeln, Emotion, Stil<br>
+      <em>„Berufe dich auf wissenschaftliche Quellen. Deine Genauigkeit ist von grösster Bedeutung …"</em></li>
+      <li><strong>Kontext</strong> – Hintergrund der Anfrage<br>
+      <em>„Diese Analyse ist Teil eines universitären Projekts …"</em></li>
+      <li><strong>Beispiele</strong> – Beispielanfragen oder -antworten<br>
+      <em>„Strukturiere deine Antwort wie folgt: 1. Relevanz, 2. Methodik, 3. Ausblick …"</em></li>
+      <li><strong>Hinweise</strong> – Letzte Tipps &amp; Fallstricke<br>
+      <em>„Vermeide spekulative Aussagen. Schreibe alle ß als ss."</em></li>
+    </ol>
+
+    <div class="summary-box">
+      <p><strong>Die wichtigsten Punkte aus diesem Teil:</strong></p>
+      <ul>
+        <li>Gute Prompts führen zu besseren Outputs. Es kann manchmal eine Weile dauern, das gewünschte Ergebnis zu erzielen. Es lohnt sich, Verschiedenes auszuprobieren und geduldig zu bleiben.</li>
+        <li>Der Super-Prompt deckt mit seinen sechs Bausteinen viele wichtige Komponenten ab und ist ein guter Startpunkt für fortgeschrittenes Prompting.</li>
+      </ul>
+    </div>
+
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       TEIL 3
+  ═══════════════════════════════════════════ -->
+  <section id="teil3">
+
+    <div class="progress-strip">
+      <div class="progress-part">
+        <div class="label"><strong>Teil 1</strong>Grundlagen der KI und LLMs</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      </div>
+      <div class="progress-part">
+        <div class="label"><strong>Teil 2</strong>Prompt Engineering</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      </div>
+      <div class="progress-part">
+        <div class="label"><strong>Teil 3</strong>Effizient Lernen mit LLMs</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      </div>
+    </div>
+
+    <h1>Teil 3: Effizient Lernen mit LLMs</h1>
+
+    <p>LLMs können auf unterschiedliche Weise eingesetzt werden. Einerseits ermöglichen sie sogenanntes <em>cognitive offloading</em>: Man lagert Denkprozesse an die Maschine aus, um eine Aufgabe schneller oder einfacher zu erledigen. Das ist praktisch – führt aber oft dazu, dass man sich nicht intensiv mit dem Inhalt auseinandersetzt und dadurch nur wenig lernt. Andererseits lassen sich LLMs gezielt so einsetzen, dass sie das eigene Lernen wirkungsvoll unterstützen.</p>
+
+    <p><strong>Bevor Sie ein LLM nutzen, sollten Sie sich deshalb bewusst entscheiden:</strong></p>
+    <ul>
+      <li>Möchte ich eine Aufgabe einfach nur erledigen oder möchte ich etwas lernen?</li>
+    </ul>
+
+    <p><strong>Lernziele für diesen Teil:</strong></p>
+    <ul>
+      <li>Wissen, was erfolgreiches Lernen ausmacht</li>
+      <li>Den sokratischen Tutor als Lernunterstützung kennen</li>
+    </ul>
+
+    <!-- ── Effizientes vs ineffizientes Lernen ── -->
+    <h2>Was macht erfolgreiches Lernen aus?<br>Effizientes vs. Ineffizientes Lernen</h2>
+
+    <p><strong>Effiziente</strong> Lernstrategien zeichnen sich durch die <strong>aktive Beteiligung am Lernprozess</strong> aus. Lernende tun mehr, als Informationen nur passiv aufzunehmen: Indem sie Fragen stellen, diskutieren, zusammenfassen oder Aufgaben lösen, setzen sie sich aktiv mit dem Lernstoff auseinander. Zahlreiche Studien belegen, dass solche aktiven Methoden dem passiven Lernen deutlich überlegen sind (Ambrose et al. 2010; Ang, 2021; Freeman et al., 2014; Hartikainen et al., 2019; Michael, 2006).</p>
+
+    <p><strong>Ineffizientes</strong> Lernen zeichnet sich durch <strong>Passivität</strong> aus. Informationen werden lediglich oberflächlich aufgenommen und kaum aktiv verarbeitet. Typische Beispiele sind rein rezeptives Zuhören während Vorlesungen oder oberflächliches Lesen von Texten, ohne diese kritisch zu reflektieren oder tiefergehend zu hinterfragen. Auch kurzfristiges Lernen, oftmals unmittelbar vor Prüfungen („Cramming"), gehört dazu: Obwohl intensives Lernen in letzter Minute kurzfristige Erfolge ermöglichen kann, fördert es kaum ein langfristiges Verständnis (McIntyre &amp; Munson, 2008). Darüber hinaus bleiben bei ineffizienten Lernmethoden häufig wichtige Wissenslücken unerkannt oder werden bewusst ignoriert, da es an regelmässigem und konstruktivem Feedback fehlt.</p>
+
+    <p>Ein weiterer wichtiger Faktor für erfolgreiches Lernen ist die <strong>Motivation</strong>: Lernende, die den Stoff nur widerwillig oder ausschliesslich aufgrund externer Vorgaben wie Prüfungsdruck erarbeiten, investieren oft nur wenig in aktives, vertiefendes Lernen. Dies führt dazu, dass das erworbene Wissen nicht nachhaltig im Gedächtnis verankert wird.</p>
+
+    <p>Studien weisen darauf hin, dass aktives Lernen zu besseren Lernergebnissen führt als passives Lernen. Aktives Lernen „funktioniert" demnach besser, weil es die tiefe Verarbeitung fördert und das Wissen flexibler anwendbar macht.</p>
+
+    <p><strong>Alltagsbeispiele:</strong></p>
+
+    <div class="example">
+      <p><strong>Effizient:</strong> Eine Studentin wiederholt während des Lernens zentrale Begriffe in eigenen Worten, diskutiert in einer Lerngruppe und wendet Theorien auf Alltagsbeispiele an. Sie nutzt zur Kontrolle Quizfragen und bittet eine Kommilitonin um Feedback zu einer Zusammenfassung. Dadurch bleibt sie engagiert und erkennt sofort, was sie noch nicht verstanden hat.</p>
+    </div>
+
+    <div class="example">
+      <p><strong>Ineffizient:</strong> Eine Studentin liest das Skript mehrfach passiv durch, ohne sich Notizen zu machen oder über den Inhalt nachzudenken. Sie beginnt erst am Abend vor der Klausur mit dem Lernen („cramming"). Sie erhält kein Feedback und prüft auch nicht ihr Verständnis. In der Prüfung kann sie einige Fakten reproduzieren, vergisst aber vieles kurz danach wieder.</p>
+    </div>
+
+    <p>Zu Beginn der Schulung haben Sie gesehen, dass der Umgang mit einem LLM kritisches und aktives Denken erfordert. LLMs sind keine Wahrheitsmaschinen. Ihre Antworten müssen immer auf Plausibilität geprüft und mit dem eigenen Wissen abgeglichen werden. Es ist wichtig, unsichere oder unklare Aussagen zu erkennen und überall dort, wo Sie selbst nicht sicher sind, ob etwas korrekt ist, sollten Sie gezielt nachprüfen. Nehmen Sie zum Beispiel Fachliteratur oder vertrauenswürdige Quellen zur Hilfe.</p>
+
+    <p>Diese kritische Auseinandersetzung mit Inhalten entspricht genau dem, was Forschung als besonders effektiv für nachhaltiges Lernen beschreibt. Wenn Sie ein LLM also bewusst und reflektiert nutzen, entsteht dadurch eher ein Lerneffekt.</p>
+
+    <div class="references">
+      <p>Ambrose, S. A., Bridges, M. W., DiPietro, M., Lovett, M. C., &amp; Norman, M. K. (2010). <em>How learning works: Seven research-based principles for smart teaching.</em> John Wiley &amp; Sons.</p>
+      <p>Ang, K. C., Afzal, F., &amp; Crawford, L. H. (2021). Transitioning from passive to active learning: Preparing future project leaders. <em>Project Leadership and Society, 2</em>, 100016.</p>
+      <p>Freeman, S., et al. (2014). Active learning increases student performance in science, engineering, and mathematics. <em>PNAS,</em> 111(23), 8410–8415.</p>
+      <p>Hartikainen, S., et al. (2019). The concept of active learning and the measurement of learning outcomes. <em>Education Sciences,</em> 9(4), 276.</p>
+      <p>McIntyre, S. H., &amp; Munson, J. M. (2008). Exploring cramming. <em>Journal of Marketing Education,</em> 30(3), 226–243.</p>
+      <p>Michael, J. (2006). Where's the evidence that active learning works? <em>Advances in physiology education.</em></p>
+    </div>
+
+    <!-- ── Sokratischer Tutor ── -->
+    <h2>Der sokratische Tutor</h2>
+
+    <p>Ein LLM kann so instruiert werden, dass es sich wie ein sokratischer Tutor verhält. Ein sokratischer Tutor fördert durch gezielte, offene Fragen das selbstständige und kritische Denken. Der Tutor gibt keine direkten Antworten, sondern hilft den Lernenden, eigene Antworten zu entwickeln und ihr Verständnis zu vertiefen (Mahoney et al., 2023). Diese Methode fördert aktives Lernen und höhere kognitive Fähigkeiten wie Analyse und Reflexion (Fakour, 2025).</p>
+
+    <p>In dieser Sitzung werden Sie mit einem LLM-gestützten sokratischen Tutor interagieren. Der Tutor stellt Fragen und gibt Hinweise, doch Sie sollen selbst die richtigen Antworten finden. Die Lernziele werden Ihnen zur Verfügung gestellt, sodass Sie Ihren Fortschritt überwachen können.</p>
+
+    <p><strong>Allgemeine Tipps im Umgang mit LLM-gestützten Chatbots:</strong></p>
+    <ul>
+      <li>Aus den vorangegangenen Teilen wissen Sie, dass LLMs nicht darauf ausgelegt sind, wahre Aussagen zu garantieren. Hinterfragen Sie die Outputs also kritisch. Wenn Ihnen eine Antwort des Tutors fragwürdig erscheint oder Sie selbst etwas nicht wissen: Überlegen Sie zunächst gründlich, identifizieren Sie gezielt das Problem, und recherchieren Sie fehlende Konzepte (z. B. online oder in Unterlagen).</li>
+      <li>Schildern Sie Ihren Denkprozess so transparent wie möglich im Chat – auch wenn Sie externe Quellen verwendet haben. Erklären Sie dem Tutor, wie Sie bei der Bearbeitung der Aufgaben vorgegangen sind: Was haben Sie verstanden? Welche Überlegungen haben Sie angestellt? Wo sind Sie auf Schwierigkeiten gestossen oder nicht weitergekommen? Je nachvollziehbarer Sie Ihren Lösungsweg beschreiben, desto gezielter kann der Tutor auf Ihre individuellen Fragen und Herausforderungen eingehen.</li>
+      <li>Behalten Sie die Lernziele im Auge und überwachen Sie, ob der Tutor entsprechend vorgeht.</li>
+    </ul>
+
+    <div class="references">
+      <p>Fakour, H., &amp; Imani, M. (2025). Socratic wisdom in the age of AI. <em>Frontiers in Education,</em> 10, 1528603.</p>
+      <p>Mahoney, B. B., et al. (2023). Learning to think critically through Socratic dialogue. <em>Thinking Skills and Creativity,</em> 50, 101422.</p>
+    </div>
+
+    <div class="summary-box">
+      <p><strong>Die wichtigsten Punkte aus diesem Teil:</strong></p>
+      <ul>
+        <li>Aktives Lernen (Fragen, Diskutieren, Anwenden) ist effektiver als passives Lernen.</li>
+        <li>Ein LLM kann die Rolle eines sokratischen Tutors annehmen und Lernende durch gezielte Fragen zum Nachdenken anregen, statt direkte Lösungen zu liefern.</li>
+      </ul>
+    </div>
+
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       ABSCHLUSS
+  ═══════════════════════════════════════════ -->
+  <section id="abschluss">
+
+    <div class="conclusion">
+      <h2>Herzlichen Glückwunsch – Sie haben die Schulung erfolgreich abgeschlossen!</h2>
+      <p>Im nächsten Schritt können Sie mit dem LLM-gestützten Tutor interagieren. Wenn Sie sich weiter mit den Inhalten der Schulung beschäftigen möchten, finden Sie unten ergänzende Materialien.</p>
+    </div>
+
+    <div class="links-section" style="margin-top:32px;">
+      <h3>Teil 1: Grundlagen der KI und LLMs</h3>
+      <ul>
+        <li><a href="https://www.youtube.com/watch?v=t9gmyvf7JYo&list=PL0EdWFC9ZZrUAirFa2amE4Hg05KqCWhoq&index=1" target="_blank" rel="noopener">YouTube-Playlist: How LLMs work</a></li>
+        <li><a href="https://ki-campus.org" target="_blank" rel="noopener">KI Campus</a></li>
+        <li><a href="https://poloclub.github.io/transformer-explainer/" target="_blank" rel="noopener">Transformer Explainer (interaktiv)</a></li>
+      </ul>
+
+      <h3>Teil 2: Prompt Engineering</h3>
+      <ul>
+        <li><a href="https://www.promptingguide.ai/de" target="_blank" rel="noopener">Prompting Guide (Deutsch)</a></li>
+      </ul>
+    </div>
+
+  </section>
+
+</div><!-- /.page -->
+</body>
+</html>
