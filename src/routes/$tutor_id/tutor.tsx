@@ -290,7 +290,7 @@ function RouteComponent() {
     }
   }
 
-  async function submitUserMessage(event: React.FormEvent) {
+  async function submitUserMessage() {
     if (!isStudyMode) {
       if (!isInitialAssistantResponse(messages)) {
         await submitReflectionOnOwnAnswer();
@@ -302,7 +302,6 @@ function RouteComponent() {
     }
     try {
       await submitUserAnswerWithFeedback({
-        event,
         promptName: tutor.tutorId,
         pseudonym,
         model,
@@ -410,12 +409,12 @@ function RouteComponent() {
                           <Badge variant={"red"} className="px-3">
                             Es ist ein Fehler aufgetreten
                             <Button
-                              onClick={(event) =>
+                              onClick={() =>
                                 pendingFeedbackSubmission
                                   ? submitReflectionOnOwnAnswer(
                                       pendingFeedbackSubmission,
                                     )
-                                  : submitUserMessage(event)
+                                  : submitUserMessage()
                               }
                               variant={"neutral"}
                               className="ml-2"
@@ -453,7 +452,10 @@ function RouteComponent() {
 
         <form
           className="grid place-items-end px-4 sm:px-0"
-          onSubmit={(event) => submitUserMessage(event)}
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submitUserMessage();
+          }}
         >
           <AutoResizingTextarea
             required
@@ -481,7 +483,8 @@ function RouteComponent() {
                 !event.shiftKey &&
                 !disableSubmitButton
               ) {
-                submitUserMessage(event);
+                event.preventDefault();
+                void submitUserMessage();
               }
             }}
           />

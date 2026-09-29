@@ -2,7 +2,6 @@ import type { UIMessage } from "ai";
 import { addMessage } from "@/lib/api/messages";
 
 export async function submitUserAnswerWithFeedback({
-  event,
   promptName,
   pseudonym,
   model,
@@ -11,7 +10,6 @@ export async function submitUserAnswerWithFeedback({
   reflectionOnChatbotFeedback,
   mode,
 }: {
-  event: React.FormEvent;
   promptName: string;
   pseudonym: string;
   model?: string;
@@ -20,8 +18,6 @@ export async function submitUserAnswerWithFeedback({
   reflectionOnChatbotFeedback: Record<string, string | undefined>;
   mode: string;
 }) {
-  event.preventDefault();
-
   try {
     await addMessage({
       data: {
