@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { asc, count, eq, getTableColumns, ne } from "drizzle-orm";
+import { asc, count, eq, getTableColumns, isNull, ne } from "drizzle-orm";
 import z from "zod";
 import { isAvailableModel } from "@/lib/ai/resolve-model";
 import { ensureAdminSession, ensureSession } from "@/lib/auth.functions";
@@ -17,15 +17,26 @@ export const getAiModels = createServerFn({ method: "GET" }).handler(
     await ensureSession();
 
     try {
-      return await db
-        .select({
-          ...getTableColumns(aiModels),
-          tutorCount: count(tutors.id),
-        })
-        .from(aiModels)
-        .leftJoin(tutors, eq(tutors.modelId, aiModels.id))
-        .groupBy(aiModels.id)
-        .orderBy(asc(aiModels.name));
+      const [models, [{ defaultTutorCount }]] = await Promise.all([
+        db
+          .select({
+            ...getTableColumns(aiModels),
+            tutorCount: count(tutors.id),
+          })
+          .from(aiModels)
+          .leftJoin(tutors, eq(tutors.modelId, aiModels.id))
+          .groupBy(aiModels.id)
+          .orderBy(asc(aiModels.name)),
+        // tutors without an explicit model implicitly use the default model
+        db
+          .select({ defaultTutorCount: count() })
+          .from(tutors)
+          .where(isNull(tutors.modelId)),
+      ]);
+      return models.map((model) => ({
+        ...model,
+        defaultTutorCount: model.isDefault ? defaultTutorCount : 0,
+      }));
     } catch {
       throw new Error("AI models could not be loaded");
     }

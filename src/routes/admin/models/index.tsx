@@ -57,6 +57,7 @@ type AiModel = {
   label: string | null;
   isDefault: boolean;
   tutorCount: number;
+  defaultTutorCount: number;
 };
 
 function RouteComponent() {
@@ -79,6 +80,7 @@ function RouteComponent() {
       );
     });
   }, [searchQuery, models]);
+  const defaultModel = models.find((model) => model.isDefault);
 
   async function run(action: () => Promise<unknown>) {
     setError(null);
@@ -167,11 +169,12 @@ function RouteComponent() {
                         </div>
                         <p className="truncate text-sm text-secondary">
                           {model.label ? `${model.name} · ` : ""}
-                          {formatTutorCount(model.tutorCount)}
+                          {formatTutorUsage(model)}
                         </p>
                       </div>
                       <AiModelActions
                         model={model}
+                        defaultModel={defaultModel}
                         isPending={
                           updateMutation.isPending || deleteMutation.isPending
                         }
@@ -216,25 +219,39 @@ function RouteComponent() {
   );
 }
 
-function formatTutorCount(count: number) {
-  if (count === 0) {
+function formatTutors(count: number) {
+  return `${count} ${count === 1 ? "Tutor" : "Tutoren"}`;
+}
+
+function formatTutorUsage({ tutorCount, defaultTutorCount }: AiModel) {
+  if (tutorCount === 0 && defaultTutorCount === 0) {
     return "Von keinem Tutor verwendet";
   }
-  return `Von ${count} ${count === 1 ? "Tutor" : "Tutoren"} verwendet`;
+  if (defaultTutorCount === 0) {
+    return `Von ${formatTutors(tutorCount)} verwendet`;
+  }
+  if (tutorCount === 0) {
+    return `Von ${formatTutors(defaultTutorCount)} als Standard verwendet`;
+  }
+  return `Von ${formatTutors(tutorCount)} ausgewählt, von ${defaultTutorCount} weiteren als Standard verwendet`;
 }
 
 function AiModelActions({
   model,
+  defaultModel,
   isPending,
   onSetDefault,
   onDelete,
 }: {
   model: AiModel;
+  defaultModel: AiModel | undefined;
   isPending: boolean;
   onSetDefault: (id: number) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [setDefaultDialogOpen, setSetDefaultDialogOpen] = useState(false);
+  const affectedTutorCount = defaultModel?.defaultTutorCount ?? 0;
   const deleteBlockedReason = model.isDefault
     ? "Das Standardmodell kann nicht gelöscht werden."
     : model.tutorCount > 0
@@ -261,7 +278,11 @@ function AiModelActions({
         >
           <DropdownMenuItem
             disabled={isPending || model.isDefault}
-            onSelect={() => onSetDefault(model.id)}
+            onSelect={() =>
+              affectedTutorCount > 0
+                ? setSetDefaultDialogOpen(true)
+                : onSetDefault(model.id)
+            }
           >
             <StarIcon />
             Als Standard festlegen
@@ -307,6 +328,40 @@ function AiModelActions({
               onClick={() => onDelete(model.id)}
             >
               Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={setDefaultDialogOpen}
+        onOpenChange={setSetDefaultDialogOpen}
+      >
+        <AlertDialogContent className="rounded-lg border border-border-primary bg-surface-primary text-primary shadow-floating">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Als Standard festlegen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {affectedTutorCount === 1
+                ? "1 Tutor verwendet"
+                : `${affectedTutorCount} Tutoren verwenden`}{" "}
+              das Standardmodell
+              {defaultModel
+                ? ` (${defaultModel.label ?? defaultModel.name})`
+                : ""}{" "}
+              und {affectedTutorCount === 1 ? "wechselt" : "wechseln"} damit zu{" "}
+              {model.label ?? model.name}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isPending}
+              className="bg-surface-button-accent text-button-outline"
+              onClick={() => onSetDefault(model.id)}
+            >
+              Als Standard festlegen
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
