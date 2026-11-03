@@ -47,6 +47,7 @@ import {
 } from "@/lib/api/tutors/query-options";
 import { authClient } from "@/lib/auth-client";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import { TutorGuideLink } from "@/routes/admin/-components/tutor-guide-link";
 
 export const Route = createFileRoute("/admin/")({
   component: RouteComponent,
@@ -120,6 +121,7 @@ function RouteComponent() {
               </Link>
             </Button>
           )}
+          <TutorGuideLink />
           <Button variant="destructive" asChild>
             <Link to="/admin/create">
               <PlusIcon />

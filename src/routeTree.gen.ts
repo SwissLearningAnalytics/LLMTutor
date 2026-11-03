@@ -9,40 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TutorRouteImport } from './routes/tutor'
-import { Route as OverviewRouteImport } from './routes/overview'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as DataRouteImport } from './routes/data'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as DataRouteImport } from './routes/data'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as OverviewRouteImport } from './routes/overview'
+import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as Tutor_idIndexRouteImport } from './routes/$tutor_id/index'
-import { Route as ApiHealthRouteImport } from './routes/api/health'
-import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as AdminImportRouteImport } from './routes/admin/import'
-import { Route as AdminCreateRouteImport } from './routes/admin/create'
 import { Route as Tutor_idTutorRouteImport } from './routes/$tutor_id/tutor'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminCreateRouteImport } from './routes/admin/create'
+import { Route as AdminImportRouteImport } from './routes/admin/import'
 import { Route as AdminUsersRouteRouteImport } from './routes/admin/users/route'
-import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AdminTutorIdIndexRouteImport } from './routes/admin/$tutorId/index'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as AdminUsersCreateRouteImport } from './routes/admin/users/create'
-import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
 import { Route as AdminTutorIdEditRouteImport } from './routes/admin/$tutorId/edit'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
+import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
+import { Route as AdminUsersCreateRouteImport } from './routes/admin/users/create'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminTutorIdConversationsExecutionIdRouteImport } from './routes/admin/$tutorId/conversations/$executionId'
 
-const TutorRoute = TutorRouteImport.update({
-  id: '/tutor',
-  path: '/tutor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OverviewRoute = OverviewRouteImport.update({
-  id: '/overview',
-  path: '/overview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DataRoute = DataRouteImport.update({
@@ -50,9 +40,29 @@ const DataRoute = DataRouteImport.update({
   path: '/data',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRouteRoute = AdminRouteRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverviewRoute = OverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TutorRoute = TutorRouteImport.update({
+  id: '/tutor',
+  path: '/tutor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Tutor_idIndexRoute = Tutor_idIndexRouteImport.update({
+  id: '/$tutor_id/',
+  path: '/$tutor_id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Tutor_idTutorRoute = Tutor_idTutorRouteImport.update({
+  id: '/$tutor_id/tutor',
+  path: '/$tutor_id/tutor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -60,9 +70,24 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const Tutor_idIndexRoute = Tutor_idIndexRouteImport.update({
-  id: '/$tutor_id/',
-  path: '/$tutor_id/',
+const AdminCreateRoute = AdminCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminImportRoute = AdminImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminUsersRouteRoute = AdminUsersRouteRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -70,29 +95,14 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiChatRoute = ApiChatRouteImport.update({
-  id: '/api/chat',
-  path: '/api/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminImportRoute = AdminImportRouteImport.update({
-  id: '/import',
-  path: '/import',
+const AdminTutorIdIndexRoute = AdminTutorIdIndexRouteImport.update({
+  id: '/$tutorId/',
+  path: '/$tutorId/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminCreateRoute = AdminCreateRouteImport.update({
-  id: '/create',
-  path: '/create',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const Tutor_idTutorRoute = Tutor_idTutorRouteImport.update({
-  id: '/$tutor_id/tutor',
-  path: '/$tutor_id/tutor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminUsersRouteRoute = AdminUsersRouteRouteImport.update({
-  id: '/users',
-  path: '/users',
+const AdminTutorIdEditRoute = AdminTutorIdEditRouteImport.update({
+  id: '/$tutorId/edit',
+  path: '/$tutorId/edit',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
@@ -100,30 +110,20 @@ const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminUsersRouteRoute,
 } as any)
-const AdminTutorIdIndexRoute = AdminTutorIdIndexRouteImport.update({
-  id: '/$tutorId/',
-  path: '/$tutorId/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
+const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
+  id: '/$userId',
+  path: '/$userId',
+  getParentRoute: () => AdminUsersRouteRoute,
 } as any)
 const AdminUsersCreateRoute = AdminUsersCreateRouteImport.update({
   id: '/create',
   path: '/create',
   getParentRoute: () => AdminUsersRouteRoute,
 } as any)
-const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
-  id: '/$userId',
-  path: '/$userId',
-  getParentRoute: () => AdminUsersRouteRoute,
-} as any)
-const AdminTutorIdEditRoute = AdminTutorIdEditRouteImport.update({
-  id: '/$tutorId/edit',
-  path: '/$tutorId/edit',
-  getParentRoute: () => AdminRouteRoute,
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTutorIdConversationsExecutionIdRoute =
   AdminTutorIdConversationsExecutionIdRouteImport.update({
@@ -279,25 +279,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tutor': {
-      id: '/tutor'
-      path: '/tutor'
-      fullPath: '/tutor'
-      preLoaderRoute: typeof TutorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/overview': {
-      id: '/overview'
-      path: '/overview'
-      fullPath: '/overview'
-      preLoaderRoute: typeof OverviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/data': {
@@ -307,11 +293,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DataRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overview': {
+      id: '/overview'
+      path: '/overview'
+      fullPath: '/overview'
+      preLoaderRoute: typeof OverviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tutor': {
+      id: '/tutor'
+      path: '/tutor'
+      fullPath: '/tutor'
+      preLoaderRoute: typeof TutorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$tutor_id/': {
+      id: '/$tutor_id/'
+      path: '/$tutor_id'
+      fullPath: '/$tutor_id/'
+      preLoaderRoute: typeof Tutor_idIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$tutor_id/tutor': {
+      id: '/$tutor_id/tutor'
+      path: '/$tutor_id/tutor'
+      fullPath: '/$tutor_id/tutor'
+      preLoaderRoute: typeof Tutor_idTutorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -321,11 +335,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/$tutor_id/': {
-      id: '/$tutor_id/'
-      path: '/$tutor_id'
-      fullPath: '/$tutor_id/'
-      preLoaderRoute: typeof Tutor_idIndexRouteImport
+    '/admin/create': {
+      id: '/admin/create'
+      path: '/create'
+      fullPath: '/admin/create'
+      preLoaderRoute: typeof AdminCreateRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/import': {
+      id: '/admin/import'
+      path: '/import'
+      fullPath: '/admin/import'
+      preLoaderRoute: typeof AdminImportRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -335,39 +370,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/chat': {
-      id: '/api/chat'
-      path: '/api/chat'
-      fullPath: '/api/chat'
-      preLoaderRoute: typeof ApiChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/import': {
-      id: '/admin/import'
-      path: '/import'
-      fullPath: '/admin/import'
-      preLoaderRoute: typeof AdminImportRouteImport
+    '/admin/$tutorId/': {
+      id: '/admin/$tutorId/'
+      path: '/$tutorId'
+      fullPath: '/admin/$tutorId/'
+      preLoaderRoute: typeof AdminTutorIdIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/admin/create': {
-      id: '/admin/create'
-      path: '/create'
-      fullPath: '/admin/create'
-      preLoaderRoute: typeof AdminCreateRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/$tutor_id/tutor': {
-      id: '/$tutor_id/tutor'
-      path: '/$tutor_id/tutor'
-      fullPath: '/$tutor_id/tutor'
-      preLoaderRoute: typeof Tutor_idTutorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/users': {
-      id: '/admin/users'
-      path: '/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AdminUsersRouteRouteImport
+    '/admin/$tutorId/edit': {
+      id: '/admin/$tutorId/edit'
+      path: '/$tutorId/edit'
+      fullPath: '/admin/$tutorId/edit'
+      preLoaderRoute: typeof AdminTutorIdEditRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/users/': {
@@ -377,19 +391,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersIndexRouteImport
       parentRoute: typeof AdminUsersRouteRoute
     }
-    '/admin/$tutorId/': {
-      id: '/admin/$tutorId/'
-      path: '/$tutorId'
-      fullPath: '/admin/$tutorId/'
-      preLoaderRoute: typeof AdminTutorIdIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/users/$userId': {
+      id: '/admin/users/$userId'
+      path: '/$userId'
+      fullPath: '/admin/users/$userId'
+      preLoaderRoute: typeof AdminUsersUserIdRouteImport
+      parentRoute: typeof AdminUsersRouteRoute
     }
     '/admin/users/create': {
       id: '/admin/users/create'
@@ -398,19 +405,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersCreateRouteImport
       parentRoute: typeof AdminUsersRouteRoute
     }
-    '/admin/users/$userId': {
-      id: '/admin/users/$userId'
-      path: '/$userId'
-      fullPath: '/admin/users/$userId'
-      preLoaderRoute: typeof AdminUsersUserIdRouteImport
-      parentRoute: typeof AdminUsersRouteRoute
-    }
-    '/admin/$tutorId/edit': {
-      id: '/admin/$tutorId/edit'
-      path: '/$tutorId/edit'
-      fullPath: '/admin/$tutorId/edit'
-      preLoaderRoute: typeof AdminTutorIdEditRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/$tutorId/conversations/$executionId': {
       id: '/admin/$tutorId/conversations/$executionId'

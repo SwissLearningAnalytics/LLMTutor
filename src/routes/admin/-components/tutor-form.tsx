@@ -23,6 +23,7 @@ import {
 } from "@/lib/api/tutors/mutation-options";
 import { getOwnTutorsOptions } from "@/lib/api/tutors/query-options";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import { TutorGuideLink } from "@/routes/admin/-components/tutor-guide-link";
 
 const tutorFormSchema = z.object({
   tutorId: z.string().min(1),
@@ -113,7 +114,9 @@ export function TutorForm(props: TutorFormProps) {
               ? `Tutor ${props.defaultValues.displayName} bearbeiten`
               : "Tutor erstellen"
           }
-        />
+        >
+          <TutorGuideLink />
+        </AdminHeader>
       }
     >
       <form
