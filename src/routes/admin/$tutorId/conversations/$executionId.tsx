@@ -2,7 +2,6 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeftIcon, DownloadIcon } from "lucide-react";
 import { ChatMessage } from "@/components/chat/chat-message";
-import { Layout } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getOwnTutorConversationOptions } from "@/lib/api/messages/query-options";
@@ -16,7 +15,7 @@ import {
   getConversationCsvRows,
   sanitizeFilenamePart,
 } from "@/routes/admin/-utils/conversation-csv";
-import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import { AdminLayout } from "@/routes/admin/-components/admin-layout";
 
 const feedbackByMode = {
   study: studyFeedback,
@@ -64,12 +63,8 @@ function RouteComponent() {
   const pseudonym = conversation[0].pseudonym;
 
   return (
-    <Layout
-      header={
-        <AdminHeader
-          title={`Konversation von ${pseudonym} mit ${tutor.displayName}`}
-        />
-      }
+    <AdminLayout
+      title={`Konversation von ${pseudonym} mit ${tutor.displayName}`}
     >
       <div className="flex flex-col gap-8">
         <div className="flex items-center justify-between gap-4">
@@ -116,7 +111,7 @@ function RouteComponent() {
           ))}
         </div>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 }
 

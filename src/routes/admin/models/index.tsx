@@ -5,7 +5,6 @@ import {
 } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowLeftIcon,
   EllipsisVerticalIcon,
   PencilIcon,
   PlusIcon,
@@ -14,7 +13,6 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Layout } from "@/components/layout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,7 +39,7 @@ import {
   updateAiModelOptions,
 } from "@/lib/api/ai-models/mutation-options";
 import { getAiModelsOptions } from "@/lib/api/ai-models/query-options";
-import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import { AdminLayout } from "@/routes/admin/-components/admin-layout";
 import { getAiModelErrorMessage } from "@/routes/admin/-components/ai-model-form";
 
 export const Route = createFileRoute("/admin/models/")({
@@ -106,26 +104,18 @@ function RouteComponent() {
   }
 
   return (
-    <Layout
-      header={
-        <AdminHeader title="Modelle">
-          <Button variant="destructive" asChild>
-            <Link to="/admin/models/create">
-              <PlusIcon />
-              Modell erfassen
-            </Link>
-          </Button>
-        </AdminHeader>
+    <AdminLayout
+      title="Modelle"
+      actions={
+        <Button variant="destructive" asChild>
+          <Link to="/admin/models/create">
+            <PlusIcon />
+            Modell erfassen
+          </Link>
+        </Button>
       }
     >
       <div className="flex flex-col gap-8">
-        <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
-          <Link to="/admin">
-            <ArrowLeftIcon />
-            Zurück zu den Tutoren
-          </Link>
-        </Button>
-
         <div className="relative">
           <SearchIcon
             aria-hidden
@@ -215,7 +205,7 @@ function RouteComponent() {
           )}
         </section>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 }
 

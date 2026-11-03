@@ -9,7 +9,6 @@ import { ArrowLeftIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import slugify from "slugify";
 import { z } from "zod";
-import { Layout } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,10 +25,9 @@ import {
   updateTutorOptions,
 } from "@/lib/api/tutors/mutation-options";
 import { getOwnTutorsOptions } from "@/lib/api/tutors/query-options";
-import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import { AdminLayout } from "@/routes/admin/-components/admin-layout";
 import { AiModelCombobox } from "@/routes/admin/-components/ai-model-combobox";
 import { MarkdownTextarea } from "@/routes/admin/-components/markdown-textarea";
-import { TutorGuideLink } from "@/routes/admin/-components/tutor-guide-link";
 
 const tutorFormSchema = z.object({
   tutorId: z.string().min(1),
@@ -122,17 +120,11 @@ export function TutorForm(props: TutorFormProps) {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Layout
-      header={
-        <AdminHeader
-          title={
-            props.mode === "edit"
-              ? `Tutor ${props.defaultValues.displayName} bearbeiten`
-              : "Tutor erstellen"
-          }
-        >
-          <TutorGuideLink />
-        </AdminHeader>
+    <AdminLayout
+      title={
+        props.mode === "edit"
+          ? `Tutor ${props.defaultValues.displayName} bearbeiten`
+          : "Tutor erstellen"
       }
     >
       <form
@@ -320,6 +312,6 @@ export function TutorForm(props: TutorFormProps) {
           </Badge>
         )}
       </form>
-    </Layout>
+    </AdminLayout>
   );
 }

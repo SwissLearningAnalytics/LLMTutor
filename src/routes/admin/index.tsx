@@ -12,12 +12,9 @@ import {
   PencilIcon,
   PlusIcon,
   SearchIcon,
-  SparklesIcon,
   Trash2Icon,
-  UserIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Layout } from "@/components/layout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,10 +43,7 @@ import {
   getOwnTutorsOptions,
   getTutorOptions,
 } from "@/lib/api/tutors/query-options";
-import { authClient } from "@/lib/auth-client";
-import { hasAdminRole } from "@/lib/auth-roles";
-import { AdminHeader } from "@/routes/admin/-components/admin-header";
-import { TutorGuideLink } from "@/routes/admin/-components/tutor-guide-link";
+import { AdminLayout } from "@/routes/admin/-components/admin-layout";
 
 export const Route = createFileRoute("/admin/")({
   component: RouteComponent,
@@ -64,8 +58,6 @@ function RouteComponent() {
   const deleteMutation = useMutation(deleteTutorOptions());
   const publishMutation = useMutation(updateTutorOptions());
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: session } = authClient.useSession();
-  const isAdmin = hasAdminRole(session?.user);
   const filteredTutors = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
 
@@ -112,33 +104,15 @@ function RouteComponent() {
   }
 
   return (
-    <Layout
-      header={
-        <AdminHeader title="Tutoren">
-          {isAdmin && (
-            <>
-              <Button asChild>
-                <Link to="/admin/models">
-                  <SparklesIcon />
-                  Modelle verwalten
-                </Link>
-              </Button>
-              <Button asChild>
-                <Link to="/admin/users">
-                  <UserIcon />
-                  Benutzer verwalten
-                </Link>
-              </Button>
-            </>
-          )}
-          <TutorGuideLink />
-          <Button variant="destructive" asChild>
-            <Link to="/admin/create">
-              <PlusIcon />
-              Tutor erstellen
-            </Link>
-          </Button>
-        </AdminHeader>
+    <AdminLayout
+      title="Tutoren"
+      actions={
+        <Button variant="destructive" asChild>
+          <Link to="/admin/create">
+            <PlusIcon />
+            Tutor erstellen
+          </Link>
+        </Button>
       }
     >
       <div className="flex flex-col gap-8">
@@ -222,7 +196,7 @@ function RouteComponent() {
           )}
         </section>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 }
 

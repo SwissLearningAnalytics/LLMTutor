@@ -4,13 +4,12 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeftIcon, SaveIcon, UserPlusIcon } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
-import { Layout } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import { AdminLayout } from "@/routes/admin/-components/admin-layout";
 
 const userFormSchema = z.object({
   name: z.string().min(1, "Name ist erforderlich."),
@@ -108,7 +107,7 @@ export function UserForm(props: UserFormProps) {
   const title = isEdit ? "Benutzer bearbeiten" : "Benutzer erstellen";
 
   return (
-    <Layout header={<AdminHeader title={title} />}>
+    <AdminLayout title={title}>
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -244,7 +243,7 @@ export function UserForm(props: UserFormProps) {
           </div>
         </section>
       </form>
-    </Layout>
+    </AdminLayout>
   );
 }
 

@@ -6,7 +6,6 @@ import {
   DownloadIcon,
   MessageSquareIcon,
 } from "lucide-react";
-import { Layout } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +13,7 @@ import {
   getOwnTutorMessagesOptions,
 } from "@/lib/api/messages/query-options";
 import { getOwnTutorOptions } from "@/lib/api/tutors/query-options";
-import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import { AdminLayout } from "@/routes/admin/-components/admin-layout";
 import {
   downloadCsv,
   getExportFilenameTimestamp,
@@ -48,9 +47,7 @@ function RouteComponent() {
   }
 
   return (
-    <Layout
-      header={<AdminHeader title={`Konversationen mit ${tutor.displayName}`} />}
-    >
+    <AdminLayout title={`Konversationen mit ${tutor.displayName}`}>
       <div className="flex flex-col gap-8">
         <div className="flex items-center justify-between gap-4">
           <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
@@ -134,7 +131,7 @@ function RouteComponent() {
           )}
         </section>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 }
 

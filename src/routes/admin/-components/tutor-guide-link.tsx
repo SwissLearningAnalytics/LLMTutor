@@ -8,9 +8,11 @@ export function TutorGuideLink() {
         href="https://learning-analytics.ch/anleitung-dozierende.html"
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="Anleitung Tutor erstellen"
+        title="Anleitung Tutor erstellen"
       >
         <BookOpenIcon />
-        Anleitung Tutor erstellen
+        <span className="hidden md:inline">Anleitung Tutor erstellen</span>
       </a>
     </Button>
   );

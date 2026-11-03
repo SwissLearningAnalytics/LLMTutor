@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowLeftIcon,
   ChevronRightIcon,
   PlusIcon,
   SearchIcon,
@@ -9,12 +8,11 @@ import {
   UserIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Layout } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import { AdminLayout } from "@/routes/admin/-components/admin-layout";
 import { getErrorMessage } from "@/routes/admin/-components/user-form";
 import { requireAdminRole } from "@/routes/admin/-utils/admin-auth";
 
@@ -68,26 +66,18 @@ function RouteComponent() {
   }, [searchQuery, users]);
 
   return (
-    <Layout
-      header={
-        <AdminHeader title="Benutzer">
-          <Button variant="destructive" asChild>
-            <Link to="/admin/users/create">
-              <PlusIcon />
-              Benutzer erstellen
-            </Link>
-          </Button>
-        </AdminHeader>
+    <AdminLayout
+      title="Benutzer"
+      actions={
+        <Button variant="destructive" asChild>
+          <Link to="/admin/users/create">
+            <PlusIcon />
+            Benutzer erstellen
+          </Link>
+        </Button>
       }
     >
       <div className="flex flex-col gap-8">
-        <Button asChild variant="ghost" className="w-fit px-0 text-secondary">
-          <Link to="/admin">
-            <ArrowLeftIcon />
-            Zurück zu den Tutoren
-          </Link>
-        </Button>
-
         <div className="relative">
           <SearchIcon
             aria-hidden
@@ -175,7 +165,7 @@ function RouteComponent() {
           )}
         </section>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 }
 

@@ -4,7 +4,6 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeftIcon, PlusIcon, SaveIcon } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
-import { Layout } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,7 +19,7 @@ import {
   updateAiModelOptions,
 } from "@/lib/api/ai-models/mutation-options";
 import { getAiModelsOptions } from "@/lib/api/ai-models/query-options";
-import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import { AdminLayout } from "@/routes/admin/-components/admin-layout";
 
 const aiModelFormSchema = z.object({
   name: z.string().trim().min(1, "Modell-ID ist erforderlich.").max(64),
@@ -90,7 +89,7 @@ export function AiModelForm(props: AiModelFormProps) {
   const title = isEdit ? "Modell bearbeiten" : "Modell erfassen";
 
   return (
-    <Layout header={<AdminHeader title={title} />}>
+    <AdminLayout title={title}>
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -200,7 +199,7 @@ export function AiModelForm(props: AiModelFormProps) {
           </div>
         </section>
       </form>
-    </Layout>
+    </AdminLayout>
   );
 }
 
