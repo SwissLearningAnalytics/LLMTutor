@@ -1,9 +1,6 @@
 import { redirect } from "@tanstack/react-router";
 import { getSession } from "@/lib/auth.functions";
-
-type UserWithRole = {
-  role?: string | string[] | null;
-};
+import { hasAdminRole } from "@/lib/auth-roles";
 
 export async function requireAdminRole() {
   const session = await getSession();
@@ -11,12 +8,4 @@ export async function requireAdminRole() {
   if (!hasAdminRole(session?.user)) {
     throw redirect({ to: "/admin" });
   }
-}
-
-function hasAdminRole(user: UserWithRole | null | undefined) {
-  const roles = Array.isArray(user?.role)
-    ? user.role
-    : (user?.role ?? "").split(",");
-
-  return roles.some((role) => role.trim() === "admin");
 }

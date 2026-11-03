@@ -3,12 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { and, eq } from "drizzle-orm";
 import { createOllama } from "ollama-ai-provider-v2";
-import {
-  AiModels,
-  AiProviders,
-  defaultModel,
-  providerName,
-} from "@/lib/ai/model";
+import { AiProviders, providerName } from "@/lib/ai/model";
+import { getDefaultModelName, isAvailableModel } from "@/lib/ai/resolve-model";
 import { createTutorModelMessages } from "@/lib/ai/tutor-chat";
 import { db } from "@/lib/db";
 import { messages as storedMessages, tutors } from "@/lib/db/schema";
@@ -46,16 +42,14 @@ const provider = (() => {
       const ollama = createOllama({
         baseURL: "http://localhost:11434/api",
       });
-      return (...args: Partial<Parameters<typeof ollama>>) =>
-        ollama(args[0] ?? AiModels[AiProviders.Local][0]);
+      return (model: string) => ollama(model);
     }
     case AiProviders.OpenAI: {
       const openai = createOpenAI({
         apiKey: process.env.OPENAI_API_KEY,
       });
 
-      return (...args: Partial<Parameters<typeof openai>>) =>
-        openai(args[0] ?? AiModels[AiProviders.OpenAI][0]);
+      return (model: string) => openai(model);
     }
 
     default: {
@@ -82,16 +76,17 @@ export const Route = createFileRoute("/api/chat")({
         if (process.env.MODE === "prod") {
           // drop model if we are in production, setting this is only valid in dev
           data.model = undefined;
-        } else if (data.model && !AiModels[providerName].includes(data.model)) {
-          throw Error(
+        } else if (data.model && !(await isAvailableModel(data.model))) {
+          return new Response(
             `Invalid model ${data.model} for provider ${providerName}`,
+            { status: 400 },
           );
         }
 
-        const model = data.model ?? defaultModel;
         try {
           const tutor = await db.query.tutors.findFirst({
             columns: { prompt: true },
+            with: { model: { columns: { name: true } } },
             where: and(
               eq(tutors.tutorId, data.tutorId),
               eq(tutors.published, true),
@@ -100,6 +95,10 @@ export const Route = createFileRoute("/api/chat")({
           if (!tutor) {
             return new Response("Tutor not found", { status: 404 });
           }
+
+          // the model is read on every request, so changing a tutor's model also affects running sessions
+          const model =
+            data.model ?? tutor.model?.name ?? (await getDefaultModelName());
 
           const result = await streamText({
             model: provider(model),

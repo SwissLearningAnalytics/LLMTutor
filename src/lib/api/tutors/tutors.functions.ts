@@ -11,6 +11,7 @@ export const tutorInsertSchema = z.object({
   prompt: z.string().min(1),
   learningObjectives: z.string().nullable().optional(),
   published: z.boolean().optional(),
+  modelId: z.number().int().nullable().optional(),
 });
 
 export const tutorUpdateSchema = z
@@ -20,6 +21,7 @@ export const tutorUpdateSchema = z
     prompt: z.string().min(1).optional(),
     learningObjectives: z.string().nullable().optional(),
     published: z.boolean().optional(),
+    modelId: z.number().int().nullable().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one tutor field must be provided",

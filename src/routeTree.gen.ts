@@ -19,11 +19,15 @@ import { Route as Tutor_idTutorRouteImport } from './routes/$tutor_id/tutor'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminCreateRouteImport } from './routes/admin/create'
 import { Route as AdminImportRouteImport } from './routes/admin/import'
+import { Route as AdminModelsRouteRouteImport } from './routes/admin/models/route'
 import { Route as AdminUsersRouteRouteImport } from './routes/admin/users/route'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AdminTutorIdIndexRouteImport } from './routes/admin/$tutorId/index'
 import { Route as AdminTutorIdEditRouteImport } from './routes/admin/$tutorId/edit'
+import { Route as AdminModelsIndexRouteImport } from './routes/admin/models/index'
+import { Route as AdminModelsModelIdRouteImport } from './routes/admin/models/$modelId'
+import { Route as AdminModelsCreateRouteImport } from './routes/admin/models/create'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
 import { Route as AdminUsersCreateRouteImport } from './routes/admin/users/create'
@@ -80,6 +84,11 @@ const AdminImportRoute = AdminImportRouteImport.update({
   path: '/import',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminModelsRouteRoute = AdminModelsRouteRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminUsersRouteRoute = AdminUsersRouteRouteImport.update({
   id: '/users',
   path: '/users',
@@ -104,6 +113,21 @@ const AdminTutorIdEditRoute = AdminTutorIdEditRouteImport.update({
   id: '/$tutorId/edit',
   path: '/$tutorId/edit',
   getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminModelsIndexRoute = AdminModelsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminModelsRouteRoute,
+} as any)
+const AdminModelsModelIdRoute = AdminModelsModelIdRouteImport.update({
+  id: '/$modelId',
+  path: '/$modelId',
+  getParentRoute: () => AdminModelsRouteRoute,
+} as any)
+const AdminModelsCreateRoute = AdminModelsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AdminModelsRouteRoute,
 } as any)
 const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
   id: '/',
@@ -138,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/overview': typeof OverviewRoute
   '/tutor': typeof TutorRoute
+  '/admin/models': typeof AdminModelsRouteRouteWithChildren
   '/admin/users': typeof AdminUsersRouteRouteWithChildren
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
   '/admin/create': typeof AdminCreateRoute
@@ -147,10 +172,13 @@ export interface FileRoutesByFullPath {
   '/$tutor_id/': typeof Tutor_idIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/$tutorId/edit': typeof AdminTutorIdEditRoute
+  '/admin/models/$modelId': typeof AdminModelsModelIdRoute
+  '/admin/models/create': typeof AdminModelsCreateRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/users/create': typeof AdminUsersCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/$tutorId/': typeof AdminTutorIdIndexRoute
+  '/admin/models/': typeof AdminModelsIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/admin/$tutorId/conversations/$executionId': typeof AdminTutorIdConversationsExecutionIdRoute
 }
@@ -167,10 +195,13 @@ export interface FileRoutesByTo {
   '/$tutor_id': typeof Tutor_idIndexRoute
   '/admin': typeof AdminIndexRoute
   '/admin/$tutorId/edit': typeof AdminTutorIdEditRoute
+  '/admin/models/$modelId': typeof AdminModelsModelIdRoute
+  '/admin/models/create': typeof AdminModelsCreateRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/users/create': typeof AdminUsersCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/$tutorId': typeof AdminTutorIdIndexRoute
+  '/admin/models': typeof AdminModelsIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
   '/admin/$tutorId/conversations/$executionId': typeof AdminTutorIdConversationsExecutionIdRoute
 }
@@ -181,6 +212,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/overview': typeof OverviewRoute
   '/tutor': typeof TutorRoute
+  '/admin/models': typeof AdminModelsRouteRouteWithChildren
   '/admin/users': typeof AdminUsersRouteRouteWithChildren
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
   '/admin/create': typeof AdminCreateRoute
@@ -190,10 +222,13 @@ export interface FileRoutesById {
   '/$tutor_id/': typeof Tutor_idIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/$tutorId/edit': typeof AdminTutorIdEditRoute
+  '/admin/models/$modelId': typeof AdminModelsModelIdRoute
+  '/admin/models/create': typeof AdminModelsCreateRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/users/create': typeof AdminUsersCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/$tutorId/': typeof AdminTutorIdIndexRoute
+  '/admin/models/': typeof AdminModelsIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/admin/$tutorId/conversations/$executionId': typeof AdminTutorIdConversationsExecutionIdRoute
 }
@@ -205,6 +240,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/overview'
     | '/tutor'
+    | '/admin/models'
     | '/admin/users'
     | '/$tutor_id/tutor'
     | '/admin/create'
@@ -214,10 +250,13 @@ export interface FileRouteTypes {
     | '/$tutor_id/'
     | '/admin/'
     | '/admin/$tutorId/edit'
+    | '/admin/models/$modelId'
+    | '/admin/models/create'
     | '/admin/users/$userId'
     | '/admin/users/create'
     | '/api/auth/$'
     | '/admin/$tutorId/'
+    | '/admin/models/'
     | '/admin/users/'
     | '/admin/$tutorId/conversations/$executionId'
   fileRoutesByTo: FileRoutesByTo
@@ -234,10 +273,13 @@ export interface FileRouteTypes {
     | '/$tutor_id'
     | '/admin'
     | '/admin/$tutorId/edit'
+    | '/admin/models/$modelId'
+    | '/admin/models/create'
     | '/admin/users/$userId'
     | '/admin/users/create'
     | '/api/auth/$'
     | '/admin/$tutorId'
+    | '/admin/models'
     | '/admin/users'
     | '/admin/$tutorId/conversations/$executionId'
   id:
@@ -247,6 +289,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/overview'
     | '/tutor'
+    | '/admin/models'
     | '/admin/users'
     | '/$tutor_id/tutor'
     | '/admin/create'
@@ -256,10 +299,13 @@ export interface FileRouteTypes {
     | '/$tutor_id/'
     | '/admin/'
     | '/admin/$tutorId/edit'
+    | '/admin/models/$modelId'
+    | '/admin/models/create'
     | '/admin/users/$userId'
     | '/admin/users/create'
     | '/api/auth/$'
     | '/admin/$tutorId/'
+    | '/admin/models/'
     | '/admin/users/'
     | '/admin/$tutorId/conversations/$executionId'
   fileRoutesById: FileRoutesById
@@ -349,6 +395,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImportRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/models': {
+      id: '/admin/models'
+      path: '/models'
+      fullPath: '/admin/models'
+      preLoaderRoute: typeof AdminModelsRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -383,6 +436,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/$tutorId/edit'
       preLoaderRoute: typeof AdminTutorIdEditRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/models/': {
+      id: '/admin/models/'
+      path: '/'
+      fullPath: '/admin/models/'
+      preLoaderRoute: typeof AdminModelsIndexRouteImport
+      parentRoute: typeof AdminModelsRouteRoute
+    }
+    '/admin/models/$modelId': {
+      id: '/admin/models/$modelId'
+      path: '/$modelId'
+      fullPath: '/admin/models/$modelId'
+      preLoaderRoute: typeof AdminModelsModelIdRouteImport
+      parentRoute: typeof AdminModelsRouteRoute
+    }
+    '/admin/models/create': {
+      id: '/admin/models/create'
+      path: '/create'
+      fullPath: '/admin/models/create'
+      preLoaderRoute: typeof AdminModelsCreateRouteImport
+      parentRoute: typeof AdminModelsRouteRoute
     }
     '/admin/users/': {
       id: '/admin/users/'
@@ -422,6 +496,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminModelsRouteRouteChildren {
+  AdminModelsModelIdRoute: typeof AdminModelsModelIdRoute
+  AdminModelsCreateRoute: typeof AdminModelsCreateRoute
+  AdminModelsIndexRoute: typeof AdminModelsIndexRoute
+}
+
+const AdminModelsRouteRouteChildren: AdminModelsRouteRouteChildren = {
+  AdminModelsModelIdRoute: AdminModelsModelIdRoute,
+  AdminModelsCreateRoute: AdminModelsCreateRoute,
+  AdminModelsIndexRoute: AdminModelsIndexRoute,
+}
+
+const AdminModelsRouteRouteWithChildren =
+  AdminModelsRouteRoute._addFileChildren(AdminModelsRouteRouteChildren)
+
 interface AdminUsersRouteRouteChildren {
   AdminUsersUserIdRoute: typeof AdminUsersUserIdRoute
   AdminUsersCreateRoute: typeof AdminUsersCreateRoute
@@ -439,6 +528,7 @@ const AdminUsersRouteRouteWithChildren = AdminUsersRouteRoute._addFileChildren(
 )
 
 interface AdminRouteRouteChildren {
+  AdminModelsRouteRoute: typeof AdminModelsRouteRouteWithChildren
   AdminUsersRouteRoute: typeof AdminUsersRouteRouteWithChildren
   AdminCreateRoute: typeof AdminCreateRoute
   AdminImportRoute: typeof AdminImportRoute
@@ -449,6 +539,7 @@ interface AdminRouteRouteChildren {
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminModelsRouteRoute: AdminModelsRouteRouteWithChildren,
   AdminUsersRouteRoute: AdminUsersRouteRouteWithChildren,
   AdminCreateRoute: AdminCreateRoute,
   AdminImportRoute: AdminImportRoute,

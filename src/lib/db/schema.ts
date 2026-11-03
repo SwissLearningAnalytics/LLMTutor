@@ -1,11 +1,13 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  integer,
   json,
   pgTable,
   serial,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 import { user } from "@/lib/auth-schema";
@@ -30,6 +32,22 @@ export const messages = pgTable("t_messages", {
   createdAt: timestamp().defaultNow().notNull(),
 });
 
+export const aiModels = pgTable(
+  "t_ai_models",
+  {
+    id: serial("pk_ai_model_id").primaryKey(),
+    name: varchar({ length: 64 }).notNull().unique(), // model id as passed to the ai provider, e.g. gpt-5.4
+    label: text(),
+    isDefault: boolean("is_default").default(false).notNull(),
+  },
+  (table) => [
+    // at most one default model
+    uniqueIndex("t_ai_models_single_default")
+      .on(table.isDefault)
+      .where(sql`${table.isDefault}`),
+  ],
+);
+
 export const tutors = pgTable("t_tutors", {
   id: serial("pk_tutor_id").primaryKey(),
   tutorId: text("tutor_id").notNull().unique(),
@@ -37,6 +55,10 @@ export const tutors = pgTable("t_tutors", {
   prompt: text().notNull(),
   learningObjectives: text("learning_objectives"),
   published: boolean().default(false).notNull(),
+  // null means the tutor uses the default model
+  modelId: integer("model_id").references(() => aiModels.id, {
+    onDelete: "restrict",
+  }),
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
@@ -47,8 +69,17 @@ export const tutorsRelations = relations(tutors, ({ one }) => ({
     fields: [tutors.userId],
     references: [user.id],
   }),
+  model: one(aiModels, {
+    fields: [tutors.modelId],
+    references: [aiModels.id],
+  }),
+}));
+
+export const aiModelsRelations = relations(aiModels, ({ many }) => ({
+  tutors: many(tutors),
 }));
 
 export type MessagesSelect = typeof messages.$inferSelect;
 export type TutorSelect = typeof tutors.$inferSelect;
 export type TutorInsert = typeof tutors.$inferInsert;
+export type AiModelSelect = typeof aiModels.$inferSelect;

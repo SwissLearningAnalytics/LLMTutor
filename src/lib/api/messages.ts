@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { and, asc, count, desc, eq, max, sql } from "drizzle-orm";
 import { z } from "zod";
-import { AiModels, providerName } from "@/lib/ai/model";
+import { resolveTutorModelName } from "@/lib/ai/resolve-model";
 import { ensureSession } from "@/lib/auth.functions";
 import { db } from "@/lib/db";
 import { type MessagesSelect, messages } from "@/lib/db/schema";
@@ -14,7 +14,7 @@ import type { QuestionnaireMode } from "@/lib/feedback/types";
  * @throws {Error} If there's a database error.
  */
 export const addMessage = createServerFn({ method: "POST" })
-  .inputValidator((messageData: Partial<MessagesSelect>) => {
+  .validator((messageData: Partial<MessagesSelect>) => {
     if (!messageData) {
       throw new Error("Invalid message data");
     }
@@ -33,7 +33,11 @@ export const addMessage = createServerFn({ method: "POST" })
     return messageData;
   })
   .handler(async ({ data }: { data: Partial<MessagesSelect> }) => {
-    data.modelName = data.modelName ?? AiModels[providerName][0];
+    data.modelName =
+      data.modelName ??
+      (data.promptName
+        ? await resolveTutorModelName(data.promptName)
+        : undefined);
 
     try {
       const [newMessage] = await db
@@ -55,7 +59,7 @@ export const addMessage = createServerFn({ method: "POST" })
   });
 
 export const getMessages = createServerFn({ method: "POST" })
-  .inputValidator((key: string) => {
+  .validator((key: string) => {
     if (!key) {
       throw new Error("Key is missing");
     }
@@ -104,7 +108,7 @@ async function ensureOwnTutor(tutorId: string) {
 }
 
 export const getOwnTutorConversations = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ tutorId: z.string().min(1) }))
+  .validator(z.object({ tutorId: z.string().min(1) }))
   .handler(async ({ data: { tutorId } }) => {
     await ensureOwnTutor(tutorId);
 
@@ -127,7 +131,7 @@ export const getOwnTutorConversations = createServerFn({ method: "GET" })
   });
 
 export const getOwnTutorConversation = createServerFn({ method: "GET" })
-  .inputValidator(
+  .validator(
     z.object({
       tutorId: z.string().min(1),
       executionId: z.string().min(1),
@@ -168,7 +172,7 @@ export const getOwnTutorConversation = createServerFn({ method: "GET" })
   });
 
 export const getOwnTutorMessages = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ tutorId: z.string().min(1) }))
+  .validator(z.object({ tutorId: z.string().min(1) }))
   .handler(async ({ data: { tutorId } }) => {
     await ensureOwnTutor(tutorId);
 

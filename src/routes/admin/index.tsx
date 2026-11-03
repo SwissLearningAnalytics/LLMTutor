@@ -12,6 +12,7 @@ import {
   PencilIcon,
   PlusIcon,
   SearchIcon,
+  SparklesIcon,
   Trash2Icon,
   UserIcon,
 } from "lucide-react";
@@ -46,6 +47,7 @@ import {
   getTutorOptions,
 } from "@/lib/api/tutors/query-options";
 import { authClient } from "@/lib/auth-client";
+import { hasAdminRole } from "@/lib/auth-roles";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
 import { TutorGuideLink } from "@/routes/admin/-components/tutor-guide-link";
 
@@ -63,7 +65,7 @@ function RouteComponent() {
   const publishMutation = useMutation(updateTutorOptions());
   const [searchQuery, setSearchQuery] = useState("");
   const { data: session } = authClient.useSession();
-  const canManageUsers = hasAdminRole(session?.user);
+  const isAdmin = hasAdminRole(session?.user);
   const filteredTutors = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
 
@@ -113,13 +115,21 @@ function RouteComponent() {
     <Layout
       header={
         <AdminHeader title="Tutoren">
-          {canManageUsers && (
-            <Button asChild>
-              <Link to="/admin/users">
-                <UserIcon />
-                Benutzer verwalten
-              </Link>
-            </Button>
+          {isAdmin && (
+            <>
+              <Button asChild>
+                <Link to="/admin/models">
+                  <SparklesIcon />
+                  Modelle verwalten
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link to="/admin/users">
+                  <UserIcon />
+                  Benutzer verwalten
+                </Link>
+              </Button>
+            </>
           )}
           <TutorGuideLink />
           <Button variant="destructive" asChild>
@@ -214,12 +224,6 @@ function RouteComponent() {
       </div>
     </Layout>
   );
-}
-
-function hasAdminRole(user: { role?: unknown } | undefined) {
-  const roles = typeof user?.role === "string" ? user.role.split(",") : [];
-
-  return roles.some((role) => role.trim() === "admin");
 }
 
 function TutorPublicationStatus({ published }: { published: boolean }) {

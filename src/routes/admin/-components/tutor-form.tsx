@@ -1,5 +1,9 @@
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeftIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -17,12 +21,14 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { getAiModelsOptions } from "@/lib/api/ai-models/query-options";
 import {
   createTutorOptions,
   updateTutorOptions,
 } from "@/lib/api/tutors/mutation-options";
 import { getOwnTutorsOptions } from "@/lib/api/tutors/query-options";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
+import { AiModelCombobox } from "@/routes/admin/-components/ai-model-combobox";
 import { TutorGuideLink } from "@/routes/admin/-components/tutor-guide-link";
 
 const tutorFormSchema = z.object({
@@ -31,6 +37,7 @@ const tutorFormSchema = z.object({
   prompt: z.string().min(1),
   learningObjectives: z.string().optional(),
   published: z.boolean(),
+  modelId: z.number().int().nullable(),
 });
 
 type TutorFormValues = z.infer<typeof tutorFormSchema>;
@@ -41,6 +48,7 @@ const defaultValues: TutorFormValues = {
   prompt: "",
   published: false,
   tutorId: "",
+  modelId: null,
 };
 
 type TutorFormProps =
@@ -62,6 +70,7 @@ export function TutorForm(props: TutorFormProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const createMutation = useMutation(createTutorOptions());
   const updateMutation = useMutation(updateTutorOptions());
+  const { data: aiModels } = useSuspenseQuery(getAiModelsOptions());
   const form = useForm({
     defaultValues: isEdit ? props.defaultValues : defaultValues,
     validators: { onSubmit: tutorFormSchema },
@@ -76,6 +85,10 @@ export function TutorForm(props: TutorFormProps) {
         await queryClient.invalidateQueries({
           queryKey: getOwnTutorsOptions().queryKey,
         });
+        // tutor counts per model may have changed
+        await queryClient.invalidateQueries({
+          queryKey: getAiModelsOptions().queryKey,
+        });
         setSuccessMessage("Tutor aktualisiert.");
         return;
       }
@@ -83,6 +96,9 @@ export function TutorForm(props: TutorFormProps) {
       const createdTutor = await createMutation.mutateAsync({ data: value });
       await queryClient.invalidateQueries({
         queryKey: getOwnTutorsOptions().queryKey,
+      });
+      await queryClient.invalidateQueries({
+        queryKey: getAiModelsOptions().queryKey,
       });
       await navigate({
         to: "/admin/$tutorId",
@@ -219,6 +235,31 @@ export function TutorForm(props: TutorFormProps) {
                   disabled={isEdit}
                   autoComplete="off"
                 />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        </form.Field>
+        <form.Field name="modelId">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Modell</FieldLabel>
+                <AiModelCombobox
+                  id={field.name}
+                  models={aiModels}
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  onBlur={field.handleBlur}
+                  disabled={isPending}
+                  aria-invalid={isInvalid}
+                />
+                <FieldDescription>
+                  Das Modell wird für alle Unterhaltungen mit diesem Tutor
+                  verwendet.
+                </FieldDescription>
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );

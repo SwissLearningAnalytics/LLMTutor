@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { auth } from "@/lib/auth";
+import { hasAdminRole } from "@/lib/auth-roles";
 
 export const getSession = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -18,6 +19,18 @@ export const ensureSession = createServerFn({ method: "GET" }).handler(
 
     if (!session) {
       throw new Error("Unauthorized");
+    }
+
+    return session;
+  },
+);
+
+export const ensureAdminSession = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const session = await ensureSession();
+
+    if (!hasAdminRole(session.user)) {
+      throw new Error("Forbidden");
     }
 
     return session;

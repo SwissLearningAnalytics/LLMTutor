@@ -4,8 +4,9 @@ export const AiProviders = {
 } as const;
 export type AiProviders = (typeof AiProviders)[keyof typeof AiProviders];
 
-// first model is the default, i.e., the one that is normally used
-export const AiModels = {
+// only used to seed t_ai_models of a fresh database, the list is maintained by admins afterwards
+// first model is seeded as the default
+export const seedAiModels = {
   [AiProviders.Local]: ["qwen3.5:latest", "mistral:v0.3", "llama3.3"],
   [AiProviders.OpenAI]: [
     "gpt-5.4",
@@ -18,7 +19,6 @@ export const AiModels = {
     "gpt-5-mini",
   ],
 };
-export type AiModels = (typeof AiModels)[keyof typeof AiModels];
 
 export const providerName = (() => {
   const aiProvider = import.meta.env.VITE_AI_PROVIDER;
@@ -35,5 +35,3 @@ export const providerName = (() => {
 
   return aiProvider as AiProviders;
 })();
-
-export const defaultModel = AiModels[providerName][0];

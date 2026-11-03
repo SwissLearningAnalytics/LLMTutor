@@ -16,11 +16,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LoadingDots } from "@/components/ui/loading-dots";
 import { MemoizedMarkdown } from "@/components/ui/memoized-markdown";
-import { AiModels, providerName } from "@/lib/ai/model";
 import {
   isInitialAssistantResponse,
   prepareTutorChatMessages,
 } from "@/lib/ai/tutor-chat";
+import { validateModelSearch } from "@/lib/ai/validate-model-search";
 import { getTutorOptions } from "@/lib/api/tutors/query-options";
 import { nonStudyFeedback, studyFeedback } from "@/lib/feedback/feedback";
 import {
@@ -40,29 +40,20 @@ type Search = {
 
 export const Route = createFileRoute("/$tutor_id/tutor")({
   component: RouteComponent,
-  loader: async ({ params, context: { queryClient } }) => {
+  loaderDeps: ({ search: { model } }) => ({ model }),
+  loader: async ({ params, deps, location, context: { queryClient } }) => {
     const tutor = await queryClient.ensureQueryData(
       getTutorOptions(params.tutor_id),
     );
     if (!tutor) {
       throw notFound();
     }
+    await validateModelSearch(deps.model, location.pathname);
   },
   validateSearch: (search: Record<string, string>): Search => {
-    if (search.model) {
-      if (import.meta.env.MODE === "prod") {
-        console.warn("Models can only be configured in the dev environment.");
-        return { model: undefined };
-      }
-
-      if (!AiModels[providerName].includes(search.model)) {
-        if (typeof window !== "undefined") {
-          alert(
-            `Model ${search.model} is not supported. Supported models are: ${AiModels[providerName].join(", ")}`,
-          );
-        }
-        return { model: undefined };
-      }
+    if (search.model && import.meta.env.MODE === "prod") {
+      console.warn("Models can only be configured in the dev environment.");
+      return { model: undefined };
     }
 
     return {

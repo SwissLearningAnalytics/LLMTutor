@@ -9,7 +9,9 @@ const PopoverTrigger = PopoverPrimitive.Trigger;
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
+    showArrow?: boolean;
+  }
 >(
   (
     {
@@ -17,6 +19,7 @@ const PopoverContent = React.forwardRef<
       align = "center",
       sideOffset = 4,
       collisionPadding = 16,
+      showArrow = true,
       children,
       ...props
     },
@@ -34,7 +37,9 @@ const PopoverContent = React.forwardRef<
         )}
         {...props}
       >
-        <PopoverPrimitive.Arrow className="h-2 w-4 fill-surface-secondary" />
+        {showArrow && (
+          <PopoverPrimitive.Arrow className="h-2 w-4 fill-surface-secondary" />
+        )}
         {children}
       </PopoverPrimitive.Content>
     </PopoverPrimitive.Portal>
