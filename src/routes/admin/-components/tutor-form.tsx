@@ -20,7 +20,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { getAiModelsOptions } from "@/lib/api/ai-models/query-options";
 import {
   createTutorOptions,
@@ -29,6 +28,7 @@ import {
 import { getOwnTutorsOptions } from "@/lib/api/tutors/query-options";
 import { AdminHeader } from "@/routes/admin/-components/admin-header";
 import { AiModelCombobox } from "@/routes/admin/-components/ai-model-combobox";
+import { MarkdownTextarea } from "@/routes/admin/-components/markdown-textarea";
 import { TutorGuideLink } from "@/routes/admin/-components/tutor-guide-link";
 
 const tutorFormSchema = z.object({
@@ -271,15 +271,17 @@ export function TutorForm(props: TutorFormProps) {
               field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Systemprompt</FieldLabel>
-                <Textarea
+                <MarkdownTextarea
+                  label={
+                    <FieldLabel htmlFor={field.name}>Systemprompt</FieldLabel>
+                  }
                   name={field.name}
                   id={field.name}
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   aria-invalid={isInvalid}
-                  className="h-96 bg-surface-primary"
+                  className="h-96"
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
@@ -292,15 +294,17 @@ export function TutorForm(props: TutorFormProps) {
               field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Lernziele</FieldLabel>
-                <Textarea
+                <MarkdownTextarea
+                  label={
+                    <FieldLabel htmlFor={field.name}>Lernziele</FieldLabel>
+                  }
                   name={field.name}
                   id={field.name}
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   aria-invalid={isInvalid}
-                  className="h-64 bg-surface-primary"
+                  className="h-64"
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>

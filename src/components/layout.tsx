@@ -24,7 +24,7 @@ export function Layout({
       <div className="flex flex-1 gap-4 overflow-hidden">
         <main
           className={cn(
-            "w-full overflow-y-auto overscroll-y-none rounded-t-lg bg-surface-background-primary",
+            "@container w-full overflow-y-auto overscroll-y-none rounded-t-lg bg-surface-background-primary",
             !noConstrain && "p-3 py-14 sm:p-6 sm:py-28",
             !!sidebox && "w-2/3",
           )}
