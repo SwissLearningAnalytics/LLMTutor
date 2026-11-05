@@ -10,6 +10,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { AdminLayout } from "@/routes/admin/-components/admin-layout";
+import { SegmentedControl } from "@/routes/admin/-components/segmented-control";
 
 const userFormSchema = z.object({
   name: z.string().min(1, "Name ist erforderlich."),
@@ -19,6 +20,11 @@ const userFormSchema = z.object({
     .min(8, "Das Passwort muss mindestens 8 Zeichen lang sein."),
   role: z.enum(["user", "admin"]),
 });
+
+const roleOptions: { value: "user" | "admin"; label: string }[] = [
+  { value: "user", label: "Benutzer" },
+  { value: "admin", label: "Admin" },
+];
 
 const editUserFormSchema = userFormSchema.extend({
   password: z
@@ -202,21 +208,14 @@ export function UserForm(props: UserFormProps) {
 
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Rolle</FieldLabel>
-                  <select
-                    id={field.name}
-                    name={field.name}
+                  <FieldLabel>Rolle</FieldLabel>
+                  <SegmentedControl
+                    label="Rolle"
+                    options={roleOptions}
                     value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) =>
-                      field.handleChange(event.target.value as "user" | "admin")
-                    }
-                    aria-invalid={isInvalid}
-                    className="flex h-10 w-full rounded-md border bg-surface-primary p-2 text-sm ring-offset-surface-primary focus-visible:ring-2 focus-visible:ring-black/50 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="user">Benutzer</option>
-                    <option value="admin">Admin</option>
-                  </select>
+                    onChange={field.handleChange}
+                    disabled={isPending}
+                  />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );

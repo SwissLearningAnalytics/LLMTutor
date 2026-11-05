@@ -4,6 +4,7 @@ import z from "zod";
 import { ensureSession } from "@/lib/auth.functions";
 import { db } from "@/lib/db";
 import { type TutorInsert, tutors } from "@/lib/db/schema";
+import { annotationConfigSchema } from "@/lib/feedback/types";
 
 export const tutorInsertSchema = z.object({
   tutorId: z.string().min(1),
@@ -12,6 +13,7 @@ export const tutorInsertSchema = z.object({
   learningObjectives: z.string().nullable().optional(),
   published: z.boolean().optional(),
   modelId: z.number().int().nullable().optional(),
+  annotations: annotationConfigSchema.optional(),
 });
 
 export const tutorUpdateSchema = z
@@ -22,6 +24,7 @@ export const tutorUpdateSchema = z
     learningObjectives: z.string().nullable().optional(),
     published: z.boolean().optional(),
     modelId: z.number().int().nullable().optional(),
+    annotations: annotationConfigSchema.optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one tutor field must be provided",
@@ -57,6 +60,7 @@ export const getTutor = createServerFn({ method: "GET" })
           displayName: true,
           prompt: true,
           learningObjectives: true,
+          annotations: true,
         },
         where(fields, { and, eq }) {
           return and(eq(fields.tutorId, tutorId), eq(fields.published, true));

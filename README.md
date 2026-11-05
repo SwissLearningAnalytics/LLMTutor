@@ -115,17 +115,14 @@ You can specify a model via query parameter in local development or development 
 
 > **Note:** Model selection via query parameter is disabled in production builds.
 
-### Modes
+### Annotations
 
-The tutor has two different modes.
-One enforces users to answer the feedback questions to proceed (study mode) and the other one does not (non-study mode).
-The questions and the UI are different in the two modes.
+Annotations are the questionnaire cards shown after a message of the tutor and after a message of the user. Their answers are stored with the messages.
+They are configured per tutor in the admin area:
 
-To choose between the two modes, you must access the application via different URL.
-The default mode is the study mode.
-To access the non-study mode you must go to `http://demo.localhost:3000`.
-
-The URL to be used for the non-study mode can be configured via the `VITE_NON_STUDY_MODE_HOSTNAME` environment variable.
+- **Mode**: `Pflicht` (required, the user must answer them to proceed, the tutor's reply is hidden until the questions about the own answer are answered), `Freiwillig` (optional) or `Keine` (none).
+- **Questions**: a list of questions for each of the two points in time, each with an optional tooltip.
+- **Scale**: `Ja/Nein` or `0–10` per question. Optional yes/no questions are rendered as a checkbox.
 
 ## Development
 

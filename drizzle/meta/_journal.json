@@ -43,6 +43,13 @@
       "when": 1793699919137,
       "tag": "0005_modern_arachne",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793892108185,
+      "tag": "0006_slow_sir_ram",
+      "breakpoints": true
     }
   ]
 }

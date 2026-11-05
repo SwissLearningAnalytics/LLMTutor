@@ -31,6 +31,7 @@ function RouteComponent() {
         learningObjectives: tutor.learningObjectives ?? undefined,
         published: tutor.published,
         modelId: tutor.modelId,
+        annotations: tutor.annotations,
       }}
     />
   );

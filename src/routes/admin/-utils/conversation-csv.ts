@@ -1,5 +1,9 @@
-import { nonStudyFeedback, studyFeedback } from "@/lib/feedback/feedback";
-import type { QuestionnaireMode } from "@/lib/feedback/types";
+import {
+  annotationModeLabels,
+  getAnnotationResponses,
+  type StoredFeedback,
+} from "@/lib/feedback/annotations";
+import type { AnnotationMode } from "@/lib/feedback/types";
 
 export type ConversationCsvMessage = {
   id: number;
@@ -7,15 +11,10 @@ export type ConversationCsvMessage = {
   pseudonym: string;
   createdAt: Date | string;
   role: "ai" | "user";
-  mode: QuestionnaireMode;
+  mode: AnnotationMode;
   message: string;
-  feedback: Record<string, string | number | boolean>;
+  feedback: StoredFeedback;
 };
-
-const feedbackByMode = {
-  study: studyFeedback,
-  "non-study": nonStudyFeedback,
-} satisfies Record<QuestionnaireMode, typeof studyFeedback>;
 
 export const conversationCsvHeader = [
   "Typ",
@@ -101,7 +100,7 @@ function getQuestionnaireCsvRows(
   tutorId: string,
   relatedMessage?: ConversationCsvMessage,
 ): string[][] {
-  const responses = getQuestionnaireResponses(feedbackMessage);
+  const responses = getAnnotationResponses(feedbackMessage);
   const message = relatedMessage ?? feedbackMessage;
   const messageColumns = getMessageCsvColumns(message, tutorId);
 
@@ -111,20 +110,6 @@ function getQuestionnaireCsvRows(
     question,
     answer,
   ]);
-}
-
-function getQuestionnaireResponses(message: ConversationCsvMessage) {
-  const config = feedbackByMode[message.mode];
-  const fields = message.role === "ai" ? config.user : config.ai;
-  const questionsByLabel = new Map(
-    fields.map((field) => [field.label, field.text] as const),
-  );
-
-  return Object.entries(message.feedback).map(([label, value]) => ({
-    answer:
-      typeof value === "boolean" ? (value ? "Ja" : "Nein") : String(value),
-    question: questionsByLabel.get(label) ?? label,
-  }));
 }
 
 function getMessageCsvColumns(
@@ -138,7 +123,7 @@ function getMessageCsvColumns(
     String(message.id),
     formatTimestamp(message.createdAt),
     message.role === "ai" ? "Tutor" : "Nutzer/in",
-    message.mode,
+    annotationModeLabels[message.mode],
     message.message,
   ];
 }

@@ -5,7 +5,10 @@ import { resolveTutorModelName } from "@/lib/ai/resolve-model";
 import { ensureSession } from "@/lib/auth.functions";
 import { db } from "@/lib/db";
 import { type MessagesSelect, messages } from "@/lib/db/schema";
-import type { QuestionnaireMode } from "@/lib/feedback/types";
+import {
+  normalizeAnnotationMode,
+  normalizeStoredFeedback,
+} from "@/lib/feedback/annotations";
 
 /**
  * Creates a new message with feedback in the database.
@@ -163,8 +166,8 @@ export const getOwnTutorConversation = createServerFn({ method: "GET" })
 
       return conversation.map((message) => ({
         ...message,
-        feedback: normalizeQuestionnaireFeedback(message.feedback),
-        mode: normalizeQuestionnaireMode(message.mode),
+        feedback: normalizeStoredFeedback(message.feedback),
+        mode: normalizeAnnotationMode(message.mode),
       }));
     } catch {
       throw new Error(`Conversation ${executionId} could not be loaded`);
@@ -194,29 +197,10 @@ export const getOwnTutorMessages = createServerFn({ method: "GET" })
 
       return tutorMessages.map((message) => ({
         ...message,
-        feedback: normalizeQuestionnaireFeedback(message.feedback),
-        mode: normalizeQuestionnaireMode(message.mode),
+        feedback: normalizeStoredFeedback(message.feedback),
+        mode: normalizeAnnotationMode(message.mode),
       }));
     } catch {
       throw new Error(`Messages for tutor ${tutorId} could not be loaded`);
     }
   });
-
-function normalizeQuestionnaireFeedback(feedback: unknown) {
-  if (!feedback || typeof feedback !== "object" || Array.isArray(feedback)) {
-    return {};
-  }
-
-  return Object.fromEntries(
-    Object.entries(feedback).filter(
-      (entry): entry is [string, string | number | boolean] =>
-        typeof entry[1] === "string" ||
-        typeof entry[1] === "number" ||
-        typeof entry[1] === "boolean",
-    ),
-  );
-}
-
-function normalizeQuestionnaireMode(mode: string | null): QuestionnaireMode {
-  return mode === "non-study" ? "non-study" : "study";
-}
