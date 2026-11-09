@@ -126,6 +126,7 @@ function RouteComponent() {
   const [phase, setPhase] = useState<Phase>(Phase.init);
   const [userAnswer, setUserAnswer] = useState("");
   const [showError, setShowError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingFeedbackSubmission, setPendingFeedbackSubmission] = useState<
     Record<string, string | undefined> | undefined
   >();
@@ -166,7 +167,16 @@ function RouteComponent() {
     userAnswer: string;
     reflectionOnChatbotFeedback: Record<string, string | undefined>;
   }) {
-    if (status === "streaming") {
+    // only one message per tutor reply, the next one has to wait for the answer
+    if (
+      status !== "ready" ||
+      latestMessage?.role !== "assistant" ||
+      isSubmitting
+    ) {
+      return false;
+    }
+
+    if (userAnswer.trim().length === 0) {
       return false;
     }
 
@@ -175,9 +185,6 @@ function RouteComponent() {
     }
 
     if (phase !== Phase.question_with_feedback) {
-      return false;
-    }
-    if (userAnswer.length === 0) {
       return false;
     }
     return feedback.ai.every(
@@ -282,6 +289,11 @@ function RouteComponent() {
   }
 
   async function submitUserMessage() {
+    if (disableSubmitButton) {
+      return;
+    }
+    setIsSubmitting(true);
+
     if (!isRequired) {
       if (!isInitialAssistantResponse(messages)) {
         await submitReflectionOnOwnAnswer();
@@ -322,6 +334,8 @@ function RouteComponent() {
       setPhase(Phase.answer_with_feedback_and_response_hidden);
     } catch {
       setShowError(true);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -472,11 +486,7 @@ function RouteComponent() {
                 : ""
             }
             onKeyDown={(event) => {
-              if (
-                event.key === "Enter" &&
-                !event.shiftKey &&
-                !disableSubmitButton
-              ) {
+              if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
                 void submitUserMessage();
               }
