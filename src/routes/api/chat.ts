@@ -5,7 +5,10 @@ import { and, eq } from "drizzle-orm";
 import { createOllama } from "ollama-ai-provider-v2";
 import { AiProviders, providerName } from "@/lib/ai/model";
 import { getDefaultModelName, isAvailableModel } from "@/lib/ai/resolve-model";
-import { createTutorModelMessages } from "@/lib/ai/tutor-chat";
+import {
+  CODE_EXECUTION_INSTRUCTION,
+  createTutorModelMessages,
+} from "@/lib/ai/tutor-chat";
 import { db } from "@/lib/db";
 import { messages as storedMessages, tutors } from "@/lib/db/schema";
 
@@ -36,6 +39,10 @@ async function persistInitialAssistantMessage({
   });
 }
 
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 const provider = (() => {
   switch (providerName) {
     case AiProviders.Local: {
@@ -45,10 +52,6 @@ const provider = (() => {
       return (model: string) => ollama(model);
     }
     case AiProviders.OpenAI: {
-      const openai = createOpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
-
       return (model: string) => openai(model);
     }
 
@@ -85,7 +88,7 @@ export const Route = createFileRoute("/api/chat")({
 
         try {
           const tutor = await db.query.tutors.findFirst({
-            columns: { prompt: true },
+            columns: { prompt: true, codeExecutionEnabled: true },
             with: { model: { columns: { name: true } } },
             where: and(
               eq(tutors.tutorId, data.tutorId),
@@ -100,6 +103,10 @@ export const Route = createFileRoute("/api/chat")({
           const model =
             data.model ?? tutor.model?.name ?? (await getDefaultModelName());
 
+          // the code interpreter is hosted by openai, so it is not available locally
+          const useCodeExecution =
+            tutor.codeExecutionEnabled && providerName === AiProviders.OpenAI;
+
           const result = await streamText({
             model: provider(model),
             messages: await convertToModelMessages(
@@ -108,7 +115,12 @@ export const Route = createFileRoute("/api/chat")({
                 data.shouldStartConversation,
               ),
             ),
-            system: tutor.prompt,
+            system: useCodeExecution
+              ? `${tutor.prompt}\n\n${CODE_EXECUTION_INSTRUCTION}`
+              : tutor.prompt,
+            tools: useCodeExecution
+              ? { code_interpreter: openai.tools.codeInterpreter() }
+              : undefined,
             allowSystemInMessages: false,
             ...(providerName === AiProviders.OpenAI && {
               temperature: model.startsWith("gpt-5") ? 1 : 0.6, // for gpt-5 only the default is 1

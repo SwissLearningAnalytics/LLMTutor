@@ -35,6 +35,7 @@ const tutorFormSchema = z.object({
   prompt: z.string().min(1),
   learningObjectives: z.string().optional(),
   published: z.boolean(),
+  codeExecutionEnabled: z.boolean(),
   modelId: z.number().int().nullable(),
 });
 
@@ -45,6 +46,7 @@ const defaultValues: TutorFormValues = {
   learningObjectives: undefined,
   prompt: "",
   published: false,
+  codeExecutionEnabled: false,
   tutorId: "",
   modelId: null,
 };
@@ -158,6 +160,33 @@ export function TutorForm(props: TutorFormProps) {
                 <FieldLabel htmlFor={field.name}>Veröffentlicht</FieldLabel>
                 <FieldDescription>
                   Veröffentlichte Tutoren sind für Studierende zugänglich.
+                </FieldDescription>
+              </div>
+            </Field>
+          )}
+        </form.Field>
+        <form.Field name="codeExecutionEnabled">
+          {(field) => (
+            <Field orientation="horizontal">
+              <Checkbox
+                id={field.name}
+                name={field.name}
+                checked={field.state.value}
+                onCheckedChange={(checked) =>
+                  field.handleChange(checked === true)
+                }
+                onBlur={field.handleBlur}
+                disabled={isPending}
+                checkIcon
+              />
+              <div className="flex flex-col gap-1">
+                <FieldLabel htmlFor={field.name}>Codeausführung</FieldLabel>
+                <FieldDescription>
+                  Der Tutor kann Python-Code ausführen, damit Berechnungen
+                  korrekt sind. Nicht alle Modelle unterstützen das, zum
+                  Beispiel möglicherweise gpt-3.5-turbo oder chatgpt-4o-latest.
+                  Bei einem nicht unterstützten Modell schlägt die Antwort des
+                  Tutors fehl.
                 </FieldDescription>
               </div>
             </Field>

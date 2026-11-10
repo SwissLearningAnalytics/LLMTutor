@@ -30,6 +30,7 @@ function RouteComponent() {
         prompt: tutor.prompt,
         learningObjectives: tutor.learningObjectives ?? undefined,
         published: tutor.published,
+        codeExecutionEnabled: tutor.codeExecutionEnabled,
         modelId: tutor.modelId,
       }}
     />

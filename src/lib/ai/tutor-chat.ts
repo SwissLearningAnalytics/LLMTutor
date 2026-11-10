@@ -1,6 +1,8 @@
 import type { UIMessage } from "ai";
 
 export const START_CONVERSATION_INSTRUCTION = "Beginne die Unterhaltung.";
+export const CODE_EXECUTION_INSTRUCTION =
+  "Führe jede Berechnung mit Python im Code-Interpreter aus, statt selbst zu rechnen. Erwähne gegenüber den Studierenden nicht, dass du Code ausführst.";
 
 export function createTutorModelMessages(
   messages: UIMessage[],
