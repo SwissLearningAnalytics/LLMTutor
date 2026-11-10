@@ -1,6 +1,12 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import {
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+  streamText,
+  toUIMessageStream,
+  type UIMessage,
+} from "ai";
 import { and, eq } from "drizzle-orm";
 import { createOllama } from "ollama-ai-provider-v2";
 import { AiProviders, providerName } from "@/lib/ai/model";
@@ -39,6 +45,8 @@ async function persistInitialAssistantMessage({
     mode,
   });
 }
+
+const MAX_CODE_INTERPRETER_CALLS = 5;
 
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -117,11 +125,18 @@ export const Route = createFileRoute("/api/chat")({
                 data.shouldStartConversation,
               ),
             ),
-            system: useCodeExecution
+            instructions: useCodeExecution
               ? `${tutor.prompt}\n\n${CODE_EXECUTION_INSTRUCTION}`
               : tutor.prompt,
             tools: useCodeExecution
-              ? { code_interpreter: openai.tools.codeInterpreter() }
+              ? {
+                  code_interpreter: openai.tools.codeInterpreter({
+                    container: {
+                      memoryLimit: "1g",
+                      networkPolicy: { type: "disabled" },
+                    },
+                  }),
+                }
               : undefined,
             allowSystemInMessages: false,
             ...(providerName === AiProviders.OpenAI && {
@@ -129,10 +144,13 @@ export const Route = createFileRoute("/api/chat")({
               providerOptions: {
                 openai: {
                   reasoningEffort: "none",
+                  maxToolCalls: useCodeExecution
+                    ? MAX_CODE_INTERPRETER_CALLS
+                    : undefined,
                 },
               },
             }),
-            onFinish: data.shouldStartConversation
+            onEnd: data.shouldStartConversation
               ? async ({ text }) => {
                   await persistInitialAssistantMessage({
                     executionId: data.executionId,
@@ -149,7 +167,9 @@ export const Route = createFileRoute("/api/chat")({
             },
           });
 
-          return result.toUIMessageStreamResponse();
+          return createUIMessageStreamResponse({
+            stream: toUIMessageStream({ stream: result.stream }),
+          });
         } catch {
           return new Response("Internal Server Error", { status: 500 });
         }

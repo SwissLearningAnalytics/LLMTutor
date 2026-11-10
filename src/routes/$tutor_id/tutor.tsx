@@ -121,7 +121,6 @@ function RouteComponent() {
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const systemMessageSent = useRef(false);
 
   const [phase, setPhase] = useState<Phase>(Phase.init);
   const [userAnswer, setUserAnswer] = useState("");
@@ -200,16 +199,16 @@ function RouteComponent() {
         search: { model },
       });
     } else if (phase === Phase.init) {
-      if (systemMessageSent.current) {
-        return;
-      }
-      systemMessageSent.current = true;
-      sendMessage({
-        role: "system",
-        parts: [{ type: "text", text: "Beginne die Unterhaltung." }],
-      }).then(() => {
-        setPhase(Phase.question_with_feedback);
+      // deferred because useChat aborts running requests when strict mode simulates an unmount
+      const timeout = setTimeout(() => {
+        sendMessage({
+          role: "system",
+          parts: [{ type: "text", text: "Beginne die Unterhaltung." }],
+        }).then(() => {
+          setPhase(Phase.question_with_feedback);
+        });
       });
+      return () => clearTimeout(timeout);
     }
   }, []);
 
