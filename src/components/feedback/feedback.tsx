@@ -9,27 +9,35 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { FeedbackField } from "@/lib/feedback/types";
+import { getScaleOptions, YES } from "@/lib/feedback/annotations";
+import type { Annotation, AnnotationMode } from "@/lib/feedback/types";
 import { cn } from "@/lib/utils/cn";
-import { useIsStudyMode } from "@/lib/utils/use-is-study-mode";
 
 export function Feedback({
-  feedbackFields,
+  annotations,
+  mode,
   feedback,
   setFeedback,
 }: {
-  feedbackFields: FeedbackField[];
+  annotations: Annotation[];
+  mode: Exclude<AnnotationMode, "none">;
   feedback: Record<string, string | undefined>;
   setFeedback: (feedback: Record<string, string | undefined>) => void;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
-  const isStudyMode = useIsStudyMode();
+  const isRequired = mode === "required";
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  const inFocusState = feedbackFields.every((field) => !feedback[field.label]);
+  if (annotations.length === 0) {
+    return null;
+  }
+
+  const inFocusState = annotations.every(
+    (annotation) => !feedback[annotation.key],
+  );
 
   return (
     <>
@@ -40,49 +48,47 @@ export function Feedback({
           duration: 0.4,
         }}
         className={cn(
-          inFocusState && isStudyMode ? "shadow-focus" : "",
+          inFocusState && isRequired ? "shadow-focus" : "",
           "m-auto mb-4 space-y-3 rounded-lg border bg-white p-4",
         )}
       >
-        {feedbackFields.map((field) => (
-          <>
-            {!isStudyMode ? (
-              <FeedbackCheckbox
-                key={field.label}
-                feedbackField={field}
-                feedback={feedback}
-                setFeedback={setFeedback}
+        {annotations.map((annotation) =>
+          // optional yes/no annotations are rendered as a checkbox, everything else as buttons
+          !isRequired && annotation.scale === "yes-no" ? (
+            <FeedbackCheckbox
+              key={annotation.key}
+              annotation={annotation}
+              feedback={feedback}
+              setFeedback={setFeedback}
+            />
+          ) : (
+            <div key={annotation.key}>
+              <FeedbackQuestion
+                question={annotation.question}
+                tooltip={annotation.tooltip}
               />
-            ) : (
-              <>
-                <FeedbackQuestion
-                  key={field.label}
-                  question={field.text}
-                  tooltip={field.tooltip}
-                />
-                <div className="flex gap-2" key={`${field.label}-options`}>
-                  {field.options.map((option) => (
-                    <FeedbackButton
-                      key={`${field.label}-option-${option}`}
-                      isSelected={feedback[field.label] === option}
-                      value={option}
-                      variant={field.options.length > 3 ? "small" : "default"}
-                      onClick={() =>
-                        setFeedback({
-                          ...feedback,
-                          [field.label]:
-                            feedback[field.label] === option
-                              ? undefined
-                              : option,
-                        })
-                      }
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </>
-        ))}
+              <div className="flex gap-2">
+                {getScaleOptions(annotation.scale).map((option, _, options) => (
+                  <FeedbackButton
+                    key={option}
+                    isSelected={feedback[annotation.key] === option}
+                    value={option}
+                    variant={options.length > 3 ? "small" : "default"}
+                    onClick={() =>
+                      setFeedback({
+                        ...feedback,
+                        [annotation.key]:
+                          feedback[annotation.key] === option
+                            ? undefined
+                            : option,
+                      })
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          ),
+        )}
       </motion.div>
       <div ref={bottomRef} />
     </>
@@ -145,34 +151,34 @@ function FeedbackButton({
 }
 
 function FeedbackCheckbox({
-  feedbackField,
+  annotation,
   feedback,
   setFeedback,
 }: {
-  feedbackField: FeedbackField;
+  annotation: Annotation;
   feedback: Record<string, string | undefined>;
   setFeedback: (feedback: Record<string, string | undefined>) => void;
 }) {
-  const isSelected = Boolean(feedback[feedbackField.label]);
+  const isSelected = Boolean(feedback[annotation.key]);
 
   return (
     <Label className="flex items-center gap-3 rounded-lg border p-3 text-secondary has-aria-checked:border-black has-aria-checked:text-black">
       <Checkbox
-        id={`toggle-${feedbackField.label}`}
+        id={`toggle-${annotation.key}`}
         checked={isSelected}
         aria-checked={isSelected}
         onCheckedChange={(checked) => {
           setFeedback({
             ...feedback,
-            [feedbackField.label]: checked
-              ? feedbackField.options[0]
-              : undefined,
+            [annotation.key]: checked ? YES : undefined,
           });
         }}
       />
       <div className="flex w-full items-center justify-between gap-1.5 font-normal">
-        <p className="text-sm leading-none font-medium">{feedbackField.text}</p>
-        {feedbackField.tooltip && (
+        <p className="text-sm leading-none font-medium">
+          {annotation.question}
+        </p>
+        {annotation.tooltip && (
           <Popover>
             <PopoverTrigger
               asChild
@@ -186,9 +192,7 @@ function FeedbackCheckbox({
                 <InfoIcon className="size-5! shrink-0" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="start">
-              {feedbackField.tooltip}
-            </PopoverContent>
+            <PopoverContent align="start">{annotation.tooltip}</PopoverContent>
           </Popover>
         )}
       </div>

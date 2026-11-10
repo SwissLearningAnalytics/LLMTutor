@@ -8,6 +8,7 @@ import { getDefaultModelName, isAvailableModel } from "@/lib/ai/resolve-model";
 import { createTutorModelMessages } from "@/lib/ai/tutor-chat";
 import { db } from "@/lib/db";
 import { messages as storedMessages, tutors } from "@/lib/db/schema";
+import type { AnnotationMode } from "@/lib/feedback/types";
 
 async function persistInitialAssistantMessage({
   executionId,
@@ -19,7 +20,7 @@ async function persistInitialAssistantMessage({
 }: {
   executionId: string;
   message: string;
-  mode: string;
+  mode: AnnotationMode;
   modelName: string;
   pseudonym: string;
   tutorId: string;
@@ -67,7 +68,8 @@ export const Route = createFileRoute("/api/chat")({
           executionId: string;
           messages: UIMessage[];
           model?: string;
-          mode: string;
+          // annotation mode of the tutor when the session was started
+          mode: AnnotationMode;
           pseudonym: string;
           shouldStartConversation: boolean;
           tutorId: string;
