@@ -6,8 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getOwnTutorConversationOptions } from "@/lib/api/messages/query-options";
 import { getOwnTutorOptions } from "@/lib/api/tutors/query-options";
-import { nonStudyFeedback, studyFeedback } from "@/lib/feedback/feedback";
-import type { QuestionnaireMode } from "@/lib/feedback/types";
+import {
+  getAnnotationResponses,
+  type StoredFeedback,
+} from "@/lib/feedback/annotations";
+import type { AnnotationMode } from "@/lib/feedback/types";
 import { cn } from "@/lib/utils/cn";
 import {
   downloadCsv,
@@ -16,20 +19,6 @@ import {
   sanitizeFilenamePart,
 } from "@/routes/admin/-utils/conversation-csv";
 import { AdminLayout } from "@/routes/admin/-components/admin-layout";
-
-const feedbackByMode = {
-  study: studyFeedback,
-  "non-study": nonStudyFeedback,
-} satisfies Record<QuestionnaireMode, typeof studyFeedback>;
-
-type ConversationMessage = {
-  id: number;
-  createdAt: Date | string;
-  feedback: Record<string, string | number | boolean>;
-  message: string;
-  mode: QuestionnaireMode;
-  role: "ai" | "user";
-};
 
 export const Route = createFileRoute(
   "/admin/$tutorId/conversations/$executionId",
@@ -120,11 +109,11 @@ function QuestionnaireAnswers({
   mode,
   role,
 }: {
-  feedback: Record<string, string | number | boolean>;
-  mode: QuestionnaireMode;
+  feedback: StoredFeedback;
+  mode: AnnotationMode;
   role: "ai" | "user";
 }) {
-  const responses = getQuestionnaireResponses({ feedback, mode, role });
+  const responses = getAnnotationResponses({ feedback, mode, role });
 
   if (responses.length === 0) {
     return null;
@@ -139,12 +128,8 @@ function QuestionnaireAnswers({
     >
       <p className="mb-3 text-sm font-semibold">Antworten auf den Fragebogen</p>
       <dl className="space-y-3">
-        {responses.map(({ answer, label, question }) => (
-          <QuestionnaireAnswer
-            key={label}
-            answer={answer}
-            question={question}
-          />
+        {responses.map(({ answer, key, question }) => (
+          <QuestionnaireAnswer key={key} answer={answer} question={question} />
         ))}
       </dl>
     </div>
@@ -166,23 +151,4 @@ function QuestionnaireAnswer({
       </dd>
     </div>
   );
-}
-
-function getQuestionnaireResponses({
-  feedback,
-  mode,
-  role,
-}: Pick<ConversationMessage, "feedback" | "mode" | "role">) {
-  const feedbackConfig = feedbackByMode[mode];
-  const fields = role === "ai" ? feedbackConfig.user : feedbackConfig.ai;
-  const questionsByLabel = new Map(
-    fields.map((field) => [field.label, field.text] as const),
-  );
-
-  return Object.entries(feedback).map(([label, value]) => ({
-    answer:
-      typeof value === "boolean" ? (value ? "Ja" : "Nein") : String(value),
-    label,
-    question: questionsByLabel.get(label) ?? label,
-  }));
 }

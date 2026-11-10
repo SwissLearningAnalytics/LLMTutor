@@ -5,7 +5,14 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeftIcon } from "lucide-react";
+import {
+  ArrowDownIcon,
+  ArrowLeftIcon,
+  ArrowUpIcon,
+  PlusIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import slugify from "slugify";
 import { z } from "zod";
@@ -19,15 +26,27 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { getAiModelsOptions } from "@/lib/api/ai-models/query-options";
 import {
   createTutorOptions,
   updateTutorOptions,
 } from "@/lib/api/tutors/mutation-options";
 import { getOwnTutorsOptions } from "@/lib/api/tutors/query-options";
+import {
+  annotationModeLabels,
+  annotationScaleLabels,
+  defaultAnnotationConfig,
+} from "@/lib/feedback/annotations";
+import {
+  type AnnotationMode,
+  type AnnotationScale,
+  annotationConfigSchema,
+} from "@/lib/feedback/types";
 import { AdminLayout } from "@/routes/admin/-components/admin-layout";
 import { AiModelCombobox } from "@/routes/admin/-components/ai-model-combobox";
 import { MarkdownTextarea } from "@/routes/admin/-components/markdown-textarea";
+import { SegmentedControl } from "@/routes/admin/-components/segmented-control";
 
 const tutorFormSchema = z.object({
   tutorId: z.string().min(1),
@@ -37,6 +56,7 @@ const tutorFormSchema = z.object({
   published: z.boolean(),
   codeExecutionEnabled: z.boolean(),
   modelId: z.number().int().nullable(),
+  annotations: annotationConfigSchema,
 });
 
 type TutorFormValues = z.infer<typeof tutorFormSchema>;
@@ -49,7 +69,16 @@ const defaultValues: TutorFormValues = {
   codeExecutionEnabled: false,
   tutorId: "",
   modelId: null,
+  annotations: defaultAnnotationConfig,
 };
+
+const annotationModeOptions = (
+  Object.entries(annotationModeLabels) as [AnnotationMode, string][]
+).map(([value, label]) => ({ value, label }));
+
+const annotationScaleOptions = (
+  Object.entries(annotationScaleLabels) as [AnnotationScale, string][]
+).map(([value, label]) => ({ value, label }));
 
 type TutorFormProps =
   | {
@@ -120,6 +149,150 @@ export function TutorForm(props: TutorFormProps) {
   }, [successMessage]);
 
   const isPending = createMutation.isPending || updateMutation.isPending;
+
+  function renderAnnotationList(
+    group: "ai" | "user",
+    title: string,
+    description: string,
+  ) {
+    return (
+      <form.Field name={`annotations.${group}`} mode="array">
+        {(listField) => (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium">{title}</p>
+                <FieldDescription>{description}</FieldDescription>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isPending}
+                onClick={() =>
+                  listField.pushValue({
+                    key: nanoid(10),
+                    question: "",
+                    tooltip: "",
+                    scale: "yes-no",
+                  })
+                }
+              >
+                <PlusIcon />
+                Hinzufügen
+              </Button>
+            </div>
+            {listField.state.value.length === 0 && (
+              <p className="text-sm text-secondary">Keine Fragen.</p>
+            )}
+            {listField.state.value.map((annotation, index) => (
+              <div
+                key={annotation.key}
+                className="flex flex-col gap-4 overflow-hidden rounded-lg border bg-surface-primary p-4"
+              >
+                <div className="-mx-4 -mt-4 flex items-center justify-between gap-4 rounded-t-lg border-b bg-surface-background-primary py-1 pr-1 pl-4">
+                  <p className="text-sm font-medium">Frage {index + 1}</p>
+                  <div className="flex gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Nach oben verschieben"
+                      disabled={isPending || index === 0}
+                      onClick={() => listField.moveValue(index, index - 1)}
+                    >
+                      <ArrowUpIcon />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Nach unten verschieben"
+                      disabled={
+                        isPending || index === listField.state.value.length - 1
+                      }
+                      onClick={() => listField.moveValue(index, index + 1)}
+                    >
+                      <ArrowDownIcon />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Frage entfernen"
+                      disabled={isPending}
+                      onClick={() => listField.removeValue(index)}
+                    >
+                      <Trash2Icon />
+                    </Button>
+                  </div>
+                </div>
+                <form.Field name={`annotations.${group}[${index}].question`}>
+                  {(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>Frage</FieldLabel>
+                        <Input
+                          type="text"
+                          name={field.name}
+                          id={field.name}
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          aria-invalid={isInvalid}
+                          disabled={isPending}
+                          autoComplete="off"
+                        />
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                </form.Field>
+                <form.Field name={`annotations.${group}[${index}].tooltip`}>
+                  {(field) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>Tooltip</FieldLabel>
+                      <Textarea
+                        name={field.name}
+                        id={field.name}
+                        value={field.state.value ?? ""}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        disabled={isPending}
+                        className="bg-surface-primary"
+                      />
+                      <FieldDescription>
+                        Optional. Wird über das Info-Symbol neben der Frage
+                        angezeigt.
+                      </FieldDescription>
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name={`annotations.${group}[${index}].scale`}>
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Skala</FieldLabel>
+                      <SegmentedControl
+                        label="Skala"
+                        options={annotationScaleOptions}
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        disabled={isPending}
+                      />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+            ))}
+          </div>
+        )}
+      </form.Field>
+    );
+  }
 
   return (
     <AdminLayout
@@ -332,6 +505,46 @@ export function TutorForm(props: TutorFormProps) {
             );
           }}
         </form.Field>
+        <div className="flex flex-col gap-6 border-t pt-6">
+          <form.Field name="annotations.mode">
+            {(field) => (
+              <Field>
+                <FieldLabel>Annotationen</FieldLabel>
+                <SegmentedControl
+                  label="Annotationen"
+                  options={annotationModeOptions}
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  disabled={isPending}
+                />
+                <FieldDescription>
+                  Pflicht-Annotationen müssen beantwortet werden, um
+                  fortzufahren. Freiwillige Ja/Nein-Fragen werden als Checkbox
+                  angezeigt. Änderungen gelten für neu gestartete Sitzungen.
+                </FieldDescription>
+              </Field>
+            )}
+          </form.Field>
+          {/* the questions are kept when switching to "Keine", so they come back when switching back */}
+          <form.Subscribe selector={(state) => state.values.annotations.mode}>
+            {(mode) =>
+              mode !== "none" && (
+                <>
+                  {renderAnnotationList(
+                    "ai",
+                    "Nach Tutor-Nachricht",
+                    "Fragen zur Nachricht des Tutors, bevor die Nutzer/in antwortet.",
+                  )}
+                  {renderAnnotationList(
+                    "user",
+                    "Nach eigener Antwort",
+                    "Fragen zur eigenen Antwort, nachdem die Nutzer/in sie abgeschickt hat.",
+                  )}
+                </>
+              )
+            }
+          </form.Subscribe>
+        </div>
         <Button type="submit" disabled={isPending}>
           {isEdit ? "Aktualisieren" : "Erstellen"}
         </Button>

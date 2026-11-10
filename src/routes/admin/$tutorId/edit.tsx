@@ -32,6 +32,7 @@ function RouteComponent() {
         published: tutor.published,
         codeExecutionEnabled: tutor.codeExecutionEnabled,
         modelId: tutor.modelId,
+        annotations: tutor.annotations,
       }}
     />
   );

@@ -22,7 +22,7 @@ import {
 } from "@/lib/ai/tutor-chat";
 import { validateModelSearch } from "@/lib/ai/validate-model-search";
 import { getTutorOptions } from "@/lib/api/tutors/query-options";
-import { nonStudyFeedback, studyFeedback } from "@/lib/feedback/feedback";
+import { toStoredAnnotations } from "@/lib/feedback/annotations";
 import {
   submitSecondFeedback,
   submitUserAnswerWithFeedback,
@@ -30,7 +30,6 @@ import {
 import { usePseudonymStore } from "@/lib/pseudonymStore";
 import { Phase } from "@/lib/types/phases";
 import { cn } from "@/lib/utils/cn";
-import { useIsStudyMode } from "@/lib/utils/use-is-study-mode";
 
 const BACKOFF_INITIAL_VALUE = 5 / 2;
 
@@ -63,13 +62,17 @@ export const Route = createFileRoute("/$tutor_id/tutor")({
 });
 
 function RouteComponent() {
-  const isStudyMode = useIsStudyMode();
-  const feedback = isStudyMode ? studyFeedback : nonStudyFeedback;
   const tutorId = Route.useParams({
     select: (params) => params.tutor_id,
   });
   const { model } = Route.useSearch();
   const { data: tutor } = useSuspenseQuery(getTutorOptions(tutorId));
+  // read once per session, changes of the tutor only affect new sessions
+  const [{ mode, ...annotations }] = useState(tutor.annotations);
+  const isRequired = mode === "required";
+  // without annotations the flow is the same as with optional ones, just without any cards
+  const feedbackMode = isRequired ? "required" : "optional";
+  const feedback = mode === "none" ? { ai: [], user: [] } : annotations;
   const executionIdRef = useRef(nanoid(10));
   const executionId = executionIdRef.current;
   const [error, setError] = useState(false);
@@ -78,7 +81,6 @@ function RouteComponent() {
     UIMessage | undefined
   >();
   const { pseudonym } = usePseudonymStore();
-  const mode = isStudyMode ? "study" : "non-study";
   const { messages, sendMessage, regenerate, status } = useChat({
     transport: new DefaultChatTransport({
       prepareSendMessagesRequest: ({ messages }) => {
@@ -124,6 +126,7 @@ function RouteComponent() {
   const [phase, setPhase] = useState<Phase>(Phase.init);
   const [userAnswer, setUserAnswer] = useState("");
   const [showError, setShowError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingFeedbackSubmission, setPendingFeedbackSubmission] = useState<
     Record<string, string | undefined> | undefined
   >();
@@ -140,9 +143,9 @@ function RouteComponent() {
   const enableInputArea =
     (phase === Phase.question_with_feedback &&
       status === "ready" &&
-      (!isStudyMode ||
-        feedback.ai.every((f) => !!reflectionOnChatbotFeedback[f.label]))) ||
-    !isStudyMode;
+      (!isRequired ||
+        feedback.ai.every((f) => !!reflectionOnChatbotFeedback[f.key]))) ||
+    !isRequired;
 
   const disableSubmitButton =
     Boolean(pendingFeedbackSubmission) ||
@@ -162,30 +165,31 @@ function RouteComponent() {
     status: string;
     phase: Phase;
     userAnswer: string;
-    reflectionOnChatbotFeedback: {
-      isCorrect?: boolean;
-      isSuitable?: boolean;
-    };
+    reflectionOnChatbotFeedback: Record<string, string | undefined>;
   }) {
-    if (status === "streaming") {
+    // only one message per tutor reply, the next one has to wait for the answer
+    if (
+      status !== "ready" ||
+      latestMessage?.role !== "assistant" ||
+      isSubmitting
+    ) {
       return false;
     }
 
-    if (!isStudyMode) {
+    if (userAnswer.trim().length === 0) {
+      return false;
+    }
+
+    if (!isRequired) {
       return true;
     }
 
     if (phase !== Phase.question_with_feedback) {
       return false;
     }
-    if (userAnswer.length === 0) {
-      return false;
-    }
-    if (reflectionOnChatbotFeedback.isCorrect === undefined) {
-      return false;
-    }
-    // not checking isSuitable because it only applies to non-study mode
-    return true;
+    return feedback.ai.every(
+      (annotation) => !!reflectionOnChatbotFeedback[annotation.key],
+    );
   }
 
   useEffect(() => {
@@ -221,8 +225,8 @@ function RouteComponent() {
 
   useEffect(() => {
     const questionnaireCompleted =
-      !isStudyMode ||
-      feedback.user.every((field) => !!reflectionOnOwnAnswer[field.label]);
+      !isRequired ||
+      feedback.user.every((field) => !!reflectionOnOwnAnswer[field.key]);
 
     if (
       phase !== Phase.answer_with_feedback_and_response_hidden ||
@@ -234,12 +238,9 @@ function RouteComponent() {
 
     setPhase(Phase.question_with_feedback);
 
-    if (isStudyMode) {
+    if (isRequired) {
       const feedbackSnapshot = { ...reflectionOnOwnAnswer };
-      setReflectionOnOwnAnswer({
-        externalResource: undefined,
-        thoughtAboutIndex: undefined,
-      });
+      setReflectionOnOwnAnswer({});
       setPendingFeedbackSubmission(feedbackSnapshot);
     }
   }, [reflectionOnOwnAnswer, latestMessage, phase]);
@@ -266,30 +267,38 @@ function RouteComponent() {
         executionId,
         model,
         message: completedAssistantMessage,
-        reflectionOnOwnAnswer: feedbackSnapshot,
+        reflectionOnOwnAnswer: toStoredAnnotations(
+          feedback.user,
+          feedbackSnapshot,
+        ),
         mode,
       });
 
       setPendingFeedbackSubmission(undefined);
-      setSubmittedFeedbackMessageId(completedAssistantMessage.id);
       setShowError(false);
-      setTimeout(() => {
-        setSubmittedFeedbackMessageId(null);
-      }, 5000);
+      // nothing to thank for without annotations
+      if (feedback.user.length > 0) {
+        setSubmittedFeedbackMessageId(completedAssistantMessage.id);
+        setTimeout(() => {
+          setSubmittedFeedbackMessageId(null);
+        }, 5000);
+      }
     } catch {
       setShowError(true);
     }
   }
 
   async function submitUserMessage() {
-    if (!isStudyMode) {
+    if (disableSubmitButton) {
+      return;
+    }
+    setIsSubmitting(true);
+
+    if (!isRequired) {
       if (!isInitialAssistantResponse(messages)) {
         await submitReflectionOnOwnAnswer();
       }
-      setReflectionOnOwnAnswer({
-        externalResource: undefined,
-        thoughtAboutIndex: undefined,
-      });
+      setReflectionOnOwnAnswer({});
     }
     try {
       await submitUserAnswerWithFeedback({
@@ -298,7 +307,10 @@ function RouteComponent() {
         model,
         executionId,
         userAnswer,
-        reflectionOnChatbotFeedback,
+        reflectionOnChatbotFeedback: toStoredAnnotations(
+          feedback.ai,
+          reflectionOnChatbotFeedback,
+        ),
         mode,
       });
 
@@ -307,12 +319,13 @@ function RouteComponent() {
 
       setShowError(false);
       setUserAnswer("");
-      setReflectionOnChatbotFeedback({
-        isCorrect: undefined,
-        isSuitable: undefined,
-      });
+      setReflectionOnChatbotFeedback({});
 
-      if (lastBotMessage && submittedFeedbackMessageId !== lastBotMessage.id) {
+      if (
+        feedback.ai.length > 0 &&
+        lastBotMessage &&
+        submittedFeedbackMessageId !== lastBotMessage.id
+      ) {
         setSubmittedFeedbackMessageId(lastBotMessage.id);
         setTimeout(() => {
           setSubmittedFeedbackMessageId(null);
@@ -321,6 +334,8 @@ function RouteComponent() {
       setPhase(Phase.answer_with_feedback_and_response_hidden);
     } catch {
       setShowError(true);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -353,18 +368,19 @@ function RouteComponent() {
         <div className="no-scrollbar flex grow flex-col overflow-auto px-4 sm:px-0">
           {messages.map((message, index) => {
             const isLastMessage = index === messages.length - 1;
-            const isFirstMessage = index === 0;
             return (
               <div key={message.id} className="group mt-6 flex w-full flex-col">
                 {((phase === Phase.answer_with_feedback_and_response_hidden &&
                   message.role !== "user" &&
                   isLastMessage) ||
-                  (!isStudyMode &&
+                  (!isRequired &&
                     phase === Phase.question_with_feedback &&
-                    !isFirstMessage &&
+                    // there is no own answer to reflect on before the user wrote anything
+                    !isInitialAssistantResponse(messages) &&
                     isLastMessage)) && (
                   <Feedback
-                    feedbackFields={feedback.user}
+                    annotations={feedback.user}
+                    mode={feedbackMode}
                     feedback={reflectionOnOwnAnswer}
                     setFeedback={setReflectionOnOwnAnswer}
                   />
@@ -373,7 +389,7 @@ function RouteComponent() {
                 <AnimatePresence>
                   {phase === Phase.question_with_feedback &&
                     submittedFeedbackMessageId === message.id &&
-                    isStudyMode && <FeedbackReaction />}
+                    isRequired && <FeedbackReaction />}
                 </AnimatePresence>
 
                 <ChatMessage
@@ -381,7 +397,7 @@ function RouteComponent() {
                   blurAssistant={
                     phase === Phase.answer_with_feedback_and_response_hidden &&
                     isLastMessage &&
-                    isStudyMode
+                    isRequired
                   }
                 />
                 {isLastMessage &&
@@ -396,7 +412,8 @@ function RouteComponent() {
                   isLastMessage && (
                     <>
                       <Feedback
-                        feedbackFields={feedback.ai}
+                        annotations={feedback.ai}
+                        mode={feedbackMode}
                         feedback={reflectionOnChatbotFeedback}
                         setFeedback={setReflectionOnChatbotFeedback}
                       />
@@ -424,7 +441,7 @@ function RouteComponent() {
                   )}
                 {phase === Phase.answer_with_feedback_and_response_hidden &&
                   submittedFeedbackMessageId === message.id &&
-                  isStudyMode && (
+                  isRequired && (
                     <AnimatePresence>
                       <FeedbackReaction />
                     </AnimatePresence>
@@ -459,7 +476,7 @@ function RouteComponent() {
             value={userAnswer}
             name="transcript"
             disabled={
-              isStudyMode &&
+              isRequired &&
               (status !== "ready" || phase !== "question-with-feedback")
             }
             onChange={(e) => setUserAnswer(e.target.value)}
@@ -474,11 +491,7 @@ function RouteComponent() {
                 : ""
             }
             onKeyDown={(event) => {
-              if (
-                event.key === "Enter" &&
-                !event.shiftKey &&
-                !disableSubmitButton
-              ) {
+              if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
                 void submitUserMessage();
               }

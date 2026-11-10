@@ -5,10 +5,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { Button } from "@/components/ui/button";
 import { MemoizedMarkdown } from "@/components/ui/memoized-markdown";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils/cn";
+import { SegmentedControl } from "@/routes/admin/-components/segmented-control";
 
 type Mode = "edit" | "preview" | "split";
 
@@ -92,24 +92,12 @@ export function MarkdownTextarea({
       >
         <div className="flex items-center justify-between gap-2">
           {label}
-          <fieldset
-            aria-label="Ansicht"
-            className="flex gap-1 rounded-md border p-0.5"
-          >
-            {modes.map((m) => (
-              <Button
-                key={m.value}
-                type="button"
-                size="sm"
-                variant={mode === m.value ? "secondary" : "ghost"}
-                aria-pressed={mode === m.value}
-                onClick={() => setMode(m.value)}
-                className={cn("h-7 px-2", m.className)}
-              >
-                {m.label}
-              </Button>
-            ))}
-          </fieldset>
+          <SegmentedControl
+            label="Ansicht"
+            options={modes}
+            value={mode}
+            onChange={setMode}
+          />
         </div>
         <div className={cn(mode === "split" && "grid gap-2 lg:grid-cols-2")}>
           {/* keep the textarea mounted so focus/scroll state and form wiring survive mode switches */}

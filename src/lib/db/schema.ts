@@ -11,6 +11,8 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { user } from "@/lib/auth-schema";
+import { defaultAnnotationConfig } from "@/lib/feedback/annotations";
+import type { AnnotationConfig } from "@/lib/feedback/types";
 
 export * from "@/lib/auth-schema";
 
@@ -28,7 +30,7 @@ export const messages = pgTable("t_messages", {
   role: varchar("role", { enum: ["ai", "user"], length: 10 }).notNull(),
   message: text("message").notNull(),
   feedback: json("feedback").notNull(), // leaving this unstructured (or less stuctured) on purpose
-  mode: text("mode"),
+  mode: text("mode"), // annotation mode of the tutor at the time of the message, "study" | "non-study" for old messages
   createdAt: timestamp().defaultNow().notNull(),
 });
 
@@ -62,6 +64,10 @@ export const tutors = pgTable("t_tutors", {
   modelId: integer("model_id").references(() => aiModels.id, {
     onDelete: "restrict",
   }),
+  annotations: json("annotations")
+    .$type<AnnotationConfig>()
+    .default(defaultAnnotationConfig)
+    .notNull(),
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),

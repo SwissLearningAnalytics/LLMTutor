@@ -1,6 +1,7 @@
 import type { Feedback } from "@/lib/feedback/types";
 
-// @Patricia - I added the questions in the new structure here, the nonStudyFeedback is just a placeholder
+// the former hardcoded questions of the study and non-study mode
+// still needed to resolve the questions of old messages, studyFeedback also serves as default config for tutors
 
 export const studyFeedback: Feedback = {
   user: [

@@ -112,19 +112,14 @@ In der lokalen Entwicklung oder in Entwicklungs-Builds kann ein Modell über ein
 > **Hinweis:** Die Modellauswahl per Query-Parameter ist in Produktions-Builds deaktiviert.
 
 
-### Modi
+### Annotationen
 
-Der Tutor hat zwei unterschiedliche Modi.  
-In einem Modus müssen Nutzer die Feedback-Fragen beantworten, um fortzufahren (Studienmodus), im anderen nicht (Nicht-Studienmodus).  
-Die Fragen und die Benutzeroberfläche unterscheiden sich zwischen den beiden Modi.
+Annotationen sind die Fragebogen-Karten, die nach einer Nachricht des Tutors und nach einer Nachricht des Nutzers angezeigt werden. Die Antworten werden mit den Nachrichten gespeichert.
+Sie werden pro Tutor im Adminbereich konfiguriert:
 
-Um zwischen den Modi zu wechseln, muss die Anwendung über unterschiedliche URLs aufgerufen werden.  
-Der Standardmodus ist der Studienmodus.  
-Für den Nicht-Studienmodus rufen Sie `http://demo.localhost:3000` auf.
-
-Die URL für den Nicht-Studienmodus kann über die Umgebungsvariable `VITE_NON_STUDY_MODE_HOSTNAME` konfiguriert werden.
-
-
+- **Modus**: `Pflicht` (die Fragen müssen beantwortet werden, um fortzufahren; die Antwort des Tutors bleibt verborgen, bis die Fragen zur eigenen Antwort beantwortet sind), `Freiwillig` oder `Keine`.
+- **Fragen**: eine Liste von Fragen für beide Zeitpunkte, jeweils mit optionalem Tooltip.
+- **Skala**: `Ja/Nein` oder `0–10` pro Frage. Freiwillige Ja/Nein-Fragen werden als Checkbox dargestellt.
 
 ## Entwicklung
 

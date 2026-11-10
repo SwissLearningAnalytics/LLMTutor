@@ -1,5 +1,6 @@
 import type { UIMessage } from "ai";
 import { addMessage } from "@/lib/api/messages";
+import type { AnnotationMode, StoredAnnotations } from "@/lib/feedback/types";
 
 export async function submitUserAnswerWithFeedback({
   promptName,
@@ -15,8 +16,8 @@ export async function submitUserAnswerWithFeedback({
   model?: string;
   executionId: string;
   userAnswer: string;
-  reflectionOnChatbotFeedback: Record<string, string | undefined>;
-  mode: string;
+  reflectionOnChatbotFeedback: StoredAnnotations;
+  mode: AnnotationMode;
 }) {
   try {
     await addMessage({
@@ -50,8 +51,8 @@ export async function submitSecondFeedback({
   executionId: string;
   model?: string;
   message: UIMessage;
-  reflectionOnOwnAnswer: Record<string, string | undefined>;
-  mode: string;
+  reflectionOnOwnAnswer: StoredAnnotations;
+  mode: AnnotationMode;
 }) {
   const text = message.parts
     .filter((part) => part.type === "text")
