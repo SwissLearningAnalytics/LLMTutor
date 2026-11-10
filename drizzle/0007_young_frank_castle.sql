@@ -1,0 +1,1 @@
+ALTER TABLE "t_tutors" ADD COLUMN "code_execution_enabled" boolean DEFAULT false NOT NULL;

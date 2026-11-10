@@ -28,6 +28,11 @@ export function ChatMessage({
   }
 
   if (message.role === "assistant") {
+    // no text yet while a tool such as the code interpreter is still running
+    if (!message.parts.some((part) => part.type === "text")) {
+      return null;
+    }
+
     return (
       <motion.div layout={false}>
         <div

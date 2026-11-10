@@ -57,6 +57,9 @@ export const tutors = pgTable("t_tutors", {
   prompt: text().notNull(),
   learningObjectives: text("learning_objectives"),
   published: boolean().default(false).notNull(),
+  codeExecutionEnabled: boolean("code_execution_enabled")
+    .default(false)
+    .notNull(),
   // null means the tutor uses the default model
   modelId: integer("model_id").references(() => aiModels.id, {
     onDelete: "restrict",

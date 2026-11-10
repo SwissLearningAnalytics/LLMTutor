@@ -12,6 +12,7 @@ export const tutorInsertSchema = z.object({
   prompt: z.string().min(1),
   learningObjectives: z.string().nullable().optional(),
   published: z.boolean().optional(),
+  codeExecutionEnabled: z.boolean().optional(),
   modelId: z.number().int().nullable().optional(),
   annotations: annotationConfigSchema.optional(),
 });
@@ -23,6 +24,7 @@ export const tutorUpdateSchema = z
     prompt: z.string().min(1).optional(),
     learningObjectives: z.string().nullable().optional(),
     published: z.boolean().optional(),
+    codeExecutionEnabled: z.boolean().optional(),
     modelId: z.number().int().nullable().optional(),
     annotations: annotationConfigSchema.optional(),
   })

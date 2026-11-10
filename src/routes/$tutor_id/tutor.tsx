@@ -400,7 +400,12 @@ function RouteComponent() {
                     isRequired
                   }
                 />
-                {status === "submitted" && isLastMessage && <LoadingDots />}
+                {isLastMessage &&
+                  (status === "submitted" ||
+                    (status === "streaming" &&
+                      message.parts.at(-1)?.type !== "text")) && (
+                    <LoadingDots />
+                  )}
 
                 {phase === Phase.question_with_feedback &&
                   status === "ready" &&
