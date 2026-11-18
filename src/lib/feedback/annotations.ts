@@ -32,21 +32,75 @@ export function getScaleOptions(scale: AnnotationScale): string[] {
   }
 }
 
-function toAnnotation(field: FeedbackField): Annotation {
-  return {
-    key: field.label,
-    question: field.text,
-    tooltip: field.tooltip,
-    scale: field.options.length > 2 ? "0-10" : "yes-no",
-  };
+type AnnotationTexts = Pick<Annotation, "question" | "tooltip">;
+
+function getTexts(fields: FeedbackField[], label: string): AnnotationTexts {
+  const field = fields.find((field) => field.label === label);
+  if (!field) {
+    throw new Error(`Missing feedback field ${label}`);
+  }
+  return { question: field.text, tooltip: field.tooltip };
 }
 
-// keeps the labels of the former study questions, so old and new answers share the same keys
+// the 0-10 questions of the former study mode and the yes/no statements of the former non-study mode,
+// keyed by the former labels, so old and new answers share the same keys
+const defaultAnnotationTexts: Record<
+  string,
+  Record<AnnotationScale, AnnotationTexts>
+> = {
+  isCorrect: {
+    "0-10": getTexts(studyFeedback.ai, "isCorrect"),
+    "yes-no": getTexts(nonStudyFeedback.ai, "isCorrect"),
+  },
+  thoughtAboutIndex: {
+    "0-10": getTexts(studyFeedback.user, "thoughtAboutIndex"),
+    "yes-no": getTexts(nonStudyFeedback.user, "thoughtAboutIndex"),
+  },
+};
+
+function getDefaultAnnotation(key: string, scale: AnnotationScale): Annotation {
+  return { key, scale, ...defaultAnnotationTexts[key][scale] };
+}
+
 export const defaultAnnotationConfig: AnnotationConfig = {
   mode: "required",
-  ai: studyFeedback.ai.map(toAnnotation),
-  user: studyFeedback.user.map(toAnnotation),
+  ai: [getDefaultAnnotation("isCorrect", "yes-no")],
+  user: [getDefaultAnnotation("thoughtAboutIndex", "0-10")],
 };
+
+function isUnchanged(
+  value: string | undefined,
+  defaultValue: string | undefined,
+) {
+  return (value ?? "").trim() === (defaultValue ?? "").trim();
+}
+
+/**
+ * Switches the scale of an annotation. The question and tooltip of a default annotation are replaced with the
+ * default texts of the new scale, as long as they weren't edited.
+ */
+export function switchAnnotationScale(
+  annotation: Annotation,
+  scale: AnnotationScale,
+): Annotation {
+  const texts = defaultAnnotationTexts[annotation.key];
+  if (!texts) {
+    return { ...annotation, scale };
+  }
+
+  const previous = texts[annotation.scale];
+  const next = texts[scale];
+  return {
+    ...annotation,
+    scale,
+    question: isUnchanged(annotation.question, previous.question)
+      ? next.question
+      : annotation.question,
+    tooltip: isUnchanged(annotation.tooltip, previous.tooltip)
+      ? next.tooltip
+      : annotation.tooltip,
+  };
+}
 
 export function toStoredAnnotations(
   annotations: Annotation[],
