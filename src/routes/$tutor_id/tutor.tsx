@@ -5,33 +5,80 @@ import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { CornerDownLeftIcon, RefreshCwIcon } from "lucide-react";
 import { AnimatePresence } from "motion/react";
-import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { Feedback } from "@/components/feedback/feedback";
 import { FeedbackReaction } from "@/components/feedback/feedback-reaction";
 import { Layout } from "@/components/layout";
+import Loading from "@/components/loading";
 import { AutoResizingTextarea } from "@/components/ui/autoresizing-textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LoadingDots } from "@/components/ui/loading-dots";
 import { MemoizedMarkdown } from "@/components/ui/memoized-markdown";
 import {
+  getResumePhase,
   isInitialAssistantResponse,
   prepareTutorChatMessages,
+  type ResumableSession,
+  toResumedChatMessages,
 } from "@/lib/ai/tutor-chat";
 import { validateModelSearch } from "@/lib/ai/validate-model-search";
+import {
+  getResumableSession,
+  startTutorSession,
+  type TutorSessionCredentials,
+} from "@/lib/api/tutor-sessions";
 import { getTutorOptions } from "@/lib/api/tutors/query-options";
 import { toStoredAnnotations } from "@/lib/feedback/annotations";
+import type { AnnotationMode } from "@/lib/feedback/types";
 import {
   submitSecondFeedback,
   submitUserAnswerWithFeedback,
 } from "@/lib/hooks/submitFeedback";
 import { usePseudonymStore } from "@/lib/pseudonymStore";
+import {
+  getSessionEndReason,
+  type SessionEndReason,
+} from "@/lib/tutor-session-errors";
+import {
+  clearTutorSession,
+  readTutorSession,
+  type TutorSessionDraft,
+  writeTutorSession,
+} from "@/lib/tutorSessionStorage";
 import { Phase } from "@/lib/types/phases";
 import { cn } from "@/lib/utils/cn";
 
 const BACKOFF_INITIAL_VALUE = 5 / 2;
+// a reply that is younger than this may still be generating, and is stored by the server when it is done
+const REPLY_GRACE_PERIOD_SECONDS = 60;
+const REPLY_POLL_INTERVAL_MS = 2000;
+
+async function loadResumableSession(
+  tutorId: string,
+  credentials: TutorSessionCredentials,
+) {
+  const load = () => getResumableSession({ data: { tutorId, ...credentials } });
+
+  let session = await load();
+  while (
+    session.messages.at(-1)?.role === "user" &&
+    session.secondsSinceLastActivity < REPLY_GRACE_PERIOD_SECONDS
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, REPLY_POLL_INTERVAL_MS));
+    session = await load();
+  }
+  return session;
+}
+
+type TutorSession = TutorSessionCredentials & {
+  pseudonym: string;
+  // a resumed session keeps the mode it was started with
+  mode: AnnotationMode;
+  resumed?: ResumableSession;
+  draft?: TutorSessionDraft;
+};
 
 type Search = {
   model?: string;
@@ -66,22 +113,134 @@ function RouteComponent() {
     select: (params) => params.tutor_id,
   });
   const { model } = Route.useSearch();
+  const { pseudonym } = usePseudonymStore();
+  const navigate = Route.useNavigate();
+  const [session, setSession] = useState<TutorSession | undefined>();
+  const [loadingFailed, setLoadingFailed] = useState(false);
+  const [endReason, setEndReason] = useState<SessionEndReason | undefined>();
+  const sessionRequested = useRef(false);
+
+  async function openSession() {
+    const stored = readTutorSession(tutorId);
+    try {
+      if (stored) {
+        const resumed = await loadResumableSession(tutorId, stored);
+        setSession({
+          executionId: stored.executionId,
+          token: stored.token,
+          pseudonym: resumed.pseudonym,
+          mode: resumed.mode,
+          resumed,
+          draft: stored.draft,
+        });
+        return;
+      }
+
+      if (pseudonym === "") {
+        navigate({
+          to: "/$tutor_id",
+          params: { tutor_id: tutorId },
+          search: { model },
+        });
+        return;
+      }
+
+      const { mode, ...credentials } = await startTutorSession({
+        data: { tutorId, pseudonym },
+      });
+      writeTutorSession(tutorId, credentials);
+      setSession({ ...credentials, pseudonym, mode });
+    } catch (error) {
+      console.error("Error loading session: ", error);
+      const reason = getSessionEndReason(error);
+      if (reason) {
+        setEndReason(reason);
+      } else {
+        // a stored session is kept, it can still be resumed once the server is reachable
+        setLoadingFailed(true);
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (sessionRequested.current) {
+      return;
+    }
+    sessionRequested.current = true;
+    void openSession();
+  }, []);
+
+  if (endReason) {
+    return (
+      <SessionEnded
+        reason={endReason}
+        onRestart={() => {
+          clearTutorSession(tutorId);
+          navigate({
+            to: "/$tutor_id",
+            params: { tutor_id: tutorId },
+            search: { model },
+          });
+        }}
+      />
+    );
+  }
+
+  if (loadingFailed) {
+    return (
+      <div className="grid h-dvh w-full place-items-center">
+        <RetryButton
+          waitTime={0}
+          onClick={() => {
+            setLoadingFailed(false);
+            void openSession();
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Loading />;
+  }
+
+  return <TutorChat session={session} onSessionEnded={setEndReason} />;
+}
+
+function TutorChat({
+  session: { executionId, token, mode, resumed, draft },
+  onSessionEnded,
+}: {
+  session: TutorSession;
+  onSessionEnded: (reason: SessionEndReason) => void;
+}) {
+  const tutorId = Route.useParams({
+    select: (params) => params.tutor_id,
+  });
+  const { model } = Route.useSearch();
   const { data: tutor } = useSuspenseQuery(getTutorOptions(tutorId));
   // read once per session, changes of the tutor only affect new sessions
-  const [{ mode, ...annotations }] = useState(tutor.annotations);
+  const [annotations] = useState(tutor.annotations);
+  const credentials = { executionId, token };
   const isRequired = mode === "required";
   // without annotations the flow is the same as with optional ones, just without any cards
   const feedbackMode = isRequired ? "required" : "optional";
   const feedback = mode === "none" ? { ai: [], user: [] } : annotations;
-  const executionIdRef = useRef(nanoid(10));
-  const executionId = executionIdRef.current;
+  const [resumedMessages] = useState(() =>
+    toResumedChatMessages(resumed?.messages ?? []),
+  );
   const [error, setError] = useState(false);
   const [backoff, setBackoff] = useState(BACKOFF_INITIAL_VALUE);
   const [completedAssistantMessage, setCompletedAssistantMessage] = useState<
     UIMessage | undefined
-  >();
-  const { pseudonym } = usePseudonymStore();
+  >(() => {
+    const latestResumedMessage = resumedMessages.at(-1);
+    return latestResumedMessage?.role === "assistant"
+      ? latestResumedMessage
+      : undefined;
+  });
   const { messages, sendMessage, regenerate, status } = useChat({
+    messages: resumedMessages,
     transport: new DefaultChatTransport({
       prepareSendMessagesRequest: ({ messages }) => {
         const preparedChat = prepareTutorChatMessages(messages);
@@ -91,8 +250,7 @@ function RouteComponent() {
             model,
             tutorId: tutor.tutorId,
             executionId,
-            pseudonym,
-            mode,
+            token,
           },
         };
       },
@@ -110,6 +268,11 @@ function RouteComponent() {
       }
     },
     onError: (error) => {
+      const reason = getSessionEndReason(error);
+      if (reason) {
+        onSessionEnded(reason);
+        return;
+      }
       setError(true);
       setBackoff((b) => 2 * b);
       console.error("Error generating response: ", error);
@@ -117,13 +280,20 @@ function RouteComponent() {
   });
   const lastBotMessage = messages.filter((m) => m.role === "assistant").at(-1);
   const latestMessage = messages.at(-1);
-  const navigate = Route.useNavigate();
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const [phase, setPhase] = useState<Phase>(Phase.init);
-  const [userAnswer, setUserAnswer] = useState("");
+  const [phase, setPhase] = useState<Phase>(() =>
+    resumed
+      ? getResumePhase({
+          messages: resumed.messages,
+          mode,
+          hasOwnAnswerQuestions: feedback.user.length > 0,
+        })
+      : Phase.init,
+  );
+  const [userAnswer, setUserAnswer] = useState(draft?.userAnswer ?? "");
   const [showError, setShowError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingFeedbackSubmission, setPendingFeedbackSubmission] = useState<
@@ -134,10 +304,28 @@ function RouteComponent() {
     string | null
   >(null);
   const [reflectionOnChatbotFeedback, setReflectionOnChatbotFeedback] =
-    useState<Record<string, string | undefined>>({});
+    useState<Record<string, string | undefined>>(
+      draft?.reflectionOnChatbotFeedback ?? {},
+    );
   const [reflectionOnOwnAnswer, setReflectionOnOwnAnswer] = useState<
     Record<string, string | undefined>
-  >({});
+  >(draft?.reflectionOnOwnAnswer ?? {});
+
+  useEffect(() => {
+    writeTutorSession(tutor.tutorId, {
+      ...credentials,
+      draft: { userAnswer, reflectionOnChatbotFeedback, reflectionOnOwnAnswer },
+    });
+  }, [userAnswer, reflectionOnChatbotFeedback, reflectionOnOwnAnswer]);
+
+  function handleSubmitError(error: unknown) {
+    const reason = getSessionEndReason(error);
+    if (reason) {
+      onSessionEnded(reason);
+    } else {
+      setShowError(true);
+    }
+  }
 
   const enableInputArea =
     (phase === Phase.question_with_feedback &&
@@ -192,24 +380,21 @@ function RouteComponent() {
   }
 
   useEffect(() => {
-    if (pseudonym === "") {
-      navigate({
-        to: "/$tutor_id",
-        params: { tutor_id: tutorId },
-        search: { model },
-      });
-    } else if (phase === Phase.init) {
-      // deferred because useChat aborts running requests when strict mode simulates an unmount
-      const timeout = setTimeout(() => {
+    // deferred because useChat aborts running requests when strict mode simulates an unmount
+    const timeout = setTimeout(() => {
+      if (phase === Phase.init) {
         sendMessage({
           role: "system",
           parts: [{ type: "text", text: "Beginne die Unterhaltung." }],
         }).then(() => {
           setPhase(Phase.question_with_feedback);
         });
-      });
-      return () => clearTimeout(timeout);
-    }
+      } else if (latestMessage?.role === "user") {
+        // the student left before the reply was stored
+        regenerate();
+      }
+    });
+    return () => clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
@@ -261,16 +446,12 @@ function RouteComponent() {
 
     try {
       await submitSecondFeedback({
-        pseudonym,
         promptName: tutor.tutorId,
-        executionId,
-        model,
-        message: completedAssistantMessage,
+        session: credentials,
         reflectionOnOwnAnswer: toStoredAnnotations(
           feedback.user,
           feedbackSnapshot,
         ),
-        mode,
       });
 
       setPendingFeedbackSubmission(undefined);
@@ -282,8 +463,8 @@ function RouteComponent() {
           setSubmittedFeedbackMessageId(null);
         }, 5000);
       }
-    } catch {
-      setShowError(true);
+    } catch (error) {
+      handleSubmitError(error);
     }
   }
 
@@ -302,15 +483,13 @@ function RouteComponent() {
     try {
       await submitUserAnswerWithFeedback({
         promptName: tutor.tutorId,
-        pseudonym,
+        session: credentials,
         model,
-        executionId,
         userAnswer,
         reflectionOnChatbotFeedback: toStoredAnnotations(
           feedback.ai,
           reflectionOnChatbotFeedback,
         ),
-        mode,
       });
 
       setCompletedAssistantMessage(undefined);
@@ -331,8 +510,8 @@ function RouteComponent() {
         }, 5000);
       }
       setPhase(Phase.answer_with_feedback_and_response_hidden);
-    } catch {
-      setShowError(true);
+    } catch (error) {
+      handleSubmitError(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -508,6 +687,29 @@ function RouteComponent() {
         </form>
       </div>
     </Layout>
+  );
+}
+
+function SessionEnded({
+  reason,
+  onRestart,
+}: {
+  reason: SessionEndReason;
+  onRestart: () => void;
+}) {
+  return (
+    <div className="grid h-dvh w-full place-items-center p-4">
+      <div className="flex max-w-md flex-col items-center gap-4 text-center">
+        <p className="text-base">
+          {reason === "replaced"
+            ? "Diese Sitzung wurde auf einem anderen Gerät fortgesetzt."
+            : "Diese Sitzung ist abgelaufen und kann nicht mehr fortgesetzt werden."}
+        </p>
+        <Button variant={"destructive"} onClick={onRestart}>
+          Neue Sitzung starten
+        </Button>
+      </div>
+    </div>
   );
 }
 
