@@ -7,7 +7,7 @@ import {
   toUIMessageStream,
   type UIMessage,
 } from "ai";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { createOllama } from "ollama-ai-provider-v2";
 import { AiProviders, providerName } from "@/lib/ai/model";
 import { getDefaultModelName, isAvailableModel } from "@/lib/ai/resolve-model";
@@ -48,11 +48,12 @@ async function persistAssistantMessage({
     .orderBy(desc(storedMessages.id))
     .limit(1);
 
-  // a retry after a lost connection replaces the reply that was saved but never fully reached the student
+  // a retry after a lost connection replaces the reply that was saved but never fully reached the student,
+  // its timestamp is reset to when the reply the student actually sees was finished
   if (latestMessage?.role === "ai") {
     await db
       .update(storedMessages)
-      .set({ message, modelName })
+      .set({ message, modelName, createdAt: sql`now()` })
       .where(eq(storedMessages.id, latestMessage.id));
     return;
   }
