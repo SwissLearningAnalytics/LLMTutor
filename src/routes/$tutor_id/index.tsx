@@ -20,6 +20,7 @@ import {
 import { validateModelSearch } from "@/lib/ai/validate-model-search";
 import { getTutorOptions } from "@/lib/api/tutors/query-options";
 import { usePseudonymStore } from "@/lib/pseudonymStore";
+import { clearTutorSession } from "@/lib/tutorSessionStorage";
 
 type Search = {
   model?: string;
@@ -74,6 +75,8 @@ function RouteComponent() {
   function handleEnter(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey && pseudonym) {
       e.preventDefault();
+      // the start page always starts a new session, only a reload of the tutor page continues one
+      clearTutorSession(tutorId);
       navigate(toTutorOptions);
     }
   }
@@ -155,7 +158,7 @@ function RouteComponent() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-end py-3">
-          <Link {...toTutorOptions}>
+          <Link {...toTutorOptions} onClick={() => clearTutorSession(tutorId)}>
             <Button disabled={pseudonym === ""} variant={"destructive"}>
               Start
             </Button>

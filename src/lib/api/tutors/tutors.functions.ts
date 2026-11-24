@@ -53,7 +53,7 @@ export const getTutors = createServerFn({ method: "GET" }).handler(async () => {
 });
 
 export const getTutor = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ tutorId: z.string() }))
+  .validator(z.object({ tutorId: z.string() }))
   .handler(async ({ data: { tutorId } }) => {
     try {
       const tutor = await db.query.tutors.findFirst({
@@ -102,7 +102,7 @@ export const getOwnTutors = createServerFn({ method: "GET" }).handler(
 );
 
 export const getOwnTutor = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ tutorId: z.string() }))
+  .validator(z.object({ tutorId: z.string() }))
   .handler(async ({ data: { tutorId } }) => {
     const session = await ensureSession();
 
@@ -125,7 +125,7 @@ export const getOwnTutor = createServerFn({ method: "GET" })
   });
 
 export const createTutor = createServerFn({ method: "POST" })
-  .inputValidator(tutorInsertSchema)
+  .validator(tutorInsertSchema)
   .handler(async ({ data }) => {
     const session = await ensureSession();
 
@@ -141,7 +141,7 @@ export const createTutor = createServerFn({ method: "POST" })
   });
 
 export const updateTutor = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     z.object({
       tutorId: z.string().min(1),
       tutor: tutorUpdateSchema,
@@ -170,7 +170,7 @@ export const updateTutor = createServerFn({ method: "POST" })
   });
 
 export const deleteTutor = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ tutorId: z.string().min(1) }))
+  .validator(z.object({ tutorId: z.string().min(1) }))
   .handler(async ({ data: { tutorId } }) => {
     const session = await ensureSession();
 

@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as OverviewRouteImport } from './routes/overview'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as Tutor_idIndexRouteImport } from './routes/$tutor_id/index'
+import { Route as Tutor_idResumeRouteImport } from './routes/$tutor_id/resume'
 import { Route as Tutor_idTutorRouteImport } from './routes/$tutor_id/tutor'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminCreateRouteImport } from './routes/admin/create'
@@ -62,6 +63,11 @@ const TutorRoute = TutorRouteImport.update({
 const Tutor_idIndexRoute = Tutor_idIndexRouteImport.update({
   id: '/$tutor_id/',
   path: '/$tutor_id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Tutor_idResumeRoute = Tutor_idResumeRouteImport.update({
+  id: '/$tutor_id/resume',
+  path: '/$tutor_id/resume',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Tutor_idTutorRoute = Tutor_idTutorRouteImport.update({
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/tutor': typeof TutorRoute
   '/admin/models': typeof AdminModelsRouteRouteWithChildren
   '/admin/users': typeof AdminUsersRouteRouteWithChildren
+  '/$tutor_id/resume': typeof Tutor_idResumeRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
   '/admin/create': typeof AdminCreateRoute
   '/admin/import': typeof AdminImportRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/overview': typeof OverviewRoute
   '/tutor': typeof TutorRoute
+  '/$tutor_id/resume': typeof Tutor_idResumeRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
   '/admin/create': typeof AdminCreateRoute
   '/admin/import': typeof AdminImportRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/tutor': typeof TutorRoute
   '/admin/models': typeof AdminModelsRouteRouteWithChildren
   '/admin/users': typeof AdminUsersRouteRouteWithChildren
+  '/$tutor_id/resume': typeof Tutor_idResumeRoute
   '/$tutor_id/tutor': typeof Tutor_idTutorRoute
   '/admin/create': typeof AdminCreateRoute
   '/admin/import': typeof AdminImportRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/tutor'
     | '/admin/models'
     | '/admin/users'
+    | '/$tutor_id/resume'
     | '/$tutor_id/tutor'
     | '/admin/create'
     | '/admin/import'
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/overview'
     | '/tutor'
+    | '/$tutor_id/resume'
     | '/$tutor_id/tutor'
     | '/admin/create'
     | '/admin/import'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/tutor'
     | '/admin/models'
     | '/admin/users'
+    | '/$tutor_id/resume'
     | '/$tutor_id/tutor'
     | '/admin/create'
     | '/admin/import'
@@ -316,6 +328,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   OverviewRoute: typeof OverviewRoute
   TutorRoute: typeof TutorRoute
+  Tutor_idResumeRoute: typeof Tutor_idResumeRoute
   Tutor_idTutorRoute: typeof Tutor_idTutorRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiHealthRoute: typeof ApiHealthRoute
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       path: '/$tutor_id'
       fullPath: '/$tutor_id/'
       preLoaderRoute: typeof Tutor_idIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$tutor_id/resume': {
+      id: '/$tutor_id/resume'
+      path: '/$tutor_id/resume'
+      fullPath: '/$tutor_id/resume'
+      preLoaderRoute: typeof Tutor_idResumeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$tutor_id/tutor': {
@@ -560,6 +580,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   OverviewRoute: OverviewRoute,
   TutorRoute: TutorRoute,
+  Tutor_idResumeRoute: Tutor_idResumeRoute,
   Tutor_idTutorRoute: Tutor_idTutorRoute,
   ApiChatRoute: ApiChatRoute,
   ApiHealthRoute: ApiHealthRoute,

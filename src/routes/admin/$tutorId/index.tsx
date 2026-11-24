@@ -5,15 +5,20 @@ import {
   ChevronRightIcon,
   DownloadIcon,
   MessageSquareIcon,
+  SearchIcon,
 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   getOwnTutorConversationsOptions,
   getOwnTutorMessagesOptions,
 } from "@/lib/api/messages/query-options";
 import { getOwnTutorOptions } from "@/lib/api/tutors/query-options";
 import { AdminLayout } from "@/routes/admin/-components/admin-layout";
+import { ResumeLinkPopover } from "@/routes/admin/-components/resume-link";
+import { SegmentedControl } from "@/routes/admin/-components/segmented-control";
 import {
   downloadCsv,
   getExportFilenameTimestamp,
@@ -41,6 +46,27 @@ function RouteComponent() {
   const { data: messages } = useSuspenseQuery(
     getOwnTutorMessagesOptions(tutorId),
   );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState<ConversationFilter>("all");
+  const filteredConversations = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
+    const startOfToday = new Date().setHours(0, 0, 0, 0);
+
+    return conversations.filter((conversation) => {
+      if (filter === "resumable" && !conversation.isResumable) {
+        return false;
+      }
+      if (
+        filter === "today" &&
+        new Date(conversation.lastMessageAt).getTime() < startOfToday
+      ) {
+        return false;
+      }
+      return [conversation.pseudonym, conversation.executionId].some((value) =>
+        value.toLocaleLowerCase().includes(normalizedQuery),
+      );
+    });
+  }, [searchQuery, filter, conversations]);
 
   if (!tutor) {
     throw notFound();
@@ -71,18 +97,65 @@ function RouteComponent() {
           </Button>
         </div>
 
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative min-w-60 flex-1">
+            <SearchIcon
+              aria-hidden
+              className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-secondary"
+            />
+            <Input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Pseudonym oder ID suchen"
+              aria-label="Konversationen suchen"
+              className="bg-surface-primary pl-10"
+            />
+          </div>
+          <SegmentedControl
+            label="Konversationen filtern"
+            options={[
+              { value: "all", label: "Alle" },
+              { value: "today", label: "Heute" },
+              { value: "resumable", label: "Fortsetzbar" },
+            ]}
+            value={filter}
+            onChange={setFilter}
+          />
+        </div>
+
         <section className="overflow-hidden rounded-lg border border-border-primary bg-surface-primary shadow-sm">
-          {conversations.length > 0 ? (
+          {conversations.length === 0 ? (
+            <div className="flex min-h-48 flex-col items-center justify-center gap-1 p-8 text-center">
+              <h2 className="text-lg font-semibold text-primary">
+                Noch keine Konversationen
+              </h2>
+              <p className="text-sm text-secondary">
+                Über diesen Tutor wurden bisher keine Nachrichten gesendet.
+              </p>
+            </div>
+          ) : filteredConversations.length === 0 ? (
+            <div className="flex min-h-48 flex-col items-center justify-center gap-1 p-8 text-center">
+              <h2 className="text-lg font-semibold text-primary">
+                Keine passenden Konversationen
+              </h2>
+              <p className="text-sm text-secondary">
+                Passe die Suche oder den Filter an.
+              </p>
+            </div>
+          ) : (
             <ul className="divide-y divide-border-primary">
-              {conversations.map((conversation) => (
-                <li key={conversation.executionId}>
+              {filteredConversations.map((conversation) => (
+                <li
+                  key={conversation.executionId}
+                  className="flex items-center transition-colors hover:bg-surface-background-primary"
+                >
                   <Link
                     to="/admin/$tutorId/conversations/$executionId"
                     params={{
                       tutorId,
                       executionId: conversation.executionId,
                     }}
-                    className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-surface-background-primary focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+                    className="flex min-w-0 flex-1 items-center justify-between gap-4 p-4 focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
                   >
                     <div className="min-w-0">
                       <div className="flex min-w-0 items-center gap-2">
@@ -99,6 +172,9 @@ function RouteComponent() {
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
+                      {conversation.isResumable && (
+                        <Badge variant="green">Fortsetzbar</Badge>
+                      )}
                       <Badge variant="gray">
                         {formatMessageCount(conversation.messageCount)}
                       </Badge>
@@ -116,24 +192,26 @@ function RouteComponent() {
                       />
                     </div>
                   </Link>
+                  {/* outside of the link, a button can't be nested in it */}
+                  {conversation.isResumable && (
+                    <div className="pr-4">
+                      <ResumeLinkPopover
+                        tutorId={tutorId}
+                        executionId={conversation.executionId}
+                      />
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
-          ) : (
-            <div className="flex min-h-48 flex-col items-center justify-center gap-1 p-8 text-center">
-              <h2 className="text-lg font-semibold text-primary">
-                Noch keine Konversationen
-              </h2>
-              <p className="text-sm text-secondary">
-                Über diesen Tutor wurden bisher keine Nachrichten gesendet.
-              </p>
-            </div>
           )}
         </section>
       </div>
     </AdminLayout>
   );
 }
+
+type ConversationFilter = "all" | "today" | "resumable";
 
 function formatDate(date: string | Date) {
   return new Intl.DateTimeFormat("de-CH", {
