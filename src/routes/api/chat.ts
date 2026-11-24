@@ -7,7 +7,7 @@ import {
   toUIMessageStream,
   type UIMessage,
 } from "ai";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { createOllama } from "ollama-ai-provider-v2";
 import { AiProviders, providerName } from "@/lib/ai/model";
 import { getDefaultModelName, isAvailableModel } from "@/lib/ai/resolve-model";
@@ -16,33 +16,56 @@ import {
   createTutorModelMessages,
 } from "@/lib/ai/tutor-chat";
 import { db } from "@/lib/db";
-import { messages as storedMessages, tutors } from "@/lib/db/schema";
-import type { AnnotationMode } from "@/lib/feedback/types";
+import {
+  messages as storedMessages,
+  type TutorSessionSelect,
+  tutors,
+} from "@/lib/db/schema";
+import { verifyTutorSession } from "@/lib/tutor-session-auth";
 
-async function persistInitialAssistantMessage({
+async function persistAssistantMessage({
   executionId,
   message,
-  mode,
   modelName,
-  pseudonym,
+  session,
   tutorId,
 }: {
   executionId: string;
   message: string;
-  mode: AnnotationMode;
   modelName: string;
-  pseudonym: string;
+  session: TutorSessionSelect;
   tutorId: string;
 }) {
+  const [latestMessage] = await db
+    .select({ id: storedMessages.id, role: storedMessages.role })
+    .from(storedMessages)
+    .where(
+      and(
+        eq(storedMessages.promptName, tutorId),
+        eq(storedMessages.executionId, executionId),
+      ),
+    )
+    .orderBy(desc(storedMessages.id))
+    .limit(1);
+
+  // a retry after a lost connection replaces the reply that was saved but never fully reached the student
+  if (latestMessage?.role === "ai") {
+    await db
+      .update(storedMessages)
+      .set({ message, modelName })
+      .where(eq(storedMessages.id, latestMessage.id));
+    return;
+  }
+
   await db.insert(storedMessages).values({
     executionId,
-    pseudonym,
+    pseudonym: session.pseudonym,
     promptName: tutorId,
     modelName,
     role: "ai",
     message,
     feedback: {},
-    mode,
+    mode: session.mode,
   });
 }
 
@@ -79,12 +102,17 @@ export const Route = createFileRoute("/api/chat")({
           executionId: string;
           messages: UIMessage[];
           model?: string;
-          // annotation mode of the tutor when the session was started
-          mode: AnnotationMode;
-          pseudonym: string;
           shouldStartConversation: boolean;
+          token: string;
           tutorId: string;
         } = await request.json();
+
+        let session: TutorSessionSelect;
+        try {
+          session = await verifyTutorSession({ ...data, touch: true });
+        } catch (error) {
+          return new Response((error as Error).message, { status: 403 });
+        }
 
         if (process.env.MODE === "prod") {
           // drop model if we are in production, setting this is only valid in dev
@@ -150,25 +178,26 @@ export const Route = createFileRoute("/api/chat")({
                 },
               },
             }),
-            onEnd: data.shouldStartConversation
-              ? async ({ text }) => {
-                  await persistInitialAssistantMessage({
-                    executionId: data.executionId,
-                    message: text,
-                    mode: data.mode,
-                    modelName: model,
-                    pseudonym: data.pseudonym,
-                    tutorId: data.tutorId,
-                  });
-                }
-              : undefined,
+            onEnd: async ({ text }) => {
+              await persistAssistantMessage({
+                executionId: data.executionId,
+                message: text,
+                modelName: model,
+                session,
+                tutorId: data.tutorId,
+              });
+            },
             onError: (error) => {
               console.error("Error generating response:", error);
             },
           });
 
+          // keeps generating if the student disconnects, so the reply is stored when the session is resumed
+          const [responseStream, backgroundStream] = result.stream.tee();
+          void backgroundStream.pipeTo(new WritableStream()).catch(() => {});
+
           return createUIMessageStreamResponse({
-            stream: toUIMessageStream({ stream: result.stream }),
+            stream: toUIMessageStream({ stream: responseStream }),
           });
         } catch {
           return new Response("Internal Server Error", { status: 500 });

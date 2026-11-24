@@ -1,10 +1,14 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeftIcon, DownloadIcon } from "lucide-react";
+import { ResumeLink } from "@/routes/admin/-components/resume-link";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getOwnTutorConversationOptions } from "@/lib/api/messages/query-options";
+import {
+  getOwnTutorConversationOptions,
+  getOwnTutorConversationsOptions,
+} from "@/lib/api/messages/query-options";
 import { getOwnTutorOptions } from "@/lib/api/tutors/query-options";
 import {
   getAnnotationResponses,
@@ -29,6 +33,9 @@ export const Route = createFileRoute(
       queryClient.ensureQueryData(
         getOwnTutorConversationOptions(params.tutorId, params.executionId),
       ),
+      queryClient.ensureQueryData(
+        getOwnTutorConversationsOptions(params.tutorId),
+      ),
     ]);
 
     if (!tutor || conversation.length === 0) {
@@ -43,6 +50,12 @@ function RouteComponent() {
   const { data: tutor } = useSuspenseQuery(getOwnTutorOptions(tutorId));
   const { data: conversation } = useSuspenseQuery(
     getOwnTutorConversationOptions(tutorId, executionId),
+  );
+  const { data: conversations } = useSuspenseQuery(
+    getOwnTutorConversationsOptions(tutorId),
+  );
+  const isResumable = conversations.some(
+    (c) => c.executionId === executionId && c.isResumable,
   );
 
   if (!tutor || conversation.length === 0) {
@@ -77,6 +90,10 @@ function RouteComponent() {
             CSV exportieren
           </Button>
         </div>
+
+        {isResumable && (
+          <ResumeLink tutorId={tutorId} executionId={executionId} />
+        )}
 
         <div>
           {conversation.map((storedMessage) => (

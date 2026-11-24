@@ -1,80 +1,45 @@
-import type { UIMessage } from "ai";
-import { addMessage } from "@/lib/api/messages";
-import type { AnnotationMode, StoredAnnotations } from "@/lib/feedback/types";
+import { addUserMessage, saveReflectionOnOwnAnswer } from "@/lib/api/messages";
+import type { TutorSessionCredentials } from "@/lib/api/tutor-sessions";
+import type { StoredAnnotations } from "@/lib/feedback/types";
 
 export async function submitUserAnswerWithFeedback({
   promptName,
-  pseudonym,
+  session,
   model,
-  executionId,
   userAnswer,
   reflectionOnChatbotFeedback,
-  mode,
 }: {
   promptName: string;
-  pseudonym: string;
+  session: TutorSessionCredentials;
   model?: string;
-  executionId: string;
   userAnswer: string;
   reflectionOnChatbotFeedback: StoredAnnotations;
-  mode: AnnotationMode;
 }) {
-  try {
-    await addMessage({
-      data: {
-        pseudonym,
-        executionId,
-        promptName: promptName,
-        modelName: model,
-        role: "user",
-        message: userAnswer,
-        feedback: reflectionOnChatbotFeedback,
-        mode,
-      },
-    });
-  } catch (error) {
-    throw Error("Error saving answer from user and feedback:", error as Error);
-  }
+  await addUserMessage({
+    data: {
+      tutorId: promptName,
+      ...session,
+      model,
+      message: userAnswer,
+      feedback: reflectionOnChatbotFeedback,
+    },
+  });
 }
 
 export async function submitSecondFeedback({
-  pseudonym,
   promptName,
-  executionId,
-  model,
-  message,
+  session,
   reflectionOnOwnAnswer,
-  mode,
 }: {
-  pseudonym: string;
   promptName: string;
-  executionId: string;
-  model?: string;
-  message: UIMessage;
+  session: TutorSessionCredentials;
   reflectionOnOwnAnswer: StoredAnnotations;
-  mode: AnnotationMode;
 }) {
-  const text = message.parts
-    .filter((part) => part.type === "text")
-    .map((part) => part.text)
-    .join("");
-  try {
-    await addMessage({
-      data: {
-        pseudonym: pseudonym,
-        promptName: promptName,
-        executionId: executionId,
-        modelName: model,
-        role: "ai",
-        message: text,
-        feedback: reflectionOnOwnAnswer,
-        mode,
-      },
-    });
-  } catch (error) {
-    throw Error(
-      "Error saving message from AI and feedback from user:",
-      error as Error,
-    );
-  }
+  await saveReflectionOnOwnAnswer({
+    data: {
+      tutorId: promptName,
+      ...session,
+      feedback: reflectionOnOwnAnswer,
+    },
+  });
 }

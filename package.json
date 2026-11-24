@@ -53,6 +53,7 @@
     "nanoid": "5.1.16",
     "ollama-ai-provider-v2": "4.1.0",
     "pg": "8.20.0",
+    "qrcode.react": "4.2.0",
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "react-markdown": "^10.1.0",

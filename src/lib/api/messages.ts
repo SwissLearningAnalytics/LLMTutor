@@ -4,61 +4,105 @@ import { z } from "zod";
 import { resolveTutorModelName } from "@/lib/ai/resolve-model";
 import { ensureSession } from "@/lib/auth.functions";
 import { db } from "@/lib/db";
-import { type MessagesSelect, messages } from "@/lib/db/schema";
+import { messages, tutorSessions } from "@/lib/db/schema";
 import {
   normalizeAnnotationMode,
   normalizeStoredFeedback,
 } from "@/lib/feedback/annotations";
+import { annotationScaleSchema } from "@/lib/feedback/types";
+import {
+  getResumableSince,
+  verifyTutorSession,
+} from "@/lib/tutor-session-auth";
+
+const storedAnnotationsSchema = z.record(
+  z.string(),
+  z.object({
+    question: z.string(),
+    scale: annotationScaleSchema,
+    value: z.string(),
+  }),
+);
 
 /**
- * Creates a new message with feedback in the database.
- * @param messageData - The data for the new message with Feedback.
- * @returns A Promise that resolves to the added message data.
- * @throws {Error} If there's a database error.
+ * Stores the answer of a student with the reflection on the tutor's previous message.
+ * The pseudonym and annotation mode are taken from the session, not from the browser.
+ * @throws {Error} If the token does not match the session, or there's a database error.
  */
-export const addMessage = createServerFn({ method: "POST" })
-  .validator((messageData: Partial<MessagesSelect>) => {
-    if (!messageData) {
-      throw new Error("Invalid message data");
-    }
+export const addUserMessage = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      tutorId: z.string().min(1),
+      executionId: z.string().min(1),
+      token: z.string().min(1),
+      model: z.string().optional(),
+      message: z.string().min(1),
+      feedback: storedAnnotationsSchema,
+    }),
+  )
+  .handler(async ({ data }) => {
+    const session = await verifyTutorSession({ ...data, touch: true });
 
-    if (messageData.modelName) {
-      if (process.env.MODE === "prod") {
-        // drop model if we are in production, setting this is only valid in dev
-        // changing to default
-        console.warn(
-          `Tried to add message with custom model prod mode - Message Data: ${JSON.stringify(messageData)}`,
-        );
-        messageData.modelName = undefined;
-      }
-    }
-
-    return messageData;
-  })
-  .handler(async ({ data }: { data: Partial<MessagesSelect> }) => {
-    data.modelName =
-      data.modelName ??
-      (data.promptName
-        ? await resolveTutorModelName(data.promptName)
-        : undefined);
+    // setting the model is only valid in dev
+    const modelName =
+      (process.env.MODE !== "prod" && data.model) ||
+      (await resolveTutorModelName(data.tutorId));
 
     try {
-      const [newMessage] = await db
-        .insert(messages)
-        .values(data as MessagesSelect)
-        .returning();
-      return {
-        ...newMessage,
-        feedback:
-          typeof newMessage.feedback === "object" &&
-          newMessage.feedback !== null
-            ? newMessage.feedback
-            : {},
-      };
+      await db.insert(messages).values({
+        executionId: data.executionId,
+        pseudonym: session.pseudonym,
+        promptName: data.tutorId,
+        modelName,
+        role: "user",
+        message: data.message,
+        feedback: data.feedback,
+        mode: session.mode,
+      });
     } catch (error) {
       console.error("Error creating message:", error);
       throw new Error("Failed to create message");
     }
+  });
+
+/**
+ * Stores the reflection on the student's own answer with the tutor's reply to it.
+ * The reply itself is stored by the chat route.
+ */
+export const saveReflectionOnOwnAnswer = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      tutorId: z.string().min(1),
+      executionId: z.string().min(1),
+      token: z.string().min(1),
+      feedback: storedAnnotationsSchema,
+    }),
+  )
+  .handler(async ({ data }) => {
+    await verifyTutorSession({ ...data, touch: true });
+
+    const [latestMessage] = await db
+      .select({ id: messages.id, role: messages.role })
+      .from(messages)
+      .where(
+        and(
+          eq(messages.promptName, data.tutorId),
+          eq(messages.executionId, data.executionId),
+        ),
+      )
+      .orderBy(desc(messages.id))
+      .limit(1);
+
+    if (latestMessage?.role !== "ai") {
+      throw new Error(
+        `Execution ${data.executionId} has no reply to reflect on`,
+      );
+    }
+
+    await db
+      .update(messages)
+      .set({ feedback: data.feedback })
+      .where(eq(messages.id, latestMessage.id));
   });
 
 export const getMessages = createServerFn({ method: "POST" })
@@ -123,8 +167,14 @@ export const getOwnTutorConversations = createServerFn({ method: "GET" })
           messageCount: count(),
           // t_messages.createdAt is a timestamp without timezone and stores UTC wall time.
           lastMessageAt: sql<Date>`max(${messages.createdAt}) AT TIME ZONE 'UTC'`,
+          // sessions started before resuming was possible have no token, they can't be resumed
+          isResumable: sql<boolean>`coalesce(bool_or(${tutorSessions.lastActiveAt} > ${getResumableSince()}), false)`,
         })
         .from(messages)
+        .leftJoin(
+          tutorSessions,
+          eq(tutorSessions.executionId, messages.executionId),
+        )
         .where(eq(messages.promptName, tutorId))
         .groupBy(messages.executionId)
         .orderBy(desc(max(messages.createdAt)));

@@ -34,6 +34,32 @@ export const messages = pgTable("t_messages", {
   createdAt: timestamp().defaultNow().notNull(),
 });
 
+// students have no login, so a session can only be read or written with the token it was started with
+export const tutorSessions = pgTable("t_tutor_sessions", {
+  executionId: varchar("execution_id", { length: 64 }).primaryKey(),
+  tutorId: text("tutor_id")
+    .notNull()
+    .references(() => tutors.tutorId, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+  pseudonym: varchar({ length: 64 }).notNull(),
+  mode: text().notNull(), // annotation mode of the tutor when the session was started
+  // only hashes are stored, so a leaked database does not give access to running sessions
+  tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+  // single use code of a resume link, created by the owner of the tutor
+  resumeCodeHash: varchar("resume_code_hash", { length: 64 }),
+  resumeCodeExpiresAt: timestamp("resume_code_expires_at", {
+    withTimezone: true,
+  }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  lastActiveAt: timestamp("last_active_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export const aiModels = pgTable(
   "t_ai_models",
   {
@@ -92,3 +118,4 @@ export type MessagesSelect = typeof messages.$inferSelect;
 export type TutorSelect = typeof tutors.$inferSelect;
 export type TutorInsert = typeof tutors.$inferInsert;
 export type AiModelSelect = typeof aiModels.$inferSelect;
+export type TutorSessionSelect = typeof tutorSessions.$inferSelect;
