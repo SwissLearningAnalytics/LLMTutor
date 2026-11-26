@@ -37,6 +37,7 @@ import {
   annotationModeLabels,
   annotationScaleLabels,
   defaultAnnotationConfig,
+  switchAnnotationScale,
 } from "@/lib/feedback/annotations";
 import {
   type AnnotationMode,
@@ -280,7 +281,21 @@ export function TutorForm(props: TutorFormProps) {
                         label="Skala"
                         options={annotationScaleOptions}
                         value={field.state.value}
-                        onChange={field.handleChange}
+                        onChange={(scale) => {
+                          const switched = switchAnnotationScale(
+                            annotation,
+                            scale,
+                          );
+                          form.setFieldValue(
+                            `annotations.${group}[${index}].question`,
+                            switched.question,
+                          );
+                          form.setFieldValue(
+                            `annotations.${group}[${index}].tooltip`,
+                            switched.tooltip,
+                          );
+                          field.handleChange(switched.scale);
+                        }}
                         disabled={isPending}
                       />
                     </Field>
