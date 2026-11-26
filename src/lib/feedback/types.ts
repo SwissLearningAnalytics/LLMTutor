@@ -1,19 +1,5 @@
 import { z } from "zod";
 
-// legacy structure, only used to resolve the questions of messages stored before annotations were configurable per tutor
-export type FeedbackField = {
-  label: string;
-  text: string;
-  tooltip: string;
-  options: string[];
-};
-
-export type Feedback = {
-  user: FeedbackField[];
-  ai: FeedbackField[];
-  required: boolean;
-};
-
 export const annotationModeSchema = z.enum(["required", "optional", "none"]);
 export const annotationScaleSchema = z.enum(["yes-no", "0-10"]);
 
